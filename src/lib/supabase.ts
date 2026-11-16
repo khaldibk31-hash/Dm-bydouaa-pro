@@ -2,10 +2,9 @@ import { createClient, Session } from '@supabase/supabase-js';
 import { DEFAULT_STORE_STATE } from '../data/defaultStore';
 import { StoreState } from '../types/store';
 
-const SB_URL = 'https://rcvtbmymewzrfrlabsbv.supabase.co';
-// Publishable client key (protected by Supabase RLS policies)
-const SB_KEY = 'sb_publishable_LkDqEApbom-4E66DdiZQag_VYA2gyWr';
-
+const SB_URL = 'https://gzkllcoypsldbdixeact.supabase.co';
+// Publishable client key
+const SB_KEY = 'sb_publishable_s2ccw-Z-ipZd3cuxMM-VoQ_8kxW0MRE';
 export const supabase = createClient(SB_URL, SB_KEY, {
   auth: {
     persistSession: true,
