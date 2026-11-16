@@ -10,7 +10,7 @@ interface LoginModalProps {
 }
 
 export function AdminLoginModal({ isOpen, onClose, onLogin }: LoginModalProps) {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState('smahiamin111@gmail.com');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -62,7 +62,7 @@ export function AdminLoginModal({ isOpen, onClose, onLogin }: LoginModalProps) {
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <input
-            type="email"
+            type="hidden"
             autoComplete="username"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
