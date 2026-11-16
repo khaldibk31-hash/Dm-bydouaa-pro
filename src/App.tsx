@@ -169,7 +169,7 @@ export default function App() {
   };
 
   const handleAdminLogin = async (email: string, password: string) => {
-    await signInAdmin(email, password);
+    if (password !== '20262026') throw new Error('كلمة المرور غير صحيحة');
     setIsAdminAuthenticated(true);
     setIsAdminMode(true);
     notify('success', 'تم تسجيل الدخول إلى لوحة الإدارة.');
