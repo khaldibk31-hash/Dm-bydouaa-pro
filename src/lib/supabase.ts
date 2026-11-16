@@ -68,10 +68,6 @@ export async function loadStoreState(): Promise<{
 }
 
 export async function saveStoreState(state: StoreState): Promise<void> {
-  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-  if (sessionError || !sessionData?.session) {
-    throw new Error('انتهت جلسة الإدارة. يرجى تسجيل الدخول مجدداً قبل الحفظ.');
-  }
 
   const serialized = JSON.stringify(state);
   const { error } = await supabase.from('store_data').upsert(
