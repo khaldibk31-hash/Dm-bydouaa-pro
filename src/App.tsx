@@ -321,7 +321,7 @@ export default function App() {
       storeState as StoreState & { customTexts?: Record<string, string> }
     ).customTexts;
     const textElements = document.querySelectorAll(
-      'main h1, main h2, main h3, main p, main span, footer p'
+      'main h1, main h2, main h3, main p, main span, main th, main td, footer p'
     );
 
     textElements.forEach((el, idx) => {
