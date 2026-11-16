@@ -111,11 +111,6 @@ export async function uploadStoreImage(file: File, maxWidth = 900): Promise<stri
     throw new Error('حجم الصورة كبير. اختاري صورة أقل من 12 ميغابايت.');
   }
 
-  const { data: sessionData } = await supabase.auth.getSession();
-  if (!sessionData?.session) {
-    throw new Error('سجّلي الدخول إلى لوحة الإدارة أولاً.');
-  }
-
   const dataUrl = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.onerror = () => reject(new Error('تعذر قراءة الصورة.'));
