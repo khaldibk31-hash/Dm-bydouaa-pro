@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-canvas: #faf8f5;
+    --bg-surface: #ffffff;
+    --bg-subtle: #f3eee8;
+    --text-primary: #1f1917;
+    --text-muted: #6e645e;
+    --border-hairline: #e6ddd3;
+    --accent-burgundy: #762b43;
+    --accent-burgundy-hover: #581e31;
+    --accent-gold: #b99a65;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    font-family: 'Cairo', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-canvas);
+    color: var(--text-primary);
+  }
+
+  body {
+    background-color: var(--bg-canvas);
+    color: var(--text-primary);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid #b99a65;
+    outline-offset: 2px;
+  }
+}
+
+.font-editorial {
+  font-family: 'Amiri', serif;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
