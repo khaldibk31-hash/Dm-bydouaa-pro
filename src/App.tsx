@@ -413,6 +413,14 @@ export default function App() {
           }
           onDeleteProduct={handleDeleteProduct}
           onReplaceProductImage={handleReplaceProductImage}
+                    onRemoveProductImage={(id) => {
+            setStoreState((prev) => ({
+              ...prev,
+              products: prev.products.map((p) => (p.id === id ? { ...p, imageUrl: '' } : p)),
+            }));
+            notify('info', 'تم حذف الصورة فقط. اضغطي "إضافة صورة" أو "حفظ ونشر".');
+          }}
+
         />
 
         <PricingAndFaq
