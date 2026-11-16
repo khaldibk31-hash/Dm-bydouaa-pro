@@ -1,5 +1,5 @@
 import { ChangeEvent, useRef, useState } from 'react';
-import { Check, ImagePlus, Pencil, Plus, ShoppingBag, Trash2 } from 'lucide-react';
+import { Check, ImageOff, ImagePlus, Pencil, Plus, ShoppingBag, Trash2 } from 'lucide-react';
 import {
   CAP_SWATCHES,
   CATEGORY_BRANCHES,
@@ -15,6 +15,7 @@ interface ProductCatalogProps {
   onEditProduct: (product: Product) => void;
   onDeleteProduct: (productId: string) => void;
   onReplaceProductImage: (productId: string, file: File) => void;
+  onRemoveProductImage?: (productId: string) => void;
 }
 
 interface ProductCardProps {
@@ -24,6 +25,7 @@ interface ProductCardProps {
   onEdit: () => void;
   onDelete: () => void;
   onReplaceImage: (file: File) => void;
+  onRemoveImage: () => void;
 }
 
 function ProductCard({
@@ -33,6 +35,7 @@ function ProductCard({
   onEdit,
   onDelete,
   onReplaceImage,
+  onRemoveImage,
 }: ProductCardProps) {
   const [selectedOptionIdx, setSelectedOptionIdx] = useState(0);
   const [selectedSecondary, setSelectedSecondary] = useState(
@@ -58,6 +61,12 @@ function ProductCard({
     }
   };
 
+  const handleConfirmDeleteModel = () => {
+    if (window.confirm(`هل أنتِ متأكدة من حذف هذا الموديل نهائياً؟\n\n"${product.name}"`)) {
+      onDelete();
+    }
+  };
+
   const handleAdd = () => {
     const detailParts: string[] = [];
     if (activeOption) detailParts.push(activeOption.label);
@@ -77,11 +86,12 @@ function ProductCard({
     });
   };
 
+  const hasValidImage = Boolean(product.imageUrl) && !imgError;
+
   return (
     <article className="group bg-white border border-[#e6ddd3] rounded-2xl overflow-hidden flex flex-col transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-md">
-      {/* Uniform 4:3 Image Frame */}
       <div className="relative aspect-[4/3] w-full bg-[#f3eee8] overflow-hidden">
-        {!imgError && product.imageUrl ? (
+        {hasValidImage ? (
           <img
             src={product.imageUrl}
             alt={product.name}
@@ -95,11 +105,21 @@ function ProductCard({
             <span className="font-editorial text-base font-bold text-[#1f1917]">
               {product.name}
             </span>
+            {isAdminMode && (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#762b43] text-white text-xs font-bold shadow-sm hover:bg-[#581e31] cursor-pointer"
+              >
+                <ImagePlus className="w-3.5 h-3.5" />
+                <span>اضغطي لإضافة صورة</span>
+              </button>
+            )}
           </div>
         )}
 
         {isAdminMode && (
-          <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
+          <div className="absolute top-2.5 left-2.5 right-2.5 flex flex-wrap items-center justify-between gap-1.5 z-10">
             <input
               ref={fileInputRef}
               type="file"
@@ -107,43 +127,53 @@ function ProductCard({
               className="hidden"
               onChange={handleImageChange}
             />
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-white/95 text-[#1f1917] border border-[#e6ddd3] text-xs font-bold shadow-sm hover:bg-[#f3eee8] cursor-pointer"
-            >
-              <ImagePlus className="w-3.5 h-3.5 text-[#762b43]" />
-              <span>صورة</span>
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-white/95 text-[#1f1917] border border-[#e6ddd3] text-xs font-bold shadow-sm hover:bg-[#f3eee8] cursor-pointer"
+              >
+                <ImagePlus className="w-3.5 h-3.5 text-[#762b43]" />
+                <span>{hasValidImage ? 'تغيير الصورة' : 'إضافة صورة'}</span>
+              </button>
+
+              {hasValidImage && (
+                <button
+                  type="button"
+                  onClick={onRemoveImage}
+                  className="inline-flex items-center gap-1 px-2 py-1.5 rounded-md bg-white/95 text-amber-800 border border-amber-200 text-xs font-bold shadow-sm hover:bg-amber-50 cursor-pointer"
+                >
+                  <ImageOff className="w-3.5 h-3.5" />
+                  <span>حذف الصورة</span>
+                </button>
+              )}
+            </div>
 
             <div className="flex items-center gap-1.5">
               <button
                 type="button"
                 onClick={onEdit}
-                title="تعديل المنتج"
-                aria-label="تعديل المنتج"
-                className="p-1.5 rounded-md bg-white/95 text-[#1f1917] border border-[#e6ddd3] shadow-sm hover:bg-[#f3eee8] cursor-pointer"
+                title="تعديل تفاصيل الموديل"
+                className="inline-flex items-center gap-1 px-2 py-1.5 rounded-md bg-white/95 text-[#1f1917] border border-[#e6ddd3] text-xs font-bold shadow-sm hover:bg-[#f3eee8] cursor-pointer"
               >
                 <Pencil className="w-3.5 h-3.5" />
+                <span>تعديل</span>
               </button>
               <button
                 type="button"
-                onClick={onDelete}
-                title="حذف المنتج"
-                aria-label="حذف المنتج"
-                className="p-1.5 rounded-md bg-red-600 text-white shadow-sm hover:bg-red-700 cursor-pointer"
+                onClick={handleConfirmDeleteModel}
+                title="حذف الموديل بالكامل"
+                className="inline-flex items-center gap-1 px-2 py-1.5 rounded-md bg-red-600 text-white text-xs font-bold shadow-sm hover:bg-red-700 cursor-pointer"
               >
                 <Trash2 className="w-3.5 h-3.5" />
+                <span>حذف الموديل</span>
               </button>
             </div>
           </div>
         )}
       </div>
-
-      {/* Product Details Body */}
       <div className="p-5 flex-1 flex flex-col justify-between gap-4">
         <div>
-          {/* Clean Unboxed Kicker Metadata */}
           <div className="flex items-center gap-2 text-xs font-semibold text-[#6e645e] mb-1.5">
             <span className="text-[#762b43]">{CATEGORY_LABELS[product.category]}</span>
             <span aria-hidden="true">·</span>
@@ -159,7 +189,6 @@ function ProductCard({
           </p>
         </div>
 
-        {/* Interactive Variants */}
         <div className="space-y-3">
           {(product.options.length > 0 ||
             (product.secondaryOptions && product.secondaryOptions.length > 0)) && (
@@ -196,7 +225,6 @@ function ProductCard({
             </div>
           )}
 
-          {/* Cap Swatches & Head Size Input */}
           {product.supportsColorSwatches && (
             <div className="pt-1 space-y-2.5">
               <div className="flex items-center justify-between text-xs">
@@ -251,7 +279,6 @@ function ProductCard({
             </div>
           )}
 
-          {/* Price & Add to Bag */}
           <div className="flex items-center justify-between gap-3 pt-3 border-t border-[#e6ddd3]">
             <div>
               <span className="block text-[11px] text-[#6e645e]">السعر</span>
@@ -283,6 +310,7 @@ export function ProductCatalog({
   onEditProduct,
   onDeleteProduct,
   onReplaceProductImage,
+  onRemoveProductImage,
 }: ProductCatalogProps) {
   const [activeCategory, setActiveCategory] = useState<'all' | CategoryId>('all');
   const [activeBranch, setActiveBranch] = useState<string>('الكل');
@@ -339,7 +367,6 @@ export function ProductCatalog({
           )}
         </div>
 
-        {/* Category Segmented Tabs */}
         <div className="flex flex-wrap items-center gap-2 mb-4">
           {categories.map((cat) => {
             const active = activeCategory === cat;
@@ -360,7 +387,6 @@ export function ProductCatalog({
           })}
         </div>
 
-        {/* Sub-Branch Filter Strip (when category selected) */}
         {branches.length > 1 && (
           <div className="flex flex-wrap items-center gap-1.5 mb-7 pb-3 border-b border-[#e6ddd3]">
             {branches.map((branch) => {
@@ -383,7 +409,6 @@ export function ProductCatalog({
           </div>
         )}
 
-        {/* Uniform 3-Column Product Grid */}
         {filteredProducts.length === 0 ? (
           <div className="bg-white border border-[#e6ddd3] rounded-2xl p-10 text-center">
             <p className="text-sm font-semibold text-[#6e645e]">
@@ -400,12 +425,3 @@ export function ProductCatalog({
                 onAddToCart={onAddToCart}
                 onEdit={() => onEditProduct(product)}
                 onDelete={() => onDeleteProduct(product.id)}
-                onReplaceImage={(file) => onReplaceProductImage(product.id, file)}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-    </section>
-  );
-}
