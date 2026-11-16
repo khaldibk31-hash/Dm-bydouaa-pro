@@ -316,6 +316,48 @@ export default function App() {
   };
 
   const totalCartItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+  useEffect(() => {
+    const savedTexts = (
+      storeState as StoreState & { customTexts?: Record<string, string> }
+    ).customTexts;
+    const textElements = document.querySelectorAll(
+      'main h1, main h2, main h3, main p, main span, footer p'
+    );
+
+    textElements.forEach((el, idx) => {
+      const htmlEl = el as HTMLElement;
+      if (htmlEl.children.length > 0) return;
+
+      const key = `txt_${idx}`;
+      if (savedTexts && savedTexts[key]) {
+        htmlEl.innerText = savedTexts[key];
+      }
+
+      if (isAdminMode) {
+        htmlEl.contentEditable = 'true';
+        htmlEl.style.outline = '1px dashed rgba(118, 43, 67, 0.35)';
+        htmlEl.style.borderRadius = '4px';
+        htmlEl.style.cursor = 'text';
+        htmlEl.onblur = () => {
+          const newText = htmlEl.innerText.trim();
+          setStoreState((prev) => ({
+            ...prev,
+            customTexts: {
+              ...((
+                prev as StoreState & { customTexts?: Record<string, string> }
+              ).customTexts || {}),
+              [key]: newText,
+            },
+          }));
+        };
+      } else {
+        htmlEl.contentEditable = 'false';
+        htmlEl.style.outline = 'none';
+        htmlEl.style.cursor = '';
+        htmlEl.onblur = null;
+      }
+    });
+  }, [isAdminMode, storeState.products]);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#faf8f5] text-[#1f1917]">
