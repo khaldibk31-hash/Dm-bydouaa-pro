@@ -1,6 +1,4 @@
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
-
-
 import {
   ArrowRight,
   Check,
@@ -32,8 +30,10 @@ interface ProductCatalogProps {
   onDeleteProduct: (productId: string) => void;
   onReplaceProductImage: (productId: string, file: File) => void;
   onSetProductColorImage?: (productId: string, colorName: string, file: File | null) => void;
-  onToggleProductField?: (productId: string, field: 'hideSizing' | 'hideCapDetails' | 'hideAmericanShawl') => void;
-
+  onToggleProductField?: (
+    productId: string,
+    field: 'hideSizing' | 'hideCapDetails' | 'hideAmericanShawl'
+  ) => void;
   onRemoveProductImage?: (productId: string) => void;
 }
 
@@ -63,6 +63,198 @@ const MAIN_SECTIONS = [
     fallbackImg: BOUQUET_IMAGE_PATH,
   },
 ];
+
+const CAP_STYLES = [
+  { id: 'round', label: 'القبعة الدائرية', extraPrice: 0, priceText: 'مشمولة', shape: 'round' as const },
+  { id: 'triangle', label: 'القبعة المثلثة', extraPrice: 0, priceText: 'مشمولة', shape: 'triangle' as const },
+  { id: 'tuxedo', label: 'قبعة توكسيدو', extraPrice: 100, priceText: '+100 دج', shape: 'tuxedo' as const },
+];
+
+function CapCardGraphic({ shape }: { shape: 'round' | 'triangle' | 'tuxedo' }) {
+  return (
+    <div className="w-full aspect-[4/5] rounded-xl bg-[#f9eef2] flex items-center justify-center p-2">
+      <svg viewBox="0 0 120 140" className="w-full h-full">
+        {/* Mannequin bust */}
+        <path d="M35 135 C35 112, 85 112, 85 135 Z" fill="#ffffff" />
+        <rect x="52" y="92" width="16" height="24" rx="6" fill="#ffffff" />
+        <ellipse cx="60" cy="76" rx="18" ry="23" fill="#ffffff" />
+        {/* Cap base */}
+        <path d="M41 56 Q60 66 79 56 L77 65 Q60 74 43 65 Z" fill="#1c1917" />
+        {/* Cap top */}
+        {shape === 'round' && (
+          <ellipse cx="60" cy="49" rx="34" ry="12" fill="#292524" />
+        )}
+        {shape === 'triangle' && (
+          <polygon points="60,34 98,50 60,64 22,50" fill="#292524" />
+        )}
+        {shape === 'tuxedo' && (
+          <>
+            <polygon points="60,33 98,49 60,63 22,49" fill="#18181b" />
+            <path d="M43 63 Q60 72 77 63" stroke="#d4af37" strokeWidth="2.5" fill="none" />
+          </>
+        )}
+        {/* Tassel */}
+        <circle cx="60" cy="49" r="2.5" fill="#d4af37" />
+        <path d="M60 49 L85 56 L85 84" stroke="#d4af37" strokeWidth="2.2" fill="none" />
+        <rect x="82.5" y="81" width="5" height="12" rx="2" fill="#d4af37" />
+      </svg>
+    </div>
+  );
+}
+
+function ProductDetailView({
+  product,
+  isAdminMode,
+  onBack,
+  onAddToCart,
+  onEditProduct,
+  onDeleteProduct,
+  onReplaceProductImage,
+  onSetColorImage,
+  onToggleField,
+}: {
+  product: Product;
+  isAdminMode: boolean;
+  onBack: () => void;
+  onAddToCart: (item: Omit<CartItem, 'id' | 'quantity'>) => void;
+  onEditProduct: (product: Product) => void;
+  onDeleteProduct: (productId: string) => void;
+  onReplaceProductImage: (productId: string, file: File) => void;
+  onSetColorImage?: (colorName: string, file: File | null) => void;
+  onToggleField?: (field: 'hideSizing' | 'hideCapDetails' | 'hideAmericanShawl') => void;
+}) {
+  const [selectedOptionIdx, setSelectedOptionIdx] = useState(0);
+  const [selectedSecondary, setSelectedSecondary] = useState<string>(
+    product.secondaryOptions?.[0] ?? ''
+  );
+  const [selectedColor, setSelectedColor] = useState(CAP_SWATCHES[0]);
+  const [selectedCapStyle, setSelectedCapStyle] = useState(CAP_STYLES[0]);
+  const [gender, setGender] = useState<'نسائي' | 'رجالي'>('نسائي');
+  const [standardSize, setStandardSize] = useState('M');
+  const [numericSize, setNumericSize] = useState('');
+  const [fullLength, setFullLength] = useState('');
+  const [shoulderAndSleeve, setShoulderAndSleeve] = useState('');
+  const [capSameColor, setCapSameColor] = useState(true);
+  const [capCustomColor, setCapCustomColor] = useState(CAP_SWATCHES[1]);
+  const [headSize, setHeadSize] = useState('');
+  const [capEmbroideryPos, setCapEmbroideryPos] = useState<'سطح القبعة' | 'جبهة القبعة'>('جبهة القبعة');
+  const [capNotes, setCapNotes] = useState('');
+  const [addAmericanShawl, setAddAmericanShawl] = useState(false);
+  const [customNotes, setCustomNotes] = useState('');
+  const [addedFeedback, setAddedFeedback] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const colorFileInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    setSelectedOptionIdx(0);
+    setSelectedSecondary(product.secondaryOptions?.[0] ?? '');
+    setSelectedColor(CAP_SWATCHES[0]);
+    setSelectedCapStyle(CAP_STYLES[0]);
+    setGender('نسائي');
+    setStandardSize('M');
+    setNumericSize('');
+    setFullLength('');
+    setShoulderAndSleeve('');
+    setCapSameColor(true);
+    setHeadSize('');
+    setCapNotes('');
+    setAddAmericanShawl(false);
+    setCustomNotes('');
+  }, [product.id, product.secondaryOptions]);
+
+  const currentOption = product.options[selectedOptionIdx] ?? product.options[0];
+  const basePrice = currentOption ? currentOption.price : product.price;
+  const showCapSection = product.category !== 'accessories' && !product.hideCapDetails;
+  const capExtra = showCapSection ? selectedCapStyle.extraPrice : 0;
+  const shawlExtra = !product.hideAmericanShawl && addAmericanShawl ? 900 : 0;
+  const displayPrice = basePrice + capExtra + shawlExtra;
+
+  const activeColorImage = product.colorImages?.[selectedColor.name];
+  const displayedImage = activeColorImage || product.imageUrl;
+  const hasDedicatedColorImg = Boolean(activeColorImage);
+
+  const handleImageFile = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) onReplaceProductImage(product.id, file);
+    e.target.value = '';
+  };
+
+  const handleColorImageFile = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && onSetColorImage) onSetColorImage(selectedColor.name, file);
+    e.target.value = '';
+  };
+
+  const handleAdd = () => {
+    const parts: string[] = [];
+    if (selectedSecondary) parts.push(selectedSecondary);
+    if (!product.hideSizing) {
+      const szText = numericSize ? `مقاس ${numericSize}` : standardSize;
+      parts.push(`${gender} (${szText})`);
+      if (fullLength.trim()) parts.push(`الطول: ${fullLength.trim()} سم`);
+      if (shoulderAndSleeve.trim()) parts.push(`الكتف/الكم: ${shoulderAndSleeve.trim()}`);
+    }
+    if (!product.hideCapDetails && product.category !== 'accessories') {
+      parts.push(`القبعة: ${selectedCapStyle.label}`);
+      parts.push(`لون القبعة: ${capSameColor ? 'نفس لون الوشاح' : capCustomColor.name}`);
+      if (headSize.trim()) parts.push(`محيط الرأس: ${headSize.trim()} سم`);
+      parts.push(`تطريز: ${capEmbroideryPos}`);
+      if (capNotes.trim()) parts.push(`ملاحظة القبعة: ${capNotes.trim()}`);
+    }
+    if (!product.hideAmericanShawl && addAmericanShawl) {
+      parts.push('+ الشال الأمريكي V');
+    }
+    if (customNotes.trim()) {
+      parts.push(`ملاحظات: ${customNotes.trim()}`);
+    }
+
+    onAddToCart({
+      productId: product.id,
+      title: product.title,
+      optionLabel: currentOption?.label ?? 'أساسي',
+      secondaryLabel: parts.join(' | ') || undefined,
+      colorName: selectedColor.name,
+      colorHex: selectedColor.hex,
+      unitPrice: displayPrice,
+      imageUrl: displayedImage,
+    });
+    setAddedFeedback(true);
+    setTimeout(() => setAddedFeedback(false), 1800);
+  };
+
+  return (
+    <div className="max-w-5xl mx-auto space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <button
+          type="button"
+          onClick={onBack}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-[#e6ddd3] text-xs font-bold text-[#1f1917] hover:border-[#762b43] transition-colors cursor-pointer"
+        >
+          <ArrowRight className="w-4 h-4 text-[#762b43]" />
+          <span>العودة إلى {CATEGORY_LABELS[product.category]}</span>
+        </button>
+
+        {isAdminMode && (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => onEditProduct(product)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#faf8f5] border border-[#e6ddd3] text-xs font-bold text-[#1f1917] hover:border-[#762b43] cursor-pointer"
+            >
+              <Pencil className="w-3.5 h-3.5 text-[#762b43]" />
+              <span>تعديل المنتج</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                onDeleteProduct(product.id);
+                onBack();
+              }}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-rose-50 border border-rose-200 text-xs font-bold text-rose-700 hover:bg-rose-100 cursor-pointer"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+
 function ProductDetailView({
   product,
   sectionTitle,
