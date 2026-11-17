@@ -41,16 +41,24 @@ export const THREAD_COLORS = [
 ];
 
 export const CAP_SWATCHES = [
-  { name: 'أسود', hex: '#141212' },
+  { name: 'أسود ملكي', hex: '#141212' },
   { name: 'بورغندي', hex: '#762b43' },
-  { name: 'كحلي', hex: '#1e3a8a' },
+  { name: 'أحمر ياقوتي', hex: '#991b1b' },
+  { name: 'كحلي داكن', hex: '#1e3a8a' },
+  { name: 'أزرق ملكي', hex: '#2563eb' },
+  { name: 'أزرق سماوي', hex: '#38bdf8' },
   { name: 'أخضر ملكي', hex: '#064e3b' },
-  { name: 'أبيض', hex: '#f5f5f4' },
-  { name: 'ذهبي', hex: '#c89b3c' },
-  { name: 'وردي', hex: '#be4b78' },
-  { name: 'بنفسجي', hex: '#581c87' },
-  { name: 'رمادي فاتح', hex: '#d6d3d1' },
+  { name: 'أخضر زمردي', hex: '#10b981' },
+  { name: 'أبيض عاجي', hex: '#f5f5f4' },
+  { name: 'بيج كريمي', hex: '#e7d8c9' },
+  { name: 'ذهبي ملكي', hex: '#c89b3c' },
+  { name: 'رمادي فضي', hex: '#9ca3af' },
+  { name: 'وردي ناعم', hex: '#f472b6' },
+  { name: 'فوشيا', hex: '#be185d' },
+  { name: 'بنفسجي ملكي', hex: '#581c87' },
+  { name: 'بني شوكولاتة', hex: '#451a03' },
 ];
+
 
 export const STOLE_STUDIO_MODELS = [
   { id: 'miss-crepe', label: 'شال ميس · قماش كريب', price: 3800 },
