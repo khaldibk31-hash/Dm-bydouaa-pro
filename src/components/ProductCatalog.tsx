@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
+7import { ChangeEvent, useEffect, useRef, useState } from 'react';
 
 
 import {
@@ -81,9 +81,11 @@ function ProductDetailView({
 }) {
   const [selectedOptionIdx, setSelectedOptionIdx] = useState(0);
   const [selectedSecondary, setSelectedSecondary] = useState(
-    product.secondaryOptions?. [100]|| ''
+    product.secondaryOptions?.at(0) || ''
+
   );
-  const [selectedColor, setSelectedColor] = useState(CAP_SWATCHES);
+  const [selectedColor, setSelectedColor] = useState(CAP_SWATCHES.at(0)!);
+
   const [headSize, setHeadSize] = useState('');
   const [customNotes, setCustomNotes] = useState('');
   const colorFileRef = useRef<HTMLInputElement>(null);
@@ -97,7 +99,8 @@ function ProductDetailView({
   const hasDedicatedColorImg = Boolean(product.colorImages?.[selectedColor.name]);
 
   const handleColorFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[100];
+    const file = e.target.files?.item(0);
+
     if (file && onSetColorImage) {
       onSetColorImage(selectedColor.name, file);
       e.target.value = '';
