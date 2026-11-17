@@ -529,6 +529,86 @@ export function ProductCatalog({
               }}
               className="group bg-white border border-[#e6ddd3] rounded-3xl overflow-hidden shadow-xs hover:shadow-lg transition-all cursor-pointer flex flex-col"
             >
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+          {filteredProducts.map((product) => (
+            <ProductGridCard
+              key={product.id}
+              product={product}
+              isAdminMode={isAdminMode}
+              onSelect={() => setSelectedProductId(product.id)}
+              onEdit={() => onEditProduct(product)}
+              onDelete={() => onDeleteProduct(product.id)}
+              onReplaceImage={(file) => onReplaceProductImage(product.id, file)}
+              onRemoveImage={
+                onRemoveProductImage ? () => onRemoveProductImage(product.id) : undefined
+              }
+            />
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section id="catalog" className="py-12 px-4 max-w-6xl mx-auto space-y-8">
+      <div className="text-center max-w-2xl mx-auto space-y-2">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#faf8f5] border border-[#e6ddd3] text-xs font-bold text-[#762b43]">
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>تشكيلة التخرج الفاخرة</span>
+        </span>
+        <h2 className="text-2xl sm:text-4xl font-extrabold text-[#1f1917]">
+          اختر إطلالة تخرجك
+        </h2>
+        <p className="text-sm text-[#6e645e]">
+          تصفّح أقسام الأوشحة، الأرواب، وباقات التخرج وصمّم كل تفصيلة على ذوقك.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {MAIN_SECTIONS.map((sec) => {
+          const firstItem = products.find((p) => p.category === sec.id);
+          const coverImg = firstItem?.imageUrl || sec.fallbackImg;
+
+          return (
+            <div
+              key={sec.id}
+              onClick={() => {
+                setActiveCategory(sec.id);
+                setActiveBranch('الكل');
+              }}
+              className="group bg-white border border-[#e6ddd3] rounded-3xl overflow-hidden shadow-xs hover:shadow-lg transition-all cursor-pointer flex flex-col"
+            >
+              <div className="relative aspect-[4/5] bg-[#faf8f5] overflow-hidden">
+                <img
+                  src={coverImg}
+                  alt={sec.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <span className="absolute bottom-3 right-3 px-3 py-1 rounded-full bg-white/95 border border-[#e6ddd3] text-xs font-extrabold text-[#762b43] shadow-xs">
+                  {sec.priceLabel}
+                </span>
+              </div>
+              <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
+                <div>
+                  <h3 className="text-xl font-extrabold text-[#1f1917] group-hover:text-[#762b43] transition-colors">
+                    {sec.title}
+                  </h3>
+                  <p className="text-xs text-[#6e645e] leading-relaxed mt-1.5">
+                    {sec.subtitle}
+                  </p>
+                </div>
+                <span className="inline-flex items-center justify-between w-full px-4 py-2.5 rounded-full bg-[#faf8f5] group-hover:bg-[#762b43] text-[#1f1917] group-hover:text-white border border-[#e6ddd3] text-xs font-bold transition-colors">
+                  <span>{sec.buttonText}</span>
+                  <ChevronLeft className="w-4 h-4" />
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
 
                         
                       
