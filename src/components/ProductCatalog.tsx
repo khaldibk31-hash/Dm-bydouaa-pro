@@ -107,7 +107,7 @@ function SmartColoredImage({
           const b = data[i + 2];
           const brightness = (r + g + b) / 3;
 
-          if (brightness < 165) {
+          if (brightness < 105) {
             const shade = Math.min(1.35, Math.max(0.28, brightness / 110));
             data[i] = Math.min(255, Math.round(tr * shade));
             data[i + 1] = Math.min(255, Math.round(tg * shade));
