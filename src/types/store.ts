@@ -13,6 +13,8 @@ export interface Product {
   description: string;
   basePrice: number;
   imageUrl: string;
+  colorImages?: Record<string, string>;
+
   options: ProductOption[];
   secondaryOptions?: string[];
   secondaryLabel?: string;
