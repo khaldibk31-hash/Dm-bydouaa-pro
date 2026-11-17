@@ -31,6 +31,8 @@ interface ProductCatalogProps {
   onEditProduct: (product: Product) => void;
   onDeleteProduct: (productId: string) => void;
   onReplaceProductImage: (productId: string, file: File) => void;
+  onSetProductColorImage?: (productId: string, colorName: string, file: File | null) => void;
+
   onRemoveProductImage?: (productId: string) => void;
 }
 
@@ -60,119 +62,54 @@ const MAIN_SECTIONS = [
     fallbackImg: BOUQUET_IMAGE_PATH,
   },
 ];
-function SmartColoredImage({
-  src,
-  alt,
-  targetHex,
-  isDefaultColor,
-}: {
-  src: string;
-  alt: string;
-  targetHex: string;
-  isDefaultColor: boolean;
-}) {
-  const [tintedSrc, setTintedSrc] = useState<string | null>(null);
-
-  useEffect(() => {
-if (true) {
-
-      setTintedSrc(null);
-      return;
-    }
-
-    let cancelled = false;
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      try {
-        const canvas = document.createElement('canvas');
-        const maxW = 600;
-        const scale = Math.min(1, maxW / img.width);
-        canvas.width = Math.round(img.width * scale);
-        canvas.height = Math.round(img.height * scale);
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const data = imageData.data;
-
-        const cleanHex = targetHex.replace('#', '');
-        const tr = parseInt(cleanHex.substring(0, 2), 16);
-        const tg = parseInt(cleanHex.substring(2, 4), 16);
-        const tb = parseInt(cleanHex.substring(4, 6), 16);
-
-        for (let i = 0; i < data.length; i += 4) {
-          const r = data[i];
-          const g = data[i + 1];
-          const b = data[i + 2];
-                              const brightness = (r + g + b) / 3;
-          const isDarkFabric = brightness < 85 || (brightness < 115 && r > g + 22);
-
-          if (isDarkFabric) {
-
-
-            const shade = Math.min(1.35, Math.max(0.28, brightness / 110));
-            data[i] = Math.min(255, Math.round(tr * shade));
-            data[i + 1] = Math.min(255, Math.round(tg * shade));
-            data[i + 2] = Math.min(255, Math.round(tb * shade));
-          }
-        }
-
-        ctx.putImageData(imageData, 0, 0);
-        if (!cancelled) setTintedSrc(canvas.toDataURL('image/jpeg', 0.9));
-      } catch {
-        if (!cancelled) setTintedSrc(null);
-      }
-    };
-    img.src = src;
-
-    return () => {
-      cancelled = true;
-    };
-  }, [src, targetHex, isDefaultColor]);
-
-  return (
-    <img
-      src={tintedSrc || src}
-      alt={alt}
-      className="w-full h-full object-cover transition-all duration-300"
-    />
-  );
-}
-
 function ProductDetailView({
   product,
   sectionTitle,
+  isAdminMode,
   onBackToHome,
   onBackToSection,
   onAddToCart,
+  onSetColorImage,
 }: {
   product: Product;
   sectionTitle: string;
+  isAdminMode: boolean;
   onBackToHome: () => void;
   onBackToSection: () => void;
   onAddToCart: (item: Omit<CartItem, 'id' | 'quantity'>) => void;
+  onSetColorImage?: (colorName: string, file: File | null) => void;
 }) {
   const [selectedOptionIdx, setSelectedOptionIdx] = useState(0);
   const [selectedSecondary, setSelectedSecondary] = useState(
-    product.secondaryOptions?.[0] || ''
+    product.secondaryOptions?. [100]|| ''
   );
-  const [selectedCapColor, setSelectedCapColor] = useState(CAP_SWATCHES[0].name);
+  const [selectedColor, setSelectedColor] = useState(CAP_SWATCHES);
   const [headSize, setHeadSize] = useState('');
   const [customNotes, setCustomNotes] = useState('');
+  const colorFileRef = useRef<HTMLInputElement>(null);
 
   const activeOption = product.options[selectedOptionIdx];
   const basePrice = activeOption ? activeOption.price : product.basePrice;
   const tuxedoSurcharge = selectedSecondary.includes('+100') ? 100 : 0;
   const displayPrice = basePrice + tuxedoSurcharge;
 
+  const activeImageUrl = product.colorImages?.[selectedColor.name] || product.imageUrl;
+  const hasDedicatedColorImg = Boolean(product.colorImages?.[selectedColor.name]);
+
+  const handleColorFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[100];
+    if (file && onSetColorImage) {
+      onSetColorImage(selectedColor.name, file);
+      e.target.value = '';
+    }
+  };
+
   const handleAdd = () => {
     const detailParts: string[] = [];
     if (activeOption) detailParts.push(activeOption.label);
     if (selectedSecondary) detailParts.push(selectedSecondary);
-    if (product.supportsColorSwatches && selectedCapColor) {
-      detailParts.push(`لون: ${selectedCapColor}`);
+    if (selectedColor) {
+      detailParts.push(`اللون: ${selectedColor.name}`);
     }
     if (product.supportsHeadCircumference && headSize.trim()) {
       detailParts.push(`محيط الرأس: ${headSize.trim()} سم`);
@@ -191,7 +128,6 @@ function ProductDetailView({
 
   return (
     <div className="bg-white border border-[#e6ddd3] rounded-3xl overflow-hidden shadow-sm">
-      {/* Breadcrumb Navigation */}
       <div className="px-5 py-3.5 bg-[#faf8f5] border-b border-[#e6ddd3] flex flex-wrap items-center justify-between gap-2 text-xs font-bold text-[#6e645e]">
         <div className="flex items-center gap-1.5">
           <button
@@ -224,32 +160,23 @@ function ProductDetailView({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-5 sm:p-8">
-        {/* Large Product Image */}
         <div className="relative aspect-[4/3] md:aspect-square rounded-2xl bg-[#f3eee8] overflow-hidden border border-[#e6ddd3]">
-                    {product.imageUrl ? (
+          {activeImageUrl ? (
             <>
-                            <SmartColoredImage
-                src={product.imageUrl}
-                alt={product.name}
-                targetHex={
-                  CAP_SWATCHES.find((s) => s.name === selectedCapColor)?.hex || '#141212'
-                }
-                isDefaultColor={selectedCapColor === 'أسود ملكي'}
+              <img
+                src={activeImageUrl}
+                alt={`${product.name} - ${selectedColor.name}`}
+                className="w-full h-full object-cover transition-all duration-300"
               />
-
               <div className="absolute bottom-3 right-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-sm border border-[#e6ddd3] shadow-sm text-xs font-bold text-[#1f1917]">
                 <span
                   className="w-3.5 h-3.5 rounded-full border border-black/15"
-                  style={{
-                    backgroundColor:
-                      CAP_SWATCHES.find((s) => s.name === selectedCapColor)?.hex || '#141212',
-                  }}
+                  style={{ backgroundColor: selectedColor.hex }}
                 />
-                <span>اللون: {selectedCapColor}</span>
+                <span>اللون: {selectedColor.name}</span>
               </div>
             </>
           ) : (
-
             <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center">
               <ShoppingBag className="w-10 h-10 text-[#762b43] mb-2 opacity-75" />
               <span className="font-editorial text-lg font-bold text-[#1f1917]">
@@ -259,7 +186,6 @@ function ProductDetailView({
           )}
         </div>
 
-        {/* Customization Controls */}
         <div className="flex flex-col justify-between space-y-5">
           <div className="space-y-4">
             <div>
@@ -334,101 +260,137 @@ function ProductDetailView({
               </div>
             )}
 
-            {true && (
-
-              <div>
-                <label className="block text-xs font-bold text-[#1f1917] mb-2">
-                  اللون المختار: <span className="text-[#762b43]">{selectedCapColor}</span>
-                </label>
-                <div className="flex flex-wrap items-center gap-2">
-                  {CAP_SWATCHES.map((swatch) => {
-                    const isActive = swatch.name === selectedCapColor;
-                    return (
-                      <button
-                        key={swatch.name}
-                        type="button"
-                        title={swatch.name}
-                        onClick={() => setSelectedCapColor(swatch.name)}
-                        className={`w-7 h-7 rounded-full border flex items-center justify-center transition-transform cursor-pointer ${
-                          isActive
-                            ? 'ring-2 ring-[#762b43] ring-offset-2 scale-110 border-[#762b43]'
-                            : 'border-[#d6cdc2]'
-                        }`}
-                        style={{ backgroundColor: swatch.hex }}
-                      >
-                        {isActive && (
-                          <Check
-                            className={`w-3.5 h-3.5 ${
-                                                          swatch.hex === '#f5f5f4' || swatch.hex === '#d6d3d1'
+            <div>
+              <label className="block text-xs font-bold text-[#1f1917] mb-2">
+                اختر اللون: <span className="text-[#762b43]">{selectedColor.name}</span>
+              </label>
+              <div className="flex flex-wrap items-center gap-2.5">
+                {CAP_SWATCHES.map((swatch) => {
+                  const isActive = swatch.name === selectedColor.name;
+                  const hasPhoto = Boolean(product.colorImages?.[swatch.name]);
+                  return (
+                    <button
+                      key={swatch.name}
+                      type="button"
+                      title={swatch.name}
+                      onClick={() => setSelectedColor(swatch)}
+                      className={`relative w-8 h-8 rounded-full border flex items-center justify-center transition-transform cursor-pointer ${
+                        isActive
+                          ? 'ring-2 ring-[#762b43] ring-offset-2 scale-110 border-[#762b43]'
+                          : 'border-[#d6cdc2]'
+                      }`}
+                      style={{ backgroundColor: swatch.hex }}
+                    >
+                      {isActive && (
+                        <Check
+                          className={`w-4 h-4 ${
+                            swatch.hex === '#f5f5f4' || swatch.hex === '#e7d8c9' || swatch.hex === '#9ca3af'
                               ? 'text-[#1f1917]'
                               : 'text-white'
                           }`}
                         />
                       )}
+                      {hasPhoto && !isActive && (
+                        <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border border-white" />
+                      )}
                     </button>
                   );
                 })}
               </div>
-            </div>
-          )}
 
-          {product.supportsHeadCircumference && (
-            <div>
+                            {isAdminMode && (
+                <div className="mt-3 p-3 rounded-xl bg-[#faf8f5] border border-[#e6ddd3] flex flex-wrap items-center justify-between gap-2">
+                  <input
+                    ref={colorFileRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleColorFileChange}
+                  />
+                  <span className="text-xs font-bold text-[#1f1917]">
+                    صورة لون "{selectedColor.name}":
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => colorFileRef.current?.click()}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#762b43] text-white text-xs font-bold cursor-pointer"
+                    >
+                      <ImagePlus className="w-3.5 h-3.5" />
+                      <span>{hasDedicatedColorImg ? 'تغيير صورة اللون' : 'رفع صورة لهذا اللون'}</span>
+                    </button>
+                    {hasDedicatedColorImg && (
+                      <button
+                        type="button"
+                        onClick={() => onSetColorImage?.(selectedColor.name, null)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white text-red-600 border border-red-200 text-xs font-bold cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>حذف</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {product.supportsHeadCircumference && (
+              <div>
+                <label className="block text-xs font-bold text-[#1f1917] mb-1.5">
+                  محيط الرأس بالسنتيمتر (اختياري):
+                </label>
+                <input
+                  type="number"
+                  min={48}
+                  max={66}
+                  value={headSize}
+                  onChange={(e) => setHeadSize(e.target.value)}
+                  placeholder="مثال: 57"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs text-[#1f1917]"
+                />
+              </div>
+            )}
+
               <label className="block text-xs font-bold text-[#1f1917] mb-1.5">
-                محيط الرأس بالسنتيمتر (اختياري):
+                ملاحظة أو مقاس أو نص للتطريز (اختياري):
               </label>
               <input
-                type="number"
-                min={48}
-                max={66}
-                value={headSize}
-                onChange={(e) => setHeadSize(e.target.value)}
-                placeholder="مثال: 57"
+                type="text"
+                value={customNotes}
+                onChange={(e) => setCustomNotes(e.target.value)}
+                placeholder="اكتبي المقاس أو الاسم المطلوب تطريزه..."
                 className="w-full px-3.5 py-2.5 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs text-[#1f1917]"
               />
             </div>
-          )}
-
-          <div>
-            <label className="block text-xs font-bold text-[#1f1917] mb-1.5">
-              ملاحظة أو لون خاص أو نص للتطريز (اختياري):
-            </label>
-            <input
-              type="text"
-              value={customNotes}
-              onChange={(e) => setCustomNotes(e.target.value)}
-              placeholder="اكتبي اللون أو المقاس أو الاسم المطلوب..."
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs text-[#1f1917]"
-            />
-          </div>
-        </div>
-
-        <div className="pt-4 border-t border-[#e6ddd3] flex items-center justify-between gap-4">
-          <div>
-            <span className="block text-xs text-[#6e645e]">الإجمالي</span>
-            <span className="text-2xl font-extrabold text-[#1f1917]">
-              {displayPrice.toLocaleString('en-US')} دج
-            </span>
           </div>
 
-          <button
-            type="button"
-            onClick={handleAdd}
-            className="flex-1 max-w-xs inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-[#762b43] hover:bg-[#581e31] text-white text-sm font-bold shadow-md transition-colors cursor-pointer"
-          >
-            <ShoppingBag className="w-4 h-4" />
-            <span>أضف إلى السلة</span>
-          </button>
+          <div className="pt-4 border-t border-[#e6ddd3] flex items-center justify-between gap-4">
+            <div>
+              <span className="block text-xs text-[#6e645e]">الإجمالي</span>
+              <span className="text-2xl font-extrabold text-[#1f1917]">
+                {displayPrice.toLocaleString('en-US')} دج
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleAdd}
+              className="flex-1 max-w-xs inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-[#762b43] hover:bg-[#581e31] text-white text-sm font-bold shadow-md transition-colors cursor-pointer"
+            >
+              <ShoppingBag className="w-4 h-4" />
+              <span>أضف إلى السلة</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
   );
 }
 
 function SectionCard({
   product,
   isAdminMode,
+
   onSelect,
   onEdit,
   onDelete,
@@ -586,7 +548,9 @@ export function ProductCatalog({
   onDeleteProduct,
   onReplaceProductImage,
   onRemoveProductImage,
+    onSetProductColorImage,
 }: ProductCatalogProps) {
+
     const [selectedSection, setSelectedSection] = useState<CategoryId | null>(null);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [activeBranch, setActiveBranch] = useState<string>('الكل');
@@ -663,6 +627,9 @@ export function ProductCatalog({
             onBackToHome={handleBackToHome}
             onBackToSection={() => setSelectedProductId(null)}
             onAddToCart={onAddToCart}
+            isAdminMode={isAdminMode}
+onSetColorImage={(colorName, file) => onSetProductColorImage?.(selectedProduct.id, colorName, file)}
+
           />
         ) : selectedSection && activeSectionMeta ? (
           <div>
