@@ -163,12 +163,14 @@ function ProductDetailView({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-5 sm:p-8">
-        <div className="relative aspect-[4/3] md:aspect-square rounded-2xl bg-[#f3eee8] overflow-hidden border border-[#e6ddd3]">
+        <div className="relative aspect-[3/4] rounded-2xl bg-[#faf8f5] overflow-hidden border border-[#e6ddd3]">
+
           {activeImageUrl ? (
             <>
               <img
                 src={activeImageUrl}
-                alt={`${product.name} - ${selectedColor.name}`}
+                className="w-full h-full object-contain transition-all duration-300"
+
                 className="w-full h-full object-cover transition-all duration-300"
               />
               <div className="absolute bottom-3 right-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-sm border border-[#e6ddd3] shadow-sm text-xs font-bold text-[#1f1917]">
