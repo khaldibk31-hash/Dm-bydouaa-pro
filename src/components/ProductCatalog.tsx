@@ -1,4 +1,6 @@
-import { ChangeEvent, useRef, useState } from 'react';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
+
+
 import {
   ArrowRight,
   Check,
@@ -487,14 +489,42 @@ export function ProductCatalog({
   onReplaceProductImage,
   onRemoveProductImage,
 }: ProductCatalogProps) {
-  const [selectedSection, setSelectedSection] = useState<CategoryId | null>(null);
+    const [selectedSection, setSelectedSection] = useState<CategoryId | null>(null);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [activeBranch, setActiveBranch] = useState<string>('الكل');
 
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      const state = event.state;
+      if (state && state.catalogLevel === 'product') {
+        setSelectedSection(state.section || null);
+        setSelectedProductId(state.productId || null);
+      } else if (state && state.catalogLevel === 'section') {
+        setSelectedSection(state.section || null);
+        setSelectedProductId(null);
+      } else {
+        setSelectedSection(null);
+        setSelectedProductId(null);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   const handleOpenSection = (cat: CategoryId) => {
+    window.history.pushState({ catalogLevel: 'section', section: cat }, '');
     setSelectedSection(cat);
     setSelectedProductId(null);
     setActiveBranch('الكل');
+  };
+
+  const handleOpenProduct = (productId: string) => {
+    window.history.pushState(
+      { catalogLevel: 'product', section: selectedSection, productId },
+      ''
+    );
+    setSelectedProductId(productId);
   };
 
   const handleBackToHome = () => {
@@ -502,6 +532,7 @@ export function ProductCatalog({
     setSelectedProductId(null);
     setActiveBranch('الكل');
   };
+
 
   const activeSectionMeta = MAIN_SECTIONS.find((s) => s.id === selectedSection);
   const selectedProduct = products.find((p) => p.id === selectedProductId) || null;
@@ -617,7 +648,8 @@ export function ProductCatalog({
                     key={product.id}
                     product={product}
                     isAdminMode={isAdminMode}
-                    onSelect={() => setSelectedProductId(product.id)}
+                    onSelect={() => handleOpenProduct(product.id)}
+
                     onEdit={() => onEditProduct(product)}
                     onDelete={() => onDeleteProduct(product.id)}
                     onReplaceImage={(file) => onReplaceProductImage(product.id, file)}
