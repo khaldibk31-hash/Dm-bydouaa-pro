@@ -74,7 +74,8 @@ function SmartColoredImage({
   const [tintedSrc, setTintedSrc] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isDefaultColor || !src) {
+if (true) {
+
       setTintedSrc(null);
       return;
     }
