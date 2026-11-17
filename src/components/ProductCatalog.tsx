@@ -240,163 +240,31 @@ function ProductDetailView({
                     const active = idx === selectedOptionIdx;
                     return (
                       
-                                  {/* المقاسات التفصيلية */}
-            <div className="pt-3 border-t border-[#e6ddd3] space-y-3">
-              <label className="block text-xs font-bold text-[#1f1917]">المقاس:</label>
-              <div className="grid grid-cols-2 gap-2 p-1 rounded-full bg-[#f3eee8]">
-                {(['نسائي', 'رجالي'] as const).map((g) => (
-                  <button
-                    key={g}
-                    type="button"
-                    onClick={() => setGender(g)}
-                    className={`py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                      gender === g ? 'bg-white text-[#762b43] shadow-sm' : 'text-[#6e645e]'
-                    }`}
-                  >
-                    {g}
-                  </button>
-                ))}
-              </div>
-
-              <div className="grid grid-cols-5 gap-1.5">
-                {['XS', 'S', 'M', 'L', 'XL'].map((sz) => (
-                  <button
-                    key={sz}
-                    type="button"
-                    onClick={() => {
-                      setStandardSize(sz);
-                      setNumericSize('');
-                    }}
-                    className={`py-2 rounded-xl border text-xs font-bold cursor-pointer ${
-                      !numericSize && standardSize === sz
-                        ? 'bg-[#762b43] text-white border-[#762b43]'
-                        : 'bg-[#faf8f5] text-[#1f1917] border-[#e6ddd3]'
-                    }`}
-                  >
-                    {sz}
-                  </button>
-                ))}
-              </div>
-
-              <div className="grid grid-cols-2 gap-2.5">
-                <div>
-                  <label className="block text-[11px] font-bold text-[#6e645e] mb-1">
-                    أو رقم مقاسك (34 - 70):
-                  </label>
-                  <input
-                    type="number"
-                    min={34}
-                    max={70}
-                    value={numericSize}
-                    onChange={(e) => setNumericSize(e.target.value)}
-                    placeholder="44 - 70"
-                    className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-bold text-[#6e645e] mb-1">
-                    الطول الكامل (80 - 200 سم):
-                  </label>
-                  <input
-                    type="number"
-                    min={80}
-                    max={200}
-                    value={fullLength}
-                    onChange={(e) => setFullLength(e.target.value)}
-                    placeholder="سم"
-                    className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
-                  />
-                </div>
-              </div>
-
-              <input
-                type="text"
-                value={shoulderAndSleeve}
-                onChange={(e) => setShoulderAndSleeve(e.target.value)}
-                placeholder="عرض الكتفين وطول الكم (اختياري)..."
-                className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
-              />
-            </div>
-
-            {/* تفاصيل القبعة والتطريز */}
-            <div className="pt-3 border-t border-[#e6ddd3] space-y-3">
-              <label className="block text-xs font-bold text-[#1f1917]">لون القبعة:</label>
-              <div className="grid grid-cols-2 gap-2 p-1 rounded-full bg-[#f3eee8]">
-                <button
-                  type="button"
-                  onClick={() => setCapSameColor(true)}
-                  className={`py-2 rounded-full text-xs font-bold cursor-pointer ${
-                    capSameColor ? 'bg-white text-[#762b43] shadow-sm' : 'text-[#6e645e]'
-                  }`}
-                >
-                  نفس لون الوشاح
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCapSameColor(false)}
-                  className={`py-2 rounded-full text-xs font-bold cursor-pointer ${
-                    !capSameColor ? 'bg-white text-[#762b43] shadow-sm' : 'text-[#6e645e]'
-                  }`}
-                >
-                  لون آخر
-                </button>
-              </div>
-
-              {!capSameColor && (
-                <div className="flex flex-wrap items-center gap-2 p-2.5 rounded-xl bg-[#faf8f5] border border-[#e6ddd3]">
-                  {CAP_SWATCHES.map((sw) => (
-                    <button
-                      key={sw.name}
+                                              <button
+                      key={opt.label}
                       type="button"
-                      title={sw.name}
-                      onClick={() => setCapCustomColor(sw)}
-                      className={`w-6 h-6 rounded-full border cursor-pointer ${
-                        capCustomColor.name === sw.name
-                          ? 'ring-2 ring-[#762b43] ring-offset-1 scale-110'
-                          : 'border-black/20'
+                      onClick={() => setSelectedOptionIdx(idx)}
+                      className={`p-3 rounded-2xl border text-right transition-all cursor-pointer ${
+                        active ? 'border-[#762b43] bg-[#faf8f5]' : 'border-[#e6ddd3] bg-white'
                       }`}
-                      style={{ backgroundColor: sw.hex }}
-                    />
-                  ))}
-                  <span className="text-[11px] font-bold text-[#762b43] mr-1">
-                    {capCustomColor.name}
-                  </span>
-                </div>
-              )}
-
-              <div>
-                <label className="block text-xs font-bold text-[#1f1917] mb-1">
-                  محيط الرأس (اختياري، 45 - 70 سم):
-                </label>
-                <input
-                  type="number"
-                  min={45}
-                  max={70}
-                  value={headSize}
-                  onChange={(e) => setHeadSize(e.target.value)}
-                  placeholder="45 - 70 سم"
-                  className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
-                />
-                <p className="text-[11px] text-[#6e645e] mt-1">
-                  لفّ شريط القياس حول الرأس فوق الحاجبين والأذنين بقليل.
-                </p>
+                    >
+                      <span className="block text-xs font-bold text-[#1f1917]">{opt.label}</span>
+                      <span className="text-[11px] font-extrabold text-[#762b43]">
+                        {opt.price.toLocaleString('en-US')} دج
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
+            </div>
+          )}
 
-              <div className="grid grid-cols-2 gap-2">
-                {(['سطح القبعة', 'جبهة القبعة'] as const).map((pos) => (
-                  <button
-                    key={pos}
-                    type="button"
-                    onClick={() => setCapEmbroideryPos(pos)}
-                    className={`py-2 px-2.5 rounded-full border text-xs font-bold cursor-pointer ${
-                      capEmbroideryPos === pos
-                        ? 'bg-[#762b43] text-white border-[#762b43]'
-                        : 'bg-white text-[#1f1917] border-[#e6ddd3]'
-                    }`}
-                  >
-                    طرّز على {pos}
-                  </button>
-
+          {product.secondaryOptions && product.secondaryOptions.length > 0 && (
+            <div>
+              <label className="block text-xs font-bold text-[#1f1917] mb-2">خيار إضافي:</label>
+              <div className="flex flex-wrap gap-2">
+                {product.secondaryOptions.map((sec) => {
+        
 
                     const active = sec === selectedSecondary;
                     return (
