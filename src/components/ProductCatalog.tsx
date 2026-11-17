@@ -239,7 +239,260 @@ function ProductDetailView({
                   {product.options.map((opt, idx) => {
                     const active = idx === selectedOptionIdx;
                     return (
+                      
                                   {/* المقاسات التفصيلية */}
+            <div className="pt-3 border-t border-[#e6ddd3] space-y-3">
+              <label className="block text-xs font-bold text-[#1f1917]">المقاس:</label>
+              <div className="grid grid-cols-2 gap-2 p-1 rounded-full bg-[#f3eee8]">
+                {(['نسائي', 'رجالي'] as const).map((g) => (
+                  <button
+                    key={g}
+                    type="button"
+                    onClick={() => setGender(g)}
+                    className={`py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                      gender === g ? 'bg-white text-[#762b43] shadow-sm' : 'text-[#6e645e]'
+                    }`}
+                  >
+                    {g}
+                  </button>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-5 gap-1.5">
+                {['XS', 'S', 'M', 'L', 'XL'].map((sz) => (
+                  <button
+                    key={sz}
+                    type="button"
+                    onClick={() => {
+                      setStandardSize(sz);
+                      setNumericSize('');
+                    }}
+                    className={`py-2 rounded-xl border text-xs font-bold cursor-pointer ${
+                      !numericSize && standardSize === sz
+                        ? 'bg-[#762b43] text-white border-[#762b43]'
+                        : 'bg-[#faf8f5] text-[#1f1917] border-[#e6ddd3]'
+                    }`}
+                  >
+                    {sz}
+                  </button>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block text-[11px] font-bold text-[#6e645e] mb-1">
+                    أو رقم مقاسك (34 - 70):
+                  </label>
+                  <input
+                    type="number"
+                    min={34}
+                    max={70}
+                    value={numericSize}
+                    onChange={(e) => setNumericSize(e.target.value)}
+                    placeholder="44 - 70"
+                    className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-[#6e645e] mb-1">
+                    الطول الكامل (80 - 200 سم):
+                  </label>
+                  <input
+                    type="number"
+                    min={80}
+                    max={200}
+                    value={fullLength}
+                    onChange={(e) => setFullLength(e.target.value)}
+                    placeholder="سم"
+                    className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
+                  />
+                </div>
+              </div>
+
+              <input
+                type="text"
+                value={shoulderAndSleeve}
+                onChange={(e) => setShoulderAndSleeve(e.target.value)}
+                placeholder="عرض الكتفين وطول الكم (اختياري)..."
+                className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
+              />
+            </div>
+
+            {/* تفاصيل القبعة والتطريز */}
+            <div className="pt-3 border-t border-[#e6ddd3] space-y-3">
+              <label className="block text-xs font-bold text-[#1f1917]">لون القبعة:</label>
+              <div className="grid grid-cols-2 gap-2 p-1 rounded-full bg-[#f3eee8]">
+                <button
+                  type="button"
+                  onClick={() => setCapSameColor(true)}
+                  className={`py-2 rounded-full text-xs font-bold cursor-pointer ${
+                    capSameColor ? 'bg-white text-[#762b43] shadow-sm' : 'text-[#6e645e]'
+                  }`}
+                >
+                  نفس لون الوشاح
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCapSameColor(false)}
+                  className={`py-2 rounded-full text-xs font-bold cursor-pointer ${
+                    !capSameColor ? 'bg-white text-[#762b43] shadow-sm' : 'text-[#6e645e]'
+                  }`}
+                >
+                  لون آخر
+                </button>
+              </div>
+
+              {!capSameColor && (
+                <div className="flex flex-wrap items-center gap-2 p-2.5 rounded-xl bg-[#faf8f5] border border-[#e6ddd3]">
+                  {CAP_SWATCHES.map((sw) => (
+                    <button
+                      key={sw.name}
+                      type="button"
+                      title={sw.name}
+                      onClick={() => setCapCustomColor(sw)}
+                      className={`w-6 h-6 rounded-full border cursor-pointer ${
+                        capCustomColor.name === sw.name
+                          ? 'ring-2 ring-[#762b43] ring-offset-1 scale-110'
+                          : 'border-black/20'
+                      }`}
+                      style={{ backgroundColor: sw.hex }}
+                    />
+                  ))}
+                  <span className="text-[11px] font-bold text-[#762b43] mr-1">
+                    {capCustomColor.name}
+                  </span>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-bold text-[#1f1917] mb-1">
+                  محيط الرأس (اختياري، 45 - 70 سم):
+                </label>
+                <input
+                  type="number"
+                  min={45}
+                  max={70}
+                  value={headSize}
+                  onChange={(e) => setHeadSize(e.target.value)}
+                  placeholder="45 - 70 سم"
+                  className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
+                />
+                <p className="text-[11px] text-[#6e645e] mt-1">
+                  لفّ شريط القياس حول الرأس فوق الحاجبين والأذنين بقليل.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                {(['سطح القبعة', 'جبهة القبعة'] as const).map((pos) => (
+                  <button
+                    key={pos}
+                    type="button"
+                    onClick={() => setCapEmbroideryPos(pos)}
+                    className={`py-2 px-2.5 rounded-full border text-xs font-bold cursor-pointer ${
+                      capEmbroideryPos === pos
+                        ? 'bg-[#762b43] text-white border-[#762b43]'
+                        : 'bg-white text-[#1f1917] border-[#e6ddd3]'
+                    }`}
+                  >
+                    طرّز على {pos}
+                  </button>
+
+
+                    const active = sec === selectedSecondary;
+                    return (
+                      <button
+                        key={sec}
+                        type="button"
+                        onClick={() => setSelectedSecondary(sec)}
+                        className={`px-3 py-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                          active
+                            ? 'bg-[#1f1917] text-white border-[#1f1917]'
+                            : 'bg-[#faf8f5] text-[#1f1917] border-[#e6ddd3] hover:border-[#1f1917]'
+                        }`}
+                      >
+                        {sec}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-xs font-bold text-[#1f1917] mb-2">
+                اختر اللون: <span className="text-[#762b43]">{selectedColor.name}</span>
+              </label>
+              <div className="flex flex-wrap items-center gap-2.5">
+                {CAP_SWATCHES.map((swatch) => {
+                  const isActive = swatch.name === selectedColor.name;
+                  const hasPhoto = Boolean(product.colorImages?.[swatch.name]);
+                  return (
+                    <button
+                      key={swatch.name}
+                      type="button"
+                      title={swatch.name}
+                      onClick={() => setSelectedColor(swatch)}
+                      className={`relative w-8 h-8 rounded-full border flex items-center justify-center transition-transform cursor-pointer ${
+                        isActive
+                          ? 'ring-2 ring-[#762b43] ring-offset-2 scale-110 border-[#762b43]'
+                          : 'border-[#d6cdc2]'
+                      }`}
+                      style={{ backgroundColor: swatch.hex }}
+                    >
+                      {isActive && (
+                        <Check
+                          className={`w-4 h-4 ${
+                            swatch.hex === '#f5f5f4' || swatch.hex === '#e7d8c9' || swatch.hex === '#9ca3af'
+                              ? 'text-[#1f1917]'
+                              : 'text-white'
+                          }`}
+                        />
+                      )}
+                      {hasPhoto && !isActive && (
+                        <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border border-white" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+                            {isAdminMode && (
+                <div className="mt-3 p-3 rounded-xl bg-[#faf8f5] border border-[#e6ddd3] flex flex-wrap items-center justify-between gap-2">
+                  <input
+                    ref={colorFileRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleColorFileChange}
+                  />
+                  <span className="text-xs font-bold text-[#1f1917]">
+                    صورة لون "{selectedColor.name}":
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => colorFileRef.current?.click()}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#762b43] text-white text-xs font-bold cursor-pointer"
+                    >
+                      <ImagePlus className="w-3.5 h-3.5" />
+                      <span>{hasDedicatedColorImg ? 'تغيير صورة اللون' : 'رفع صورة لهذا اللون'}</span>
+                    </button>
+                    {hasDedicatedColorImg && (
+                      <button
+                        type="button"
+                        onClick={() => onSetColorImage?.(selectedColor.name, null)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white text-red-600 border border-red-200 text-xs font-bold cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>حذف</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+                        {/* المقاسات التفصيلية */}
             <div className="pt-3 border-t border-[#e6ddd3] space-y-3">
               <label className="block text-xs font-bold text-[#1f1917]">المقاس:</label>
               <div className="grid grid-cols-2 gap-2 p-1 rounded-full bg-[#f3eee8]">
@@ -433,101 +686,6 @@ function ProductDetailView({
               />
             </div>
 
-                    const active = sec === selectedSecondary;
-                    return (
-                      <button
-                        key={sec}
-                        type="button"
-                        onClick={() => setSelectedSecondary(sec)}
-                        className={`px-3 py-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
-                          active
-                            ? 'bg-[#1f1917] text-white border-[#1f1917]'
-                            : 'bg-[#faf8f5] text-[#1f1917] border-[#e6ddd3] hover:border-[#1f1917]'
-                        }`}
-                      >
-                        {sec}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            <div>
-              <label className="block text-xs font-bold text-[#1f1917] mb-2">
-                اختر اللون: <span className="text-[#762b43]">{selectedColor.name}</span>
-              </label>
-              <div className="flex flex-wrap items-center gap-2.5">
-                {CAP_SWATCHES.map((swatch) => {
-                  const isActive = swatch.name === selectedColor.name;
-                  const hasPhoto = Boolean(product.colorImages?.[swatch.name]);
-                  return (
-                    <button
-                      key={swatch.name}
-                      type="button"
-                      title={swatch.name}
-                      onClick={() => setSelectedColor(swatch)}
-                      className={`relative w-8 h-8 rounded-full border flex items-center justify-center transition-transform cursor-pointer ${
-                        isActive
-                          ? 'ring-2 ring-[#762b43] ring-offset-2 scale-110 border-[#762b43]'
-                          : 'border-[#d6cdc2]'
-                      }`}
-                      style={{ backgroundColor: swatch.hex }}
-                    >
-                      {isActive && (
-                        <Check
-                          className={`w-4 h-4 ${
-                            swatch.hex === '#f5f5f4' || swatch.hex === '#e7d8c9' || swatch.hex === '#9ca3af'
-                              ? 'text-[#1f1917]'
-                              : 'text-white'
-                          }`}
-                        />
-                      )}
-                      {hasPhoto && !isActive && (
-                        <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border border-white" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-
-                            {isAdminMode && (
-                <div className="mt-3 p-3 rounded-xl bg-[#faf8f5] border border-[#e6ddd3] flex flex-wrap items-center justify-between gap-2">
-                  <input
-                    ref={colorFileRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleColorFileChange}
-                  />
-                  <span className="text-xs font-bold text-[#1f1917]">
-                    صورة لون "{selectedColor.name}":
-                  </span>
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => colorFileRef.current?.click()}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#762b43] text-white text-xs font-bold cursor-pointer"
-                    >
-                      <ImagePlus className="w-3.5 h-3.5" />
-                      <span>{hasDedicatedColorImg ? 'تغيير صورة اللون' : 'رفع صورة لهذا اللون'}</span>
-                    </button>
-                    {hasDedicatedColorImg && (
-                      <button
-                        type="button"
-                        onClick={() => onSetColorImage?.(selectedColor.name, null)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white text-red-600 border border-red-200 text-xs font-bold cursor-pointer"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        <span>حذف</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            
 
           </div>
 
