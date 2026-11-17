@@ -420,6 +420,32 @@ export default function App() {
             }));
             notify('info', 'تم حذف الصورة فقط. اضغطي "إضافة صورة" أو "حفظ ونشر".');
           }}
+          onSetProductColorImage={async (id, colorName, file) => {
+            try {
+              const dataUrl = file ? await compressImageToDataUrl(file, 900, 0.85) : '';
+              setStoreState((prev) => ({
+                ...prev,
+                products: prev.products.map((p) => {
+                  if (p.id !== id) return p;
+                  const updatedColors = { ...(p.colorImages || {}) };
+                  if (dataUrl) {
+                    updatedColors[colorName] = dataUrl;
+                  } else {
+                    delete updatedColors[colorName];
+                  }
+                  return { ...p, colorImages: updatedColors };
+                }),
+              }));
+              notify(
+                'info',
+                file
+                  ? `تم رفع صورة لون "${colorName}". اضغطي "حفظ ونشر" لتثبيتها.`
+                  : `تم حذف صورة لون "${colorName}".`
+              );
+            } catch {
+              notify('error', 'تعذر معالجة الصورة. جربي صورة أخرى.');
+            }
+          }}
 
         />
 
