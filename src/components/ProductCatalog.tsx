@@ -425,3 +425,14 @@ export function ProductCatalog({
                 onAddToCart={onAddToCart}
                 onEdit={() => onEditProduct(product)}
                 onDelete={() => onDeleteProduct(product.id)}
+                                onReplaceImage={(file) => onReplaceProductImage(product.id, file)}
+                onRemoveImage={() => onRemoveProductImage?.(product.id)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
