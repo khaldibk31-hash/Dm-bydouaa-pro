@@ -436,6 +436,16 @@ export default function App() {
               {secId === 'catalog' && (
                 <ProductCatalog
                   products={storeState.products}
+                              onToggleProductField={(id, field) => {
+              setStoreState((prev) => ({
+                ...prev,
+                products: prev.products.map((p) =>
+                  p.id === id ? { ...p, [field]: !p[field] } : p
+                ),
+              }));
+              notify('info', 'تم تحديث ظهور القسم. اضغطي "حفظ ونشر" لتثبيت التغيير.');
+            }}
+
                   isAdminMode={isAdminMode}
                   onAddToCart={handleAddToCart}
                   onOpenAddProduct={(defaultCat) =>
