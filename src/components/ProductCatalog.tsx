@@ -366,6 +366,7 @@ function ProductDetailView({
                 </div>
             
             </div>
+           )}
 
                                 {/* المقاسات التفصيلية */}
             {(isAdminMode || !product.hideSizing) && (
