@@ -86,21 +86,33 @@ function ProductDetailView({
   );
   const [selectedColor, setSelectedColor] = useState(CAP_SWATCHES.at(0)!);
 
+    const [gender, setGender] = useState<'نسائي' | 'رجالي'>('نسائي');
+  const [standardSize, setStandardSize] = useState('M');
+  const [numericSize, setNumericSize] = useState('');
+  const [fullLength, setFullLength] = useState('');
+  const [shoulderAndSleeve, setShoulderAndSleeve] = useState('');
+
+  const [capSameColor, setCapSameColor] = useState(true);
+  const [capCustomColor, setCapCustomColor] = useState(CAP_SWATCHES.at(0)!);
   const [headSize, setHeadSize] = useState('');
+  const [capEmbroideryPos, setCapEmbroideryPos] = useState<'سطح القبعة' | 'جبهة القبعة'>('سطح القبعة');
+  const [capNotes, setCapNotes] = useState('');
+
+  const [addAmericanShawl, setAddAmericanShawl] = useState(false);
   const [customNotes, setCustomNotes] = useState('');
   const colorFileRef = useRef<HTMLInputElement>(null);
 
   const activeOption = product.options[selectedOptionIdx];
   const basePrice = activeOption ? activeOption.price : product.basePrice;
   const tuxedoSurcharge = selectedSecondary.includes('+100') ? 100 : 0;
-  const displayPrice = basePrice + tuxedoSurcharge;
+  const americanShawlSurcharge = addAmericanShawl ? 900 : 0;
+  const displayPrice = basePrice + tuxedoSurcharge + americanShawlSurcharge;
 
   const activeImageUrl = product.colorImages?.[selectedColor.name] || product.imageUrl;
   const hasDedicatedColorImg = Boolean(product.colorImages?.[selectedColor.name]);
 
   const handleColorFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.item(0);
-
     if (file && onSetColorImage) {
       onSetColorImage(selectedColor.name, file);
       e.target.value = '';
@@ -111,15 +123,25 @@ function ProductDetailView({
     const detailParts: string[] = [];
     if (activeOption) detailParts.push(activeOption.label);
     if (selectedSecondary) detailParts.push(selectedSecondary);
-    if (selectedColor) {
-      detailParts.push(`اللون: ${selectedColor.name}`);
+    if (selectedColor) detailParts.push(`اللون: ${selectedColor.name}`);
+
+    detailParts.push(`الفئة: ${gender}`);
+    if (numericSize.trim()) {
+      detailParts.push(`المقاس: ${numericSize.trim()}`);
+    } else {
+      detailParts.push(`المقاس: ${standardSize}`);
     }
-    if (product.supportsHeadCircumference && headSize.trim()) {
-      detailParts.push(`محيط الرأس: ${headSize.trim()} سم`);
-    }
-    if (customNotes.trim()) {
-      detailParts.push(`ملاحظة: ${customNotes.trim()}`);
-    }
+    if (fullLength.trim()) detailParts.push(`الطول: ${fullLength.trim()} سم`);
+    if (shoulderAndSleeve.trim()) detailParts.push(`الكتف/الكم: ${shoulderAndSleeve.trim()}`);
+
+    const finalCapColor = capSameColor ? selectedColor.name : capCustomColor.name;
+    detailParts.push(`لون القبعة: ${finalCapColor}`);
+    if (headSize.trim()) detailParts.push(`محيط الرأس: ${headSize.trim()} سم`);
+    detailParts.push(`تطريز القبعة: ${capEmbroideryPos}`);
+    if (capNotes.trim()) detailParts.push(`ملاحظة القبعة: ${capNotes.trim()}`);
+
+    if (addAmericanShawl) detailParts.push('+ شال أمريكي V');
+    if (customNotes.trim()) detailParts.push(`ملاحظة: ${customNotes.trim()}`);
 
     onAddToCart({
       category: product.category,
@@ -217,34 +239,200 @@ function ProductDetailView({
                   {product.options.map((opt, idx) => {
                     const active = idx === selectedOptionIdx;
                     return (
-                      <button
-                        key={opt.label}
-                        type="button"
-                        onClick={() => setSelectedOptionIdx(idx)}
-                        className={`px-3 py-2.5 rounded-xl border text-xs font-bold text-right transition-all cursor-pointer ${
-                          active
-                            ? 'bg-[#762b43] text-white border-[#762b43]'
-                            : 'bg-[#faf8f5] text-[#1f1917] border-[#e6ddd3] hover:border-[#762b43]'
-                        }`}
-                      >
-                        <span className="block">{opt.label}</span>
-                        <span className={`text-[11px] ${active ? 'text-white/90' : 'text-[#6e645e]'}`}>
-                          {opt.price.toLocaleString('en-US')} دج
-                        </span>
-                      </button>
-                    );
-                  })}
+                                  {/* المقاسات التفصيلية */}
+            <div className="pt-3 border-t border-[#e6ddd3] space-y-3">
+              <label className="block text-xs font-bold text-[#1f1917]">المقاس:</label>
+              <div className="grid grid-cols-2 gap-2 p-1 rounded-full bg-[#f3eee8]">
+                {(['نسائي', 'رجالي'] as const).map((g) => (
+                  <button
+                    key={g}
+                    type="button"
+                    onClick={() => setGender(g)}
+                    className={`py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                      gender === g ? 'bg-white text-[#762b43] shadow-sm' : 'text-[#6e645e]'
+                    }`}
+                  >
+                    {g}
+                  </button>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-5 gap-1.5">
+                {['XS', 'S', 'M', 'L', 'XL'].map((sz) => (
+                  <button
+                    key={sz}
+                    type="button"
+                    onClick={() => {
+                      setStandardSize(sz);
+                      setNumericSize('');
+                    }}
+                    className={`py-2 rounded-xl border text-xs font-bold cursor-pointer ${
+                      !numericSize && standardSize === sz
+                        ? 'bg-[#762b43] text-white border-[#762b43]'
+                        : 'bg-[#faf8f5] text-[#1f1917] border-[#e6ddd3]'
+                    }`}
+                  >
+                    {sz}
+                  </button>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block text-[11px] font-bold text-[#6e645e] mb-1">
+                    أو رقم مقاسك (34 - 70):
+                  </label>
+                  <input
+                    type="number"
+                    min={34}
+                    max={70}
+                    value={numericSize}
+                    onChange={(e) => setNumericSize(e.target.value)}
+                    placeholder="44 - 70"
+                    className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-[#6e645e] mb-1">
+                    الطول الكامل (80 - 200 سم):
+                  </label>
+                  <input
+                    type="number"
+                    min={80}
+                    max={200}
+                    value={fullLength}
+                    onChange={(e) => setFullLength(e.target.value)}
+                    placeholder="سم"
+                    className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
+                  />
                 </div>
               </div>
-            )}
 
-            {product.secondaryOptions && product.secondaryOptions.length > 0 && (
+              <input
+                type="text"
+                value={shoulderAndSleeve}
+                onChange={(e) => setShoulderAndSleeve(e.target.value)}
+                placeholder="عرض الكتفين وطول الكم (اختياري)..."
+                className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
+              />
+            </div>
+
+            {/* تفاصيل القبعة والتطريز */}
+            <div className="pt-3 border-t border-[#e6ddd3] space-y-3">
+              <label className="block text-xs font-bold text-[#1f1917]">لون القبعة:</label>
+              <div className="grid grid-cols-2 gap-2 p-1 rounded-full bg-[#f3eee8]">
+                <button
+                  type="button"
+                  onClick={() => setCapSameColor(true)}
+                  className={`py-2 rounded-full text-xs font-bold cursor-pointer ${
+                    capSameColor ? 'bg-white text-[#762b43] shadow-sm' : 'text-[#6e645e]'
+                  }`}
+                >
+                  نفس لون الوشاح
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCapSameColor(false)}
+                  className={`py-2 rounded-full text-xs font-bold cursor-pointer ${
+                    !capSameColor ? 'bg-white text-[#762b43] shadow-sm' : 'text-[#6e645e]'
+                  }`}
+                >
+                  لون آخر
+                </button>
+              </div>
+
+              {!capSameColor && (
+                <div className="flex flex-wrap items-center gap-2 p-2.5 rounded-xl bg-[#faf8f5] border border-[#e6ddd3]">
+                  {CAP_SWATCHES.map((sw) => (
+                    <button
+                      key={sw.name}
+                      type="button"
+                      title={sw.name}
+                      onClick={() => setCapCustomColor(sw)}
+                      className={`w-6 h-6 rounded-full border cursor-pointer ${
+                        capCustomColor.name === sw.name
+                          ? 'ring-2 ring-[#762b43] ring-offset-1 scale-110'
+                          : 'border-black/20'
+                      }`}
+                      style={{ backgroundColor: sw.hex }}
+                    />
+                  ))}
+                  <span className="text-[11px] font-bold text-[#762b43] mr-1">
+                    {capCustomColor.name}
+                  </span>
+                </div>
+              )}
+
               <div>
-                <label className="block text-xs font-bold text-[#1f1917] mb-2">
-                  {product.secondaryLabel || 'خيارات إضافية'}:
+                <label className="block text-xs font-bold text-[#1f1917] mb-1">
+                  محيط الرأس (اختياري، 45 - 70 سم):
                 </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {product.secondaryOptions.map((sec) => {
+                <input
+                  type="number"
+                  min={45}
+                  max={70}
+                  value={headSize}
+                  onChange={(e) => setHeadSize(e.target.value)}
+                  placeholder="45 - 70 سم"
+                  className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
+                />
+                <p className="text-[11px] text-[#6e645e] mt-1">
+                  لفّ شريط القياس حول الرأس فوق الحاجبين والأذنين بقليل.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                {(['سطح القبعة', 'جبهة القبعة'] as const).map((pos) => (
+                  <button
+                    key={pos}
+                    type="button"
+                    onClick={() => setCapEmbroideryPos(pos)}
+                    className={`py-2 px-2.5 rounded-full border text-xs font-bold cursor-pointer ${
+                      capEmbroideryPos === pos
+                        ? 'bg-[#762b43] text-white border-[#762b43]'
+                        : 'bg-white text-[#1f1917] border-[#e6ddd3]'
+                    }`}
+                  >
+                    طرّز على {pos}
+                  </button>
+                ))}
+              </div>
+
+              <input
+                type="text"
+                value={capNotes}
+                onChange={(e) => setCapNotes(e.target.value)}
+                placeholder="ملاحظات للقبعة (مثلاً: الاسم على الجبهة بخيط ذهبي)..."
+                className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
+              />
+            </div>
+
+            {/* إضافات اختيارية وملاحظات عامة */}
+            <div className="pt-3 border-t border-[#e6ddd3] space-y-2.5">
+              <label className="flex items-center justify-between p-3 rounded-2xl border border-[#e6ddd3] bg-[#faf8f5] cursor-pointer">
+                <div>
+                  <span className="block text-xs font-bold text-[#1f1917]">
+                    إضافة الشال الأمريكي V (+900 دج)
+                  </span>
+                  <span className="text-[11px] text-[#6e645e]">يُلبس على الكتفين ويتدلى بأناقة</span>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={addAmericanShawl}
+                  onChange={(e) => setAddAmericanShawl(e.target.checked)}
+                  className="w-4 h-4 accent-[#762b43]"
+                />
+              </label>
+
+              <input
+                type="text"
+                value={customNotes}
+                onChange={(e) => setCustomNotes(e.target.value)}
+                placeholder="ملاحظات إضافية للوشاح أو التطريز (اختياري)..."
+                className="w-full px-3 py-2.5 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
+              />
+            </div>
+
                     const active = sec === selectedSecondary;
                     return (
                       <button
