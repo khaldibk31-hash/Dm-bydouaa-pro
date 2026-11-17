@@ -14,6 +14,10 @@ export interface Product {
   basePrice: number;
   imageUrl: string;
   colorImages?: Record<string, string>;
+    hideSizing?: boolean;
+  hideCapDetails?: boolean;
+  hideAmericanShawl?: boolean;
+
 
   options: ProductOption[];
   secondaryOptions?: string[];
