@@ -32,6 +32,7 @@ interface ProductCatalogProps {
   onDeleteProduct: (productId: string) => void;
   onReplaceProductImage: (productId: string, file: File) => void;
   onSetProductColorImage?: (productId: string, colorName: string, file: File | null) => void;
+  onToggleProductField?: (productId: string, field: 'hideSizing' | 'hideCapDetails' | 'hideAmericanShawl') => void;
 
   onRemoveProductImage?: (productId: string) => void;
 }
@@ -69,8 +70,11 @@ function ProductDetailView({
   onBackToHome,
   onBackToSection,
   onAddToCart,
-  onSetColorImage,
-}: {
+  
+    onSetColorImage,
+    onToggleField,
+  }: {
+
   product: Product;
   sectionTitle: string;
   isAdminMode: boolean;
@@ -78,7 +82,9 @@ function ProductDetailView({
   onBackToSection: () => void;
   onAddToCart: (item: Omit<CartItem, 'id' | 'quantity'>) => void;
   onSetColorImage?: (colorName: string, file: File | null) => void;
+  onToggleField?: (field: 'hideSizing' | 'hideCapDetails' | 'hideAmericanShawl') => void;
 }) {
+
   const [selectedOptionIdx, setSelectedOptionIdx] = useState(0);
   const [selectedSecondary, setSelectedSecondary] = useState(
     product.secondaryOptions?.at(0) || ''
@@ -355,205 +361,225 @@ function ProductDetailView({
                         <span>حذف</span>
                       </button>
                     )}
-                  </div>
+                                 
+
                 </div>
               )}
             </div>
 
-                        {/* المقاسات التفصيلية */}
-            <div className="pt-3 border-t border-[#e6ddd3] space-y-3">
-              <label className="block text-xs font-bold text-[#1f1917]">المقاس:</label>
-              <div className="grid grid-cols-2 gap-2 p-1 rounded-full bg-[#f3eee8]">
-                {(['نسائي', 'رجالي'] as const).map((g) => (
-                  <button
-                    key={g}
-                    type="button"
-                    onClick={() => setGender(g)}
-                    className={`py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                      gender === g ? 'bg-white text-[#762b43] shadow-sm' : 'text-[#6e645e]'
-                    }`}
-                  >
-                    {g}
-                  </button>
-                ))}
-              </div>
-
-              <div className="grid grid-cols-5 gap-1.5">
-                {['XS', 'S', 'M', 'L', 'XL'].map((sz) => (
-                  <button
-                    key={sz}
-                    type="button"
-                    onClick={() => {
-                      setStandardSize(sz);
-                      setNumericSize('');
-                    }}
-                    className={`py-2 rounded-xl border text-xs font-bold cursor-pointer ${
-                      !numericSize && standardSize === sz
-                        ? 'bg-[#762b43] text-white border-[#762b43]'
-                        : 'bg-[#faf8f5] text-[#1f1917] border-[#e6ddd3]'
-                    }`}
-                  >
-                    {sz}
-                  </button>
-                ))}
-              </div>
-
-              <div className="grid grid-cols-2 gap-2.5">
-                <div>
-                  <label className="block text-[11px] font-bold text-[#6e645e] mb-1">
-                    أو رقم مقاسك (34 - 70):
-                  </label>
-                  <input
-                    type="number"
-                    min={34}
-                    max={70}
-                    value={numericSize}
-                    onChange={(e) => setNumericSize(e.target.value)}
-                    placeholder="44 - 70"
-                    className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
-                  />
+                                {/* المقاسات التفصيلية */}
+            {(isAdminMode || !product.hideSizing) && (
+              <div className={`pt-3 border-t border-[#e6ddd3] space-y-3 ${product.hideSizing ? 'opacity-50' : ''}`}>
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-[#1f1917]">المقاس:</label>
+                  {isAdminMode && onToggleField && (
+                    <button
+                      type="button"
+                      onClick={() => onToggleField('hideSizing')}
+                      className={`px-2.5 py-1 rounded-full text-[11px] font-bold cursor-pointer ${
+                        product.hideSizing
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : 'bg-rose-100 text-rose-700'
+                      }`}
+                    >
+                      {product.hideSizing ? '+ إظهار للزبائن' : '✕ حذف وإخفاء'}
+                    </button>
+                  )}
                 </div>
-                <div>
-                  <label className="block text-[11px] font-bold text-[#6e645e] mb-1">
-                    الطول الكامل (80 - 200 سم):
-                  </label>
-                  <input
-                    type="number"
-                    min={80}
-                    max={200}
-                    value={fullLength}
-                    onChange={(e) => setFullLength(e.target.value)}
-                    placeholder="سم"
-                    className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
-                  />
-                </div>
-              </div>
+                {!product.hideSizing && (
+                  <>
+                    <div className="grid grid-cols-2 gap-2 p-1 rounded-full bg-[#f3eee8]">
+                      {(['نسائي', 'رجالي'] as const).map((g) => (
+                        <button
+                          key={g}
+                          type="button"
+                          onClick={() => setGender(g)}
+                          className={`py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                            gender === g ? 'bg-white text-[#762b43] shadow-sm' : 'text-[#6e645e]'
+                          }`}
+                        >
+                          {g}
+                        </button>
+                      ))}
+                    </div>
 
-              <input
-                type="text"
-                value={shoulderAndSleeve}
-                onChange={(e) => setShoulderAndSleeve(e.target.value)}
-                placeholder="عرض الكتفين وطول الكم (اختياري)..."
-                className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
-              />
-            </div>
+                    <div className="grid grid-cols-5 gap-1.5">
+                      {['XS', 'S', 'M', 'L', 'XL'].map((sz) => (
+                        <button
+                          key={sz}
+                          type="button"
+                          onClick={() => {
+                            setStandardSize(sz);
+                            setNumericSize('');
+                          }}
+                          className={`py-2 rounded-xl border text-xs font-bold cursor-pointer ${
+                            !numericSize && standardSize === sz
+                              ? 'bg-[#762b43] text-white border-[#762b43]'
+                              : 'bg-[#faf8f5] text-[#1f1917] border-[#e6ddd3]'
+                          }`}
+                        >
+                          {sz}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="block text-[11px] font-bold text-[#6e645e] mb-1">
+                          أو رقم مقاسك (34 - 70):
+                        </label>
+                        <input
+                          type="number"
+                          min={34}
+                          max={70}
+                          value={numericSize}
+                          onChange={(e) => setNumericSize(e.target.value)}
+                          placeholder="44 - 70"
+                          className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-bold text-[#6e645e] mb-1">
+                          الطول الكامل (80 - 200 سم):
+                        </label>
+                        <input
+                          type="number"
+                          min={80}
+                          max={200}
+                          value={fullLength}
+                          onChange={(e) => setFullLength(e.target.value)}
+                          placeholder="سم"
+                          className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
+                        />
+                      </div>
+                    </div>
+
+                    <input
+                      type="text"
+                      value={shoulderAndSleeve}
+                      onChange={(e) => setShoulderAndSleeve(e.target.value)}
+                      placeholder="عرض الكتفين وطول الكم (اختياري)..."
+                      className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
+                    />
+                  </>
+                )}
+              </div>
+            )}
 
             {/* تفاصيل القبعة والتطريز */}
-            <div className="pt-3 border-t border-[#e6ddd3] space-y-3">
-              <label className="block text-xs font-bold text-[#1f1917]">لون القبعة:</label>
-              <div className="grid grid-cols-2 gap-2 p-1 rounded-full bg-[#f3eee8]">
-                <button
-                  type="button"
-                  onClick={() => setCapSameColor(true)}
-                  className={`py-2 rounded-full text-xs font-bold cursor-pointer ${
-                    capSameColor ? 'bg-white text-[#762b43] shadow-sm' : 'text-[#6e645e]'
-                  }`}
-                >
-                  نفس لون الوشاح
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCapSameColor(false)}
-                  className={`py-2 rounded-full text-xs font-bold cursor-pointer ${
-                    !capSameColor ? 'bg-white text-[#762b43] shadow-sm' : 'text-[#6e645e]'
-                  }`}
-                >
-                  لون آخر
-                </button>
-              </div>
-
-              {!capSameColor && (
-                <div className="flex flex-wrap items-center gap-2 p-2.5 rounded-xl bg-[#faf8f5] border border-[#e6ddd3]">
-                  {CAP_SWATCHES.map((sw) => (
+            {(isAdminMode || !product.hideCapDetails) && (
+              <div className={`pt-3 border-t border-[#e6ddd3] space-y-3 ${product.hideCapDetails ? 'opacity-50' : ''}`}>
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-[#1f1917]">لون القبعة وتفاصيلها:</label>
+                  {isAdminMode && onToggleField && (
                     <button
-                      key={sw.name}
                       type="button"
-                      title={sw.name}
-                      onClick={() => setCapCustomColor(sw)}
-                      className={`w-6 h-6 rounded-full border cursor-pointer ${
-                        capCustomColor.name === sw.name
-                          ? 'ring-2 ring-[#762b43] ring-offset-1 scale-110'
-                          : 'border-black/20'
+                      onClick={() => onToggleField('hideCapDetails')}
+                      className={`px-2.5 py-1 rounded-full text-[11px] font-bold cursor-pointer ${
+                        product.hideCapDetails
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : 'bg-rose-100 text-rose-700'
                       }`}
-                      style={{ backgroundColor: sw.hex }}
-                    />
-                  ))}
-                  <span className="text-[11px] font-bold text-[#762b43] mr-1">
-                    {capCustomColor.name}
-                  </span>
+                    >
+                      {product.hideCapDetails ? '+ إظهار للزبائن' : '✕ حذف وإخفاء'}
+                    </button>
+                  )}
                 </div>
-              )}
+                {!product.hideCapDetails && (
+                  <>
+                    <div className="grid grid-cols-2 gap-2 p-1 rounded-full bg-[#f3eee8]">
+                      <button
+                        type="button"
+                        onClick={() => setCapSameColor(true)}
+                        className={`py-2 rounded-full text-xs font-bold cursor-pointer ${
+                          capSameColor ? 'bg-white text-[#762b43] shadow-sm' : 'text-[#6e645e]'
+                        }`}
+                      >
+                        نفس لون الوشاح
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCapSameColor(false)}
+                        className={`py-2 rounded-full text-xs font-bold cursor-pointer ${
+                          !capSameColor ? 'bg-white text-[#762b43] shadow-sm' : 'text-[#6e645e]'
+                        }`}
+                      >
+                        لون آخر
+                      </button>
+                    </div>
 
-              <div>
-                <label className="block text-xs font-bold text-[#1f1917] mb-1">
-                  محيط الرأس (اختياري، 45 - 70 سم):
-                </label>
-                <input
-                  type="number"
-                  min={45}
-                  max={70}
-                  value={headSize}
-                  onChange={(e) => setHeadSize(e.target.value)}
-                  placeholder="45 - 70 سم"
-                  className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
-                />
-                <p className="text-[11px] text-[#6e645e] mt-1">
-                  لفّ شريط القياس حول الرأس فوق الحاجبين والأذنين بقليل.
-                </p>
+                    {!capSameColor && (
+                      <div className="flex flex-wrap items-center gap-2 p-2.5 rounded-xl bg-[#faf8f5] border border-[#e6ddd3]">
+                        {CAP_SWATCHES.map((sw) => (
+                          <button
+                            key={sw.name}
+                            type="button"
+                            title={sw.name}
+                            onClick={() => setCapCustomColor(sw)}
+                            className={`w-6 h-6 rounded-full border cursor-pointer ${
+                              capCustomColor.name === sw.name
+                                ? 'ring-2 ring-[#762b43] ring-offset-1 scale-110'
+                                : 'border-black/20'
+                            }`}
+                            style={{ backgroundColor: sw.hex }}
+                          />
+                        ))}
+                        <span className="text-[11px] font-bold text-[#762b43] mr-1">
+                          {capCustomColor.name}
+                        </span>
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="block text-xs font-bold text-[#1f1917] mb-1">
+                        محيط الرأس (اختياري، 45 - 70 سم):
+                      </label>
+                      <input
+                        type="number"
+                        min={45}
+                        max={70}
+                        value={headSize}
+                        onChange={(e) => setHeadSize(e.target.value)}
+                        placeholder="45 - 70 سم"
+                        className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
+                      />
+                      <p className="text-[11px] text-[#6e645e] mt-1">
+                        لفّ شريط القياس حول الرأس فوق الحاجبين والأذنين بقليل.
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      {(['سطح القبعة', 'جبهة القبعة'] as const).map((pos) => (
+                        <button
+                          key={pos}
+                          type="button"
+                          onClick={() => setCapEmbroideryPos(pos)}
+                          className={`py-2 px-2.5 rounded-full border text-xs font-bold cursor-pointer ${
+                            capEmbroideryPos === pos
+                              ? 'bg-[#762b43] text-white border-[#762b43]'
+                              : 'bg-white text-[#1f1917] border-[#e6ddd3]'
+                          }`}
+                        >
+                          طرّز على {pos}
+                        </button>
+                      ))}
+                    </div>
+
+                    <input
+                      type="text"
+                      value={capNotes}
+                      onChange={(e) => setCapNotes(e.target.value)}
+                      placeholder="ملاحظات للقبعة (مثلاً: الاسم على الجبهة بخيط ذهبي)..."
+                      className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
+                    />
+                  </>
+                )}
               </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                {(['سطح القبعة', 'جبهة القبعة'] as const).map((pos) => (
-                  <button
-                    key={pos}
-                    type="button"
-                    onClick={() => setCapEmbroideryPos(pos)}
-                    className={`py-2 px-2.5 rounded-full border text-xs font-bold cursor-pointer ${
-                      capEmbroideryPos === pos
-                        ? 'bg-[#762b43] text-white border-[#762b43]'
-                        : 'bg-white text-[#1f1917] border-[#e6ddd3]'
-                    }`}
-                  >
-                    طرّز على {pos}
-                  </button>
-                ))}
-              </div>
-
-              <input
-                type="text"
-                value={capNotes}
-                onChange={(e) => setCapNotes(e.target.value)}
-                placeholder="ملاحظات للقبعة (مثلاً: الاسم على الجبهة بخيط ذهبي)..."
-                className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
-              />
-            </div>
+            )}
 
             {/* إضافات اختيارية وملاحظات عامة */}
-            <div className="pt-3 border-t border-[#e6ddd3] space-y-2.5">
-              <label className="flex items-center justify-between p-3 rounded-2xl border border-[#e6ddd3] bg-[#faf8f5] cursor-pointer">
-                <div>
-                  <span className="block text-xs font-bold text-[#1f1917]">
-                    إضافة الشال الأمريكي V (+900 دج)
-                  </span>
-                  <span className="text-[11px] text-[#6e645e]">يُلبس على الكتفين ويتدلى بأناقة</span>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={addAmericanShawl}
-                  onChange={(e) => setAddAmericanShawl(e.target.checked)}
-                  className="w-4 h-4 accent-[#762b43]"
-                />
-              </label>
-
-              <input
-                type="text"
-                value={customNotes}
-                onChange={(e) => setCustomNotes(e.target.value)}
-                placeholder="ملاحظات إضافية للوشاح أو التطريز (اختياري)..."
-                className="w-full px-3 py-2.5 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
-              />
-            </div>
-
+    
+            
 
           </div>
 
@@ -742,8 +768,12 @@ export function ProductCatalog({
   onDeleteProduct,
   onReplaceProductImage,
   onRemoveProductImage,
-    onSetProductColorImage,
-}: ProductCatalogProps) {
+    
+          onSetProductColorImage,
+    onToggleProductField,
+  }: ProductCatalogProps) {
+
+
 
     const [selectedSection, setSelectedSection] = useState<CategoryId | null>(null);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
@@ -823,6 +853,7 @@ export function ProductCatalog({
             onAddToCart={onAddToCart}
             isAdminMode={isAdminMode}
 onSetColorImage={(colorName, file) => onSetProductColorImage?.(selectedProduct.id, colorName, file)}
+                onToggleField={(field) => onToggleProductField?.(selectedProduct.id, field)}
 
           />
         ) : selectedSection && activeSectionMeta ? (
