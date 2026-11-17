@@ -145,14 +145,36 @@ function ProductDetailView({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-5 sm:p-8">
         {/* Large Product Image */}
-        <div className="aspect-[4/3] md:aspect-square rounded-2xl bg-[#f3eee8] overflow-hidden border border-[#e6ddd3]">
-          {product.imageUrl ? (
-            <img
-              src={product.imageUrl}
-              alt={product.name}
-              className="w-full h-full object-cover"
-            />
+        <div className="relative aspect-[4/3] md:aspect-square rounded-2xl bg-[#f3eee8] overflow-hidden border border-[#e6ddd3]">
+                    {product.imageUrl ? (
+            <>
+              <img
+                src={product.imageUrl}
+                alt={product.name}
+                className="w-full h-full object-cover transition-all duration-300"
+              />
+              {selectedCapColor !== 'أسود ملكي' && (
+                <div
+                  className="absolute inset-0 pointer-events-none transition-colors duration-300 mix-blend-color opacity-70"
+                  style={{
+                    backgroundColor:
+                      CAP_SWATCHES.find((s) => s.name === selectedCapColor)?.hex || 'transparent',
+                  }}
+                />
+              )}
+              <div className="absolute bottom-3 right-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-sm border border-[#e6ddd3] shadow-sm text-xs font-bold text-[#1f1917]">
+                <span
+                  className="w-3.5 h-3.5 rounded-full border border-black/15"
+                  style={{
+                    backgroundColor:
+                      CAP_SWATCHES.find((s) => s.name === selectedCapColor)?.hex || '#141212',
+                  }}
+                />
+                <span>اللون: {selectedCapColor}</span>
+              </div>
+            </>
           ) : (
+
             <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center">
               <ShoppingBag className="w-10 h-10 text-[#762b43] mb-2 opacity-75" />
               <span className="font-editorial text-lg font-bold text-[#1f1917]">
@@ -237,7 +259,8 @@ function ProductDetailView({
               </div>
             )}
 
-            {product.supportsColorSwatches && (
+            {true && (
+
               <div>
                 <label className="block text-xs font-bold text-[#1f1917] mb-2">
                   اللون المختار: <span className="text-[#762b43]">{selectedCapColor}</span>
