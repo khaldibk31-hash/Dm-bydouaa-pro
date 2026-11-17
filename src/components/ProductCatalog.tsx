@@ -60,6 +60,82 @@ const MAIN_SECTIONS = [
     fallbackImg: BOUQUET_IMAGE_PATH,
   },
 ];
+function SmartColoredImage({
+  src,
+  alt,
+  targetHex,
+  isDefaultColor,
+}: {
+  src: string;
+  alt: string;
+  targetHex: string;
+  isDefaultColor: boolean;
+}) {
+  const [tintedSrc, setTintedSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isDefaultColor || !src) {
+      setTintedSrc(null);
+      return;
+    }
+
+    let cancelled = false;
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        const maxW = 600;
+        const scale = Math.min(1, maxW / img.width);
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+
+        const cleanHex = targetHex.replace('#', '');
+        const tr = parseInt(cleanHex.substring(0, 2), 16);
+        const tg = parseInt(cleanHex.substring(2, 4), 16);
+        const tb = parseInt(cleanHex.substring(4, 6), 16);
+
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+          const brightness = (r + g + b) / 3;
+
+          if (brightness < 165) {
+            const shade = Math.min(1.35, Math.max(0.28, brightness / 110));
+            data[i] = Math.min(255, Math.round(tr * shade));
+            data[i + 1] = Math.min(255, Math.round(tg * shade));
+            data[i + 2] = Math.min(255, Math.round(tb * shade));
+          }
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+        if (!cancelled) setTintedSrc(canvas.toDataURL('image/jpeg', 0.9));
+      } catch {
+        if (!cancelled) setTintedSrc(null);
+      }
+    };
+    img.src = src;
+
+    return () => {
+      cancelled = true;
+    };
+  }, [src, targetHex, isDefaultColor]);
+
+  return (
+    <img
+      src={tintedSrc || src}
+      alt={alt}
+      className="w-full h-full object-cover transition-all duration-300"
+    />
+  );
+}
 
 function ProductDetailView({
   product,
@@ -148,20 +224,15 @@ function ProductDetailView({
         <div className="relative aspect-[4/3] md:aspect-square rounded-2xl bg-[#f3eee8] overflow-hidden border border-[#e6ddd3]">
                     {product.imageUrl ? (
             <>
-              <img
+                            <SmartColoredImage
                 src={product.imageUrl}
                 alt={product.name}
-                className="w-full h-full object-cover transition-all duration-300"
+                targetHex={
+                  CAP_SWATCHES.find((s) => s.name === selectedCapColor)?.hex || '#141212'
+                }
+                isDefaultColor={selectedCapColor === 'أسود ملكي'}
               />
-              {selectedCapColor !== 'أسود ملكي' && (
-                <div
-                  className="absolute inset-0 pointer-events-none transition-colors duration-300 mix-blend-color opacity-70"
-                  style={{
-                    backgroundColor:
-                      CAP_SWATCHES.find((s) => s.name === selectedCapColor)?.hex || 'transparent',
-                  }}
-                />
-              )}
+
               <div className="absolute bottom-3 right-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-sm border border-[#e6ddd3] shadow-sm text-xs font-bold text-[#1f1917]">
                 <span
                   className="w-3.5 h-3.5 rounded-full border border-black/15"
