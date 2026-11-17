@@ -42,6 +42,18 @@ export default function App() {
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [isSavingCloud, setIsSavingCloud] = useState(false);
+  const sectionOrder = storeState.sectionOrder && storeState.sectionOrder.length === 3
+    ? storeState.sectionOrder
+    : ['catalog', 'studio', 'pricing'];
+
+  const moveSection = (id: string, dir: -1 | 1) => {
+    const idx = sectionOrder.indexOf(id);
+    const target = idx + dir;
+    if (idx < 0 || target < 0 || target >= sectionOrder.length) return;
+    const next = [...sectionOrder];
+    [next[idx], next[target]] = [next[target], next[idx]];
+    setStoreState((prev) => ({ ...prev, sectionOrder: next }));
+  };
 
   const [cart, setCart] = useState<CartItem[]>(() => {
     try {
@@ -385,76 +397,130 @@ export default function App() {
         <HeroSection copy={storeState.copy} />
 
         
+        {sectionOrder.map((secId, index) => {
+          const sectionTitle =
+            secId === 'catalog'
+              ? 'أقسام دار الأزياء (الوشاح والروب والقبعة)'
+              : secId === 'studio'
+              ? 'استوديو تصميم الوشاح'
+              : 'جدول الأسعار والأسئلة الشائعة';
 
-        <ProductCatalog
-          products={storeState.products}
-          isAdminMode={isAdminMode}
-          onAddToCart={handleAddToCart}
-          onOpenAddProduct={(defaultCat) =>
-            setProductModalState({
-              isOpen: true,
-              category: defaultCat || 'shawl',
-              editing: null,
-            })
-          }
-          onEditProduct={(product) =>
-            setProductModalState({
-              isOpen: true,
-              category: product.category,
-              editing: product,
-            })
-          }
-          onDeleteProduct={handleDeleteProduct}
-          onReplaceProductImage={handleReplaceProductImage}
-                    onRemoveProductImage={(id) => {
-            setStoreState((prev) => ({
-              ...prev,
-              products: prev.products.map((p) => (p.id === id ? { ...p, imageUrl: '' } : p)),
-            }));
-            notify('info', 'تم حذف الصورة فقط. اضغطي "إضافة صورة" أو "حفظ ونشر".');
-          }}
-          onSetProductColorImage={async (id, colorName, file) => {
-            try {
-              const dataUrl = file ? await new Promise<string>((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result || '')); r.onerror = rej; r.readAsDataURL(file); }) : '';
+          return (
+            <div key={secId} className="relative">
+              {isAdminMode && (
+                <div className="max-w-6xl mx-auto px-4 pt-3 flex items-center justify-between gap-2">
+                  <span className="text-xs font-bold text-[#762b43] bg-[#faf8f5] px-3 py-1.5 rounded-full border border-[#e6ddd3]">
+                    قسم: {sectionTitle}
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      disabled={index === 0}
+                      onClick={() => moveSection(secId, -1)}
+                      className="px-3 py-1.5 rounded-full bg-white border border-[#e6ddd3] text-xs font-bold text-[#1f1917] disabled:opacity-40 cursor-pointer"
+                    >
+                      ↑ نقل للأعلى
+                    </button>
+                    <button
+                      type="button"
+                      disabled={index === sectionOrder.length - 1}
+                      onClick={() => moveSection(secId, 1)}
+                      className="px-3 py-1.5 rounded-full bg-white border border-[#e6ddd3] text-xs font-bold text-[#1f1917] disabled:opacity-40 cursor-pointer"
+                    >
+                      ↓ نقل للأسفل
+                    </button>
+                  </div>
+                </div>
+              )}
 
-              setStoreState((prev) => ({
-                ...prev,
-                products: prev.products.map((p) => {
-                  if (p.id !== id) return p;
-                  const updatedColors = { ...(p.colorImages || {}) };
-                  if (dataUrl) {
-                    updatedColors[colorName] = dataUrl;
-                  } else {
-                    delete updatedColors[colorName];
+              {secId === 'catalog' && (
+                <ProductCatalog
+                  products={storeState.products}
+                  isAdminMode={isAdminMode}
+                  onAddToCart={handleAddToCart}
+                  onOpenAddProduct={(defaultCat) =>
+                    setProductModalState({
+                      isOpen: true,
+                      category: defaultCat || 'shawl',
+                      editing: null,
+                    })
                   }
-                  return { ...p, colorImages: updatedColors };
-                }),
-              }));
-              notify(
-                'info',
-                file
-                  ? `تم رفع صورة لون "${colorName}". اضغطي "حفظ ونشر" لتثبيتها.`
-                  : `تم حذف صورة لون "${colorName}".`
-              );
-            } catch {
-              notify('error', 'تعذر معالجة الصورة. جربي صورة أخرى.');
-            }
-          }}
+                  onEditProduct={(product) =>
+                    setProductModalState({
+                      isOpen: true,
+                      category: product.category,
+                      editing: product,
+                    })
+                  }
+                  onDeleteProduct={handleDeleteProduct}
+                  onReplaceProductImage={handleReplaceProductImage}
+                  onRemoveProductImage={(id) => {
+                    setStoreState((prev) => ({
+                      ...prev,
+                      products: prev.products.map((p) =>
+                        p.id === id ? { ...p, imageUrl: '' } : p
+                      ),
+                    }));
+                    notify('info', 'تمت إزالة الصورة. اضغطي "حفظ ونشر" لتثبيت التغيير.');
+                  }}
+                  onSetProductColorImage={async (id, colorName, file) => {
+                    try {
+                      const dataUrl = file
+                        ? await new Promise<string>((res, rej) => {
+                            const r = new FileReader();
+                            r.onload = () => res(String(r.result || ''));
+                            r.onerror = rej;
+                            r.readAsDataURL(file);
+                          })
+                        : '';
+                      setStoreState((prev) => ({
+                        ...prev,
+                        products: prev.products.map((p) => {
+                          if (p.id !== id) return p;
+                          const updatedColors = { ...(p.colorImages || {}) };
+                          if (dataUrl) {
+                            updatedColors[colorName] = dataUrl;
+                          } else {
+                            delete updatedColors[colorName];
+                          }
+                          return { ...p, colorImages: updatedColors };
+                        }),
+                      }));
+                      notify(
+                        'info',
+                        file
+                          ? `تم رفع صورة لون "${colorName}". اضغطي "حفظ ونشر" لتثبيتها.`
+                          : `تم حذف صورة لون "${colorName}".`
+                      );
+                    } catch {
+                      notify('error', 'تعذر معالجة الصورة. جربي صورة أخرى.');
+                    }
+                  }}
+                />
+              )}
 
-        />
-        <StoleStudio
-          title={storeState.copy.studioTitle}
-          subtitle={storeState.copy.studioSubtitle}
-          studioBgUrl={storeState.studioBgUrl}
-          isAdminMode={isAdminMode}
-          onUploadStudioBg={handleUploadStudioBg}
-          onAddToCart={handleAddToCart}
-        />
+              {secId === 'studio' && (
+                <StoleStudio
+                  title={storeState.copy.studioTitle}
+                  subtitle={storeState.copy.studioSubtitle}
+                  studioBgUrl={storeState.studioBgUrl}
+                  isAdminMode={isAdminMode}
+                  onUploadStudioBg={handleUploadStudioBg}
+                  onAddToCart={handleAddToCart}
+                />
+              )}
 
-        <PricingAndFaq
-          pricesTitle={storeState.copy.pricesTitle}
-          pricesSubtitle={storeState.copy.pricesSubtitle}
-        />
+              {secId === 'pricing' && (
+                <PricingAndFaq
+                  priceTitle={storeState.copy.pricesTitle}
+                  pricesSubtitle={storeState.copy.pricesSubtitle}
+                />
+              )}
+            </div>
+          );
+        })}
+
+  
       </main>
 
       {/* Quiet Atelier Footer */}
