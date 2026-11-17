@@ -105,10 +105,11 @@ function SmartColoredImage({
           const r = data[i];
           const g = data[i + 1];
           const b = data[i + 2];
-                    const brightness = (r + g + b) / 3;
-          const warmth = r - b;
+                              const brightness = (r + g + b) / 3;
+          const isDarkFabric = brightness < 85 || (brightness < 115 && r > g + 22);
 
-          if (brightness < 95 && warmth < 16) {
+          if (isDarkFabric) {
+
 
             const shade = Math.min(1.35, Math.max(0.28, brightness / 110));
             data[i] = Math.min(255, Math.round(tr * shade));
