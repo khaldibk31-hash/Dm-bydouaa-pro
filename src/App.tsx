@@ -422,7 +422,7 @@ export default function App() {
           }}
           onSetProductColorImage={async (id, colorName, file) => {
             try {
-              const dataUrl = file ? await compressImageToDataUrl(file, 900, 0.85) : '';
+              const dataUrl = file ? await compressImageToDataUrl(file) : '';
               setStoreState((prev) => ({
                 ...prev,
                 products: prev.products.map((p) => {
