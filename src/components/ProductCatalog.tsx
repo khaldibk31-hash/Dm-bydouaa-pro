@@ -527,34 +527,8 @@ function ProductDetailView({
               )}
             </div>
 
-            {product.supportsHeadCircumference && (
-              <div>
-                <label className="block text-xs font-bold text-[#1f1917] mb-1.5">
-                  محيط الرأس بالسنتيمتر (اختياري):
-                </label>
-                <input
-                  type="number"
-                  min={48}
-                  max={66}
-                  value={headSize}
-                  onChange={(e) => setHeadSize(e.target.value)}
-                  placeholder="مثال: 57"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs text-[#1f1917]"
-                />
-              </div>
-            )}
-<div>
-              <label className="block text-xs font-bold text-[#1f1917] mb-1.5">
-                ملاحظة أو مقاس أو نص للتطريز (اختياري):
-              </label>
-              <input
-                type="text"
-                value={customNotes}
-                onChange={(e) => setCustomNotes(e.target.value)}
-                placeholder="اكتبي المقاس أو الاسم المطلوب تطريزه..."
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs text-[#1f1917]"
-              />
-            </div>
+            
+
           </div>
 
           <div className="pt-4 border-t border-[#e6ddd3] flex items-center justify-between gap-4">
