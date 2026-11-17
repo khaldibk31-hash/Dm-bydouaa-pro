@@ -353,7 +353,7 @@ function ProductDetailView({
                 />
               </div>
             )}
-
+<div>
               <label className="block text-xs font-bold text-[#1f1917] mb-1.5">
                 ملاحظة أو مقاس أو نص للتطريز (اختياري):
               </label>
@@ -383,7 +383,7 @@ function ProductDetailView({
               <ShoppingBag className="w-4 h-4" />
               <span>أضف إلى السلة</span>
             </button>
-          </div>
+                   </div>
         </div>
       </div>
     </div>
@@ -391,6 +391,7 @@ function ProductDetailView({
 }
 
 function SectionCard({
+
   product,
   isAdminMode,
 
