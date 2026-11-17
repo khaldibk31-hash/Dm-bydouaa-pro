@@ -384,14 +384,7 @@ export default function App() {
       <main className="flex-1">
         <HeroSection copy={storeState.copy} />
 
-        <StoleStudio
-          title={storeState.copy.studioTitle}
-          subtitle={storeState.copy.studioSubtitle}
-          studioBgUrl={storeState.studioBgUrl}
-          isAdminMode={isAdminMode}
-          onUploadStudioBg={handleUploadStudioBg}
-          onAddToCart={handleAddToCart}
-        />
+        
 
         <ProductCatalog
           products={storeState.products}
@@ -448,6 +441,14 @@ export default function App() {
             }
           }}
 
+        />
+        <StoleStudio
+          title={storeState.copy.studioTitle}
+          subtitle={storeState.copy.studioSubtitle}
+          studioBgUrl={storeState.studioBgUrl}
+          isAdminMode={isAdminMode}
+          onUploadStudioBg={handleUploadStudioBg}
+          onAddToCart={handleAddToCart}
         />
 
         <PricingAndFaq
