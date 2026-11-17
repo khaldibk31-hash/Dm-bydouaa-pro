@@ -364,7 +364,7 @@ function ProductDetailView({
                                  
 
                 </div>
-              )}
+            
             </div>
 
                                 {/* المقاسات التفصيلية */}
