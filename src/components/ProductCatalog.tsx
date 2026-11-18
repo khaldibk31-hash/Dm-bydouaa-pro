@@ -739,8 +739,10 @@ function ProductDetailView({
                     </label>
                   )}
 
-            </div>
+                    </div>
+            )}
           </div>
+      
 
           <div className="pt-4 border-t border-[#e6ddd3] flex items-center justify-between gap-4">
             <div>
