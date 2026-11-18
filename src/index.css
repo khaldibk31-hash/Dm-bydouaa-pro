@@ -45,12 +45,79 @@
   font-variant-numeric: tabular-nums;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto !important;
-    transition-duration: 0.01ms !important;
-    animation-duration: 0.01ms !important;
-  }
+/* ============ الانتقالات السلسة ============ */
+.section-reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition:
+    opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+.section-reveal.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.catalog-enter {
+  animation: catalogFadeSlide 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes catalogFadeSlide {
+  from { opacity: 0; transform: translateX(18px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ============ Toolbar العائم ============ */
+.admin-floating-toolbar {
+  display: none;
+  position: fixed;
+  gap: 4px;
+  padding: 4px;
+  background: #ffffff;
+  border: 1px solid #e6ddd3;
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(31, 25, 23, 0.18);
+  z-index: 9999;
+  align-items: center;
+}
+.admin-floating-toolbar button {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  background: #faf8f5;
+  transition: background 0.15s, transform 0.15s;
+}
+.admin-floating-toolbar button:hover {
+  background: #f3eee8;
+  transform: scale(1.08);
+}
+.admin-floating-toolbar button[data-action="delete"]:hover {
+  background: #fee2e2;
+}
+
+[data-admin-text="true"] {
+  transition: background 0.15s ease;
+}
+[data-admin-text="true"]:hover {
+  background: rgba(185, 154, 101, 0.07);
+}
+[contenteditable="true"]:focus {
+  outline: 2px solid #b99a65 !important;
+  background: rgba(185, 154, 101, 0.08) !important;
+  box-shadow: 0 0 0 4px rgba(185, 154, 101, 0.12);
+  border-radius: 4px;
+}
+
+.admin-inserted-img {
+  display: block;
+  max-width: 100%;
+  margin: 10px 0;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(31, 25, 23, 0.1);
 }
