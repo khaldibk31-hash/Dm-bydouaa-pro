@@ -259,9 +259,414 @@ function ProductDetailView({
           </div>
         )}
       </div>
+            <div className="bg-white border border-[#e6ddd3] rounded-3xl overflow-hidden shadow-sm grid grid-cols-1 md:grid-cols-2">
+        <div className="relative bg-[#faf8f5] flex items-center justify-center min-h-[340px] sm:min-h-[460px] p-4 sm:p-8">
+          <img
+            src={displayedImage}
+            alt={product.title}
+            className="w-full h-full max-h-[500px] object-contain rounded-2xl transition-all duration-300"
+          />
+          {product.badge && (
+            <span className="absolute top-4 right-4 px-3 py-1 rounded-full bg-[#762b43] text-white text-xs font-bold shadow">
+              {product.badge}
+            </span>
+          )}
+          <span className="absolute bottom-4 right-4 px-3 py-1 rounded-full bg-white/95 border border-[#e6ddd3] text-[11px] font-bold text-[#1f1917] flex items-center gap-1.5 shadow-sm">
+            <span
+              className="w-3 h-3 rounded-full border border-black/15"
+              style={{ backgroundColor: selectedColor.hex }}
+            />
+            <span>اللون المختار: {selectedColor.name}</span>
+          </span>
+
+          {isAdminMode && (
+            <>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageFile}
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute bottom-4 left-4 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#1f1917]/90 text-white text-xs font-bold shadow hover:bg-[#762b43] cursor-pointer"
+              >
+                <ImagePlus className="w-3.5 h-3.5" />
+                <span>تغيير الصورة الأساسية</span>
+              </button>
+            </>
+          )}
+        </div>
+
+        <div className="p-6 sm:p-8 flex flex-col justify-between space-y-6">
+          <div className="space-y-5">
+            <div>
+              <span className="inline-block px-3 py-1 rounded-full bg-[#faf8f5] border border-[#e6ddd3] text-[11px] font-bold text-[#762b43] mb-2">
+                {product.branch}
+              </span>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1f1917] leading-snug">
+                {product.title}
+              </h1>
+              <p className="text-sm text-[#6e645e] leading-relaxed mt-2">
+                {product.description}
+              </p>
+            </div>
+
+            {product.options.length > 0 && (
+              <div>
+                <label className="block text-xs font-bold text-[#1f1917] mb-2">
+                  اختر القماش والمقاس الأساسي:
+                </label>
+                <div className="grid grid-cols-2 gap-2.5">
+                  {product.options.map((opt, idx) => {
+                    const active = idx === selectedOptionIdx;
+                    return (
+                      <button
+                        key={opt.label}
+                        type="button"
+                        onClick={() => setSelectedOptionIdx(idx)}
+                        className={`p-3 rounded-2xl border text-right transition-all cursor-pointer ${
+                          active
+                            ? 'border-[#762b43] bg-[#faf8f5] shadow-xs'
+                            : 'border-[#e6ddd3] bg-white hover:border-[#762b43]/50'
+                        }`}
+                      >
+                        <span className="block text-xs font-bold text-[#1f1917]">{opt.label}</span>
+                        <span className="text-[11px] font-extrabold text-[#762b43]">
+                          {opt.price.toLocaleString('en-US')} دج
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-xs font-bold text-[#1f1917] mb-2">
+                اختر اللون: <span className="text-[#762b43]">{selectedColor.name}</span>
+              </label>
+              <div className="flex flex-wrap gap-2.5">
+                {CAP_SWATCHES.map((swatch) => {
+                  const active = selectedColor.name === swatch.name;
+                  return (
+                    <button
+                      key={swatch.name}
+                      type="button"
+                      title={swatch.name}
+                      onClick={() => setSelectedColor(swatch)}
+                      className={`relative w-8 h-8 rounded-full border transition-transform cursor-pointer flex items-center justify-center ${
+                        active
+                          ? 'ring-2 ring-[#762b43] ring-offset-2 scale-110'
+                          : 'border-black/20 hover:scale-105'
+                      }`}
+                      style={{ backgroundColor: swatch.hex }}
+                    >
+                      {active && (
+                        <Check
+                          className={`w-4 h-4 ${
+                            swatch.hex === '#ffffff' || swatch.hex === '#f5f0e6'
+                              ? 'text-[#1f1917]'
+                              : 'text-white'
+                          }`}
+                        />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {isAdminMode && onSetColorImage && (
+                <div className="mt-3 p-3 rounded-2xl bg-[#faf8f5] border border-[#e6ddd3] flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-[11px] font-bold text-[#1f1917]">
+                    صورة لون "{selectedColor.name}":
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <input
+                      ref={colorFileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleColorImageFile}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => colorFileInputRef.current?.click()}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#762b43] text-white text-[11px] font-bold cursor-pointer"
+                    >
+                      <ImagePlus className="w-3.5 h-3.5" />
+                      <span>{hasDedicatedColorImg ? 'تغيير صورة اللون' : 'رفع صورة لهذا اللون'}</span>
+                    </button>
+                    {hasDedicatedColorImg && (
+                      <button
+                        type="button"
+                        onClick={() => onSetColorImage(selectedColor.name, null)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-[11px] font-bold cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>حذف</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {(isAdminMode || !product.hideSizing) && (
+              <div className={`pt-3 border-t border-[#e6ddd3] space-y-3 ${product.hideSizing ? 'opacity-50' : ''}`}>
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-[#1f1917]">المقاس:</label>
+                  {isAdminMode && onToggleField && (
+                    <button
+                      type="button"
+                      onClick={() => onToggleField('hideSizing')}
+                      className={`px-2.5 py-1 rounded-full text-[11px] font-bold cursor-pointer ${
+                        product.hideSizing ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-700'
+                      }`}
+                    >
+                      {product.hideSizing ? '+ إظهار للزبائن' : '✕ حذف وإخفاء'}
+                    </button>
+                  )}
+                </div>
+                {!product.hideSizing && (
+                  <>
+                    <div className="grid grid-cols-2 gap-2 p-1 rounded-full bg-[#f3eee8]">
+                      {(['نسائي', 'رجالي'] as const).map((g) => (
+                        <button
+                          key={g}
+                          type="button"
+                          onClick={() => setGender(g)}
+                          className={`py-2 rounded-full text-xs font-bold cursor-pointer ${
+                            gender === g ? 'bg-white text-[#762b43] shadow-sm' : 'text-[#6e645e]'
+                          }`}
+                        >
+                          {g}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-5 gap-1.5">
+                      {['XS', 'S', 'M', 'L', 'XL'].map((sz) => (
+                        <button
+                          key={sz}
+                          type="button"
+                          onClick={() => {
+                            setStandardSize(sz);
+                            setNumericSize('');
+                          }}
+                          className={`py-2 rounded-xl border text-xs font-bold cursor-pointer ${
+                            !numericSize && standardSize === sz
+                              ? 'bg-[#762b43] text-white border-[#762b43]'
+                              : 'bg-[#faf8f5] text-[#1f1917] border-[#e6ddd3]'
+                          }`}
+                        >
+                          {sz}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <input
+                        type="number"
+                        min={34}
+                        max={70}
+                                              value={numericSize}
+
+                                onChange={(e) => setNumericSize(e.target.value)}
+                        placeholder="رقم المقاس (34 - 70)"
+                        className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
+                      />
+                      <input
+                        type="number"
+                        min={80}
+                        max={200}
+                        value={fullLength}
+                        onChange={(e) => setFullLength(e.target.value)}
+                        placeholder="الطول (80 - 200 سم)"
+                        className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
+            {product.category !== 'accessories' && (isAdminMode || !product.hideCapDetails) && (
+              <div className={`pt-3 border-t border-[#e6ddd3] space-y-3 ${product.hideCapDetails ? 'opacity-50' : ''}`}>
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-[#1f1917]">القبعة وتفاصيلها:</label>
+                  {isAdminMode && onToggleField && (
+                    <button
+                      type="button"
+                      onClick={() => onToggleField('hideCapDetails')}
+                      className={`px-2.5 py-1 rounded-full text-[11px] font-bold cursor-pointer ${
+                        product.hideCapDetails ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-700'
+                      }`}
+                    >
+                      {product.hideCapDetails ? '+ إظهار للزبائن' : '✕ حذف وإخفاء'}
+                    </button>
+                  )}
+                </div>
+                {!product.hideCapDetails && (
+                  <>
+                    <div className="grid grid-cols-3 gap-2">
+                      {CAP_STYLES.map((cap) => {
+                        const active = selectedCapStyle.id === cap.id;
+                        return (
+                          <button
+                            key={cap.id}
+                            type="button"
+                            onClick={() => setSelectedCapStyle(cap)}
+                            className={`p-2 rounded-2xl border text-center cursor-pointer flex flex-col items-center ${
+                              active ? 'border-[#762b43] ring-2 ring-[#762b43]/20 bg-[#faf8f5]' : 'border-[#e6ddd3] bg-white'
+                            }`}
+                          >
+                            <CapCardGraphic shape={cap.shape} />
+                            <span className="mt-2 block text-[11px] font-extrabold text-[#1f1917] leading-tight">
+                              {cap.label}
+                            </span>
+                            <span className="text-[11px] font-bold text-[#762b43] mt-0.5">{cap.priceText}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 p-1 rounded-full bg-[#f3eee8]">
+                      <button
+                        type="button"
+                        onClick={() => setCapSameColor(true)}
+                        className={`py-2 rounded-full text-xs font-bold cursor-pointer ${
+                          capSameColor ? 'bg-white text-[#762b43] shadow-sm' : 'text-[#6e645e]'
+                        }`}
+                      >
+                        نفس لون الوشاح
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCapSameColor(false)}
+                        className={`py-2 rounded-full text-xs font-bold cursor-pointer ${
+                          !capSameColor ? 'bg-white text-[#762b43] shadow-sm' : 'text-[#6e645e]'
+                        }`}
+                      >
+                        لون آخر
+                      </button>
+                    </div>
+
+                    {!capSameColor && (
+                      <div className="flex flex-wrap items-center gap-2 p-2.5 rounded-xl bg-[#faf8f5] border border-[#e6ddd3]">
+                        {CAP_SWATCHES.map((sw) => (
+                          <button
+                            key={sw.name}
+                            type="button"
+                            title={sw.name}
+                            onClick={() => setCapCustomColor(sw)}
+                            className={`w-6 h-6 rounded-full border cursor-pointer ${
+                              capCustomColor.name === sw.name ? 'ring-2 ring-[#762b43] ring-offset-1 scale-110' : 'border-black/20'
+                            }`}
+                            style={{ backgroundColor: sw.hex }}
+                          />
+                        ))}
+                        <span className="text-[11px] font-bold text-[#762b43] mr-1">{capCustomColor.name}</span>
+                      </div>
+                    )}
+
+                    <input
+                      type="number"
+                      min={45}
+                      max={70}
+                      value={headSize}
+                      onChange={(e) => setHeadSize(e.target.value)}
+                      placeholder="محيط الرأس (اختياري، 45 - 70 سم)"
+                      className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
+                    />
+
+                    <div className="grid grid-cols-2 gap-2">
+                      {(['سطح القبعة', 'جبهة القبعة'] as const).map((pos) => (
+                        <button
+                          key={pos}
+                          type="button"
+                          onClick={() => setCapEmbroideryPos(pos)}
+                          className={`py-2 px-2.5 rounded-full border text-xs font-bold cursor-pointer ${
+                            capEmbroideryPos === pos ? 'bg-[#762b43] text-white border-[#762b43]' : 'bg-white text-[#1f1917] border-[#e6ddd3]'
+                          }`}
+                        >
+                          طرّز على {pos}
+                        </button>
+                      ))}
+                    </div>
+
+                    <input
+                      type="text"
+                      value={capNotes}
+                      onChange={(e) => setCapNotes(e.target.value)}
+                      placeholder="ملاحظات للقبعة..."
+                      className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
+                    />
+                  </>
+                )}
+              </div>
+            )}
+
+            <div className="pt-3 border-t border-[#e6ddd3] space-y-2.5">
+              {(isAdminMode || !product.hideAmericanShawl) && (
+                <div className={`p-3 rounded-2xl border border-[#e6ddd3] bg-[#faf8f5] space-y-2 ${product.hideAmericanShawl ? 'opacity-50' : ''}`}>
+                  {isAdminMode && onToggleField && (
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => onToggleField('hideAmericanShawl')}
+                        className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold cursor-pointer ${
+                          product.hideAmericanShawl ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-700'
+                        }`}
+                      >
+                        {product.hideAmericanShawl ? '+ إظهار الشال الأمريكي' : '✕ حذف الشال الأمريكي'}
+                      </button>
+                    </div>
+                  )}
+                  {!product.hideAmericanShawl && (
+                    <label className="flex items-center justify-between cursor-pointer">
+                      <span className="text-xs font-bold text-[#1f1917]">إضافة الشال الأمريكي V (+900 دج)</span>
+                      <input
+                        type="checkbox"
+                        checked={addAmericanShawl}
+                        onChange={(e) => setAddAmericanShawl(e.target.checked)}
+                        className="w-4 h-4 accent-[#762b43]"
+                      />
+                    </label>
+                  )}
+                </div>
+              )}
+
+              <input
+                type="text"
+                value={customNotes}
+                onChange={(e) => setCustomNotes(e.target.value)}
+                placeholder="ملاحظات إضافية للوشاح أو التطريز..."
+                className="w-full px-3 py-2.5 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
+              />
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-[#e6ddd3] flex items-center justify-between gap-4">
+            <div>
+              <span className="text-[11px] text-[#6e645e] block">الإجمالي</span>
+              <span className="text-2xl font-extrabold text-[#1f1917]">{displayPrice.toLocaleString('en-US')} دج</span>
+            </div>
+            <button
+              type="button"
+              onClick={handleAdd}
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-[#762b43] hover:bg-[#5e2135] text-white font-bold text-sm shadow-sm cursor-pointer"
+            >
+              {addedFeedback ? <Check className="w-4 h-4" /> : <ShoppingBag className="w-4 h-4" />}
+              <span>{addedFeedback ? 'تمت الإضافة للسلة' : 'أضف إلى السلة'}</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
+                
 function ProductGridCard({
   product,
   isAdminMode,
