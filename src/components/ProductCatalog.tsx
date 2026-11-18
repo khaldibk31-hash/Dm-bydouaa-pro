@@ -764,7 +764,8 @@ function ProductDetailView({
           </div>
         </div>
       </div>
-    
+      </div>
+
   );
 }
 function SectionCard({
