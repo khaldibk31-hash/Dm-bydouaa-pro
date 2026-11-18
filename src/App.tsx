@@ -171,6 +171,7 @@ export default function App() {
     setCart([]);
     notify('info', 'تم تفريغ الحقيبة.');
   };
+
   const handleUpdateProductAddon = (
     productId: string,
     addon: { title: string; subtitle: string; price: number }
@@ -346,7 +347,8 @@ export default function App() {
   };
 
   const totalCartItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    /* ============ محرر النصوص الاحترافي (حذف + صور) ============ */
+
+  /* ============ محرر النصوص الاحترافي (حذف + صور) ============ */
   useEffect(() => {
     document.querySelectorAll('.admin-floating-toolbar').forEach((t) => t.remove());
     document.querySelectorAll<HTMLElement>('[data-admin-text]').forEach((el) => {
@@ -500,7 +502,8 @@ export default function App() {
       toolbar.remove();
     };
   }, [isAdminMode, storeState.products]);
-    /* ============ Scroll reveal للأقسام ============ */
+
+  /* ============ Scroll reveal للأقسام ============ */
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -540,7 +543,6 @@ export default function App() {
       <main className="flex-1">
         <HeroSection copy={storeState.copy} />
 
-        
         {sectionOrder.map((secId, index) => {
           const sectionTitle =
             secId === 'catalog'
@@ -580,17 +582,16 @@ export default function App() {
               {secId === 'catalog' && (
                 <ProductCatalog
                   products={storeState.products}
-                              onToggleProductField={(id, field) => {
-              setStoreState((prev) => ({
-                ...prev,
-                products: prev.products.map((p) =>
-                  p.id === id ? { ...p, [field]: !p[field] } : p
-                ),
-              }));
-              notify('info', 'تم تحديث ظهور القسم. اضغطي "حفظ ونشر" لتثبيت التغيير.');
-            }}
-                onUpdateProductAddon={handleUpdateProductAddon}
-
+                  onToggleProductField={(id, field) => {
+                    setStoreState((prev) => ({
+                      ...prev,
+                      products: prev.products.map((p) =>
+                        p.id === id ? { ...p, [field]: !p[field] } : p
+                      ),
+                    }));
+                    notify('info', 'تم تحديث ظهور القسم. اضغطي "حفظ ونشر" لتثبيت التغيير.');
+                  }}
+                  onUpdateProductAddon={handleUpdateProductAddon}
                   isAdminMode={isAdminMode}
                   onAddToCart={handleAddToCart}
                   onOpenAddProduct={(defaultCat) =>
@@ -674,11 +675,8 @@ export default function App() {
             </div>
           );
         })}
-
-  
       </main>
 
-      {/* Quiet Atelier Footer */}
       <footer className="bg-white border-t border-[#e6ddd3] py-10 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <div>
@@ -715,7 +713,6 @@ export default function App() {
         </div>
       </footer>
 
-      {/* Direct WhatsApp Floating Action */}
       <a
         href={`https://wa.me/${WHATSAPP_NUMBER}`}
         target="_blank"
@@ -727,7 +724,6 @@ export default function App() {
         <MessageCircle className="w-5 h-5" />
       </a>
 
-      {/* Slide-Over Cart Drawer */}
       <CartDrawer
         isOpen={isCartOpen}
         items={cart}
@@ -738,7 +734,6 @@ export default function App() {
         onNotify={notify}
       />
 
-      {/* Admin Modals */}
       <AdminLoginModal
         isOpen={isLoginOpen}
         onClose={() => setIsLoginOpen(false)}
@@ -762,8 +757,7 @@ export default function App() {
         onSaveCopy={handleSaveCopy}
       />
 
-      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
-            {/* لوحة الإدارة العائمة */}
+      {/* لوحة الإدارة العائمة */}
       {isAdminMode && (
         <div className="fixed bottom-5 right-5 z-40 flex flex-col gap-2 bg-white/95 backdrop-blur-md border border-[#e6ddd3] rounded-2xl shadow-xl p-3 max-w-[230px]">
           <div className="text-[11px] font-bold text-[#762b43] text-center pb-1.5 border-b border-[#e6ddd3]">
@@ -790,6 +784,7 @@ export default function App() {
         </div>
       )}
 
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
     </div>
   );
 }
