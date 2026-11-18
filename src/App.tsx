@@ -171,6 +171,24 @@ export default function App() {
     setCart([]);
     notify('info', 'تم تفريغ الحقيبة.');
   };
+  const handleUpdateProductAddon = (
+    productId: string,
+    addon: { title: string; subtitle: string; price: number }
+  ) => {
+    setStoreState((prev) => ({
+      ...prev,
+      products: prev.products.map((p) =>
+        p.id === productId
+          ? {
+              ...p,
+              americanShawlTitle: addon.title,
+              americanShawlSubtitle: addon.subtitle,
+              americanShawlPrice: addon.price,
+            }
+          : p
+      ),
+    }));
+  };
 
   const handleUnlockAdmin = () => {
     if (isAdminAuthenticated) {
@@ -445,6 +463,7 @@ export default function App() {
               }));
               notify('info', 'تم تحديث ظهور القسم. اضغطي "حفظ ونشر" لتثبيت التغيير.');
             }}
+                onUpdateProductAddon={handleUpdateProductAddon}
 
                   isAdminMode={isAdminMode}
                   onAddToCart={handleAddToCart}
