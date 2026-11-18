@@ -221,6 +221,9 @@ export const DEFAULT_STORE_STATE: StoreState = {
   studioBgUrl: '',
   copy: DEFAULT_COPY,
   products: DEFAULT_PRODUCTS,
+  sectionOrder: ['catalog', 'studio', 'pricing'],
+  customTexts: {},
+  customImages: {},
 };
 
 export const PRICING_TABLE_ROWS = [
