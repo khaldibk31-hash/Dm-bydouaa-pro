@@ -468,6 +468,7 @@ export function ProductCatalog({
   const filteredProducts = sectionProducts.filter((p) => activeBranch === 'الكل' || p.branch === activeBranch);
 
   return (
+        <div key={selectedProductId || selectedSection || 'home'} className="catalog-enter">
     <section id="catalog-sec" className="py-8 sm:py-12 border-b border-[#e6ddd3] overflow-hidden">
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         
@@ -583,5 +584,6 @@ export function ProductCatalog({
         .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
       `}} />
     </section>
+          </div>
   );
 }
