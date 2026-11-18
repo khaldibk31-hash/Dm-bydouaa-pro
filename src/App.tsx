@@ -346,48 +346,174 @@ export default function App() {
   };
 
   const totalCartItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+    /* ============ محرر النصوص الاحترافي (حذف + صور) ============ */
   useEffect(() => {
-    const savedTexts = (
-      storeState as StoreState & { customTexts?: Record<string, string> }
-    ).customTexts;
-    const textElements = document.querySelectorAll(
-      'main h1, main h2, main h3, main p, main span, main th, main td, footer p'
-    );
-
-    textElements.forEach((el, idx) => {
-      const htmlEl = el as HTMLElement;
-      if (htmlEl.children.length > 0) return;
-
-      const key = `txt_${idx}`;
-      if (savedTexts && savedTexts[key]) {
-        htmlEl.innerText = savedTexts[key];
-      }
-
-      if (isAdminMode) {
-        htmlEl.contentEditable = 'true';
-        htmlEl.style.outline = '1px dashed rgba(118, 43, 67, 0.35)';
-        htmlEl.style.borderRadius = '4px';
-        htmlEl.style.cursor = 'text';
-        htmlEl.onblur = () => {
-          const newText = htmlEl.innerText.trim();
-          setStoreState((prev) => ({
-            ...prev,
-            customTexts: {
-              ...((
-                prev as StoreState & { customTexts?: Record<string, string> }
-              ).customTexts || {}),
-              [key]: newText,
-            },
-          }));
-        };
-      } else {
-        htmlEl.contentEditable = 'false';
-        htmlEl.style.outline = 'none';
-        htmlEl.style.cursor = '';
-        htmlEl.onblur = null;
-      }
+    document.querySelectorAll('.admin-floating-toolbar').forEach((t) => t.remove());
+    document.querySelectorAll<HTMLElement>('[data-admin-text]').forEach((el) => {
+      el.removeAttribute('data-admin-text');
+      el.style.outline = 'none';
+      el.style.cursor = '';
+      el.contentEditable = 'false';
+      el.onblur = null;
+      el.onmouseenter = null;
+      el.onmouseleave = null;
     });
+
+    if (!isAdminMode) return;
+
+    const savedTexts = storeState.customTexts || {};
+    const savedImages = storeState.customImages || {};
+
+    const els = Array.from(
+      document.querySelectorAll<HTMLElement>(
+        'main h1, main h2, main h3, main p, main span, main th, main td, footer p'
+      )
+    ).filter((el) => el.children.length === 0);
+
+    const toolbar = document.createElement('div');
+    toolbar.className = 'admin-floating-toolbar';
+    toolbar.setAttribute('contenteditable', 'false');
+    toolbar.innerHTML = `
+      <button type="button" data-action="delete" title="حذف العنصر">🗑️</button>
+      <button type="button" data-action="image" title="إضافة صورة">🖼️</button>
+    `;
+    document.body.appendChild(toolbar);
+
+    let activeEl: HTMLElement | null = null;
+
+    const showFor = (target: HTMLElement) => {
+      activeEl = target;
+      const rect = target.getBoundingClientRect();
+      toolbar.style.display = 'inline-flex';
+      toolbar.style.top = `${Math.max(6, rect.top - 40)}px`;
+      toolbar.style.left = `${Math.max(6, Math.min(rect.left, window.innerWidth - 100))}px`;
+    };
+
+    const hide = () => {
+      setTimeout(() => {
+        if (!toolbar.matches(':hover')) {
+          toolbar.style.display = 'none';
+          activeEl = null;
+        }
+      }, 180);
+    };
+
+    toolbar.onmouseleave = hide;
+
+    const handleToolbarClick = async (e: Event) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const btn = (e.target as HTMLElement).closest('button');
+      if (!btn || !activeEl) return;
+      const action = btn.dataset.action;
+      const el = activeEl;
+      const idx = els.indexOf(el);
+      if (idx < 0) return;
+      const key = `txt_${idx}`;
+      const imgKey = `img_${idx}`;
+
+      if (action === 'delete') {
+        if (!confirm('هل تريد حذف هذا العنصر؟')) return;
+        el.style.display = 'none';
+        setStoreState((prev) => ({
+          ...prev,
+          customTexts: { ...(prev.customTexts || {}), [`${key}_hidden`]: '1' },
+        }));
+        toolbar.style.display = 'none';
+      }
+
+      if (action === 'image') {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = async () => {
+          const file = input.files?.[0];
+          if (!file) return;
+          try {
+            const url = await uploadStoreImage(file, 900);
+            const next = el.nextElementSibling as HTMLImageElement | null;
+            if (next?.classList.contains('admin-inserted-img')) {
+              next.src = url;
+            } else {
+              const img = document.createElement('img');
+              img.src = url;
+              img.className = 'admin-inserted-img';
+              el.after(img);
+            }
+            setStoreState((prev) => ({
+              ...prev,
+              customImages: { ...(prev.customImages || {}), [imgKey]: url },
+            }));
+            notify('success', 'تمت إضافة الصورة. اضغطي "حفظ ونشر" لتثبيتها.');
+          } catch (err) {
+            notify('error', err instanceof Error ? err.message : 'تعذر رفع الصورة.');
+          }
+        };
+        input.click();
+      }
+    };
+    toolbar.addEventListener('click', handleToolbarClick);
+
+    els.forEach((el, idx) => {
+      const key = `txt_${idx}`;
+      const imgKey = `img_${idx}`;
+
+      if (savedTexts[key] !== undefined && el.innerText !== savedTexts[key]) {
+        el.innerText = savedTexts[key];
+      }
+      if (savedTexts[`${key}_hidden`] === '1') {
+        el.style.display = 'none';
+        return;
+      }
+
+      if (savedImages[imgKey]) {
+        const next = el.nextElementSibling as HTMLImageElement | null;
+        if (next?.classList.contains('admin-inserted-img')) {
+          next.src = savedImages[imgKey];
+        } else {
+          const img = document.createElement('img');
+          img.src = savedImages[imgKey];
+          img.className = 'admin-inserted-img';
+          el.after(img);
+        }
+      }
+
+      el.dataset.adminText = 'true';
+      el.contentEditable = 'true';
+      el.style.outline = '1px dashed rgba(118, 43, 67, 0.35)';
+      el.style.cursor = 'text';
+      el.style.borderRadius = '4px';
+
+      el.onblur = () => {
+        setStoreState((prev) => ({
+          ...prev,
+          customTexts: { ...(prev.customTexts || {}), [key]: el.innerText.trim() },
+        }));
+      };
+
+      el.onmouseenter = () => showFor(el);
+      el.onmouseleave = hide;
+    });
+
+    return () => {
+      toolbar.removeEventListener('click', handleToolbarClick);
+      toolbar.remove();
+    };
   }, [isAdminMode, storeState.products]);
+    /* ============ Scroll reveal للأقسام ============ */
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) entry.target.classList.add('in-view');
+        });
+      },
+      { threshold: 0.06, rootMargin: '0px 0px -60px 0px' }
+    );
+    const els = document.querySelectorAll('.section-reveal');
+    els.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [sectionOrder]);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#faf8f5] text-[#1f1917]">
@@ -424,7 +550,7 @@ export default function App() {
               : 'جدول الأسعار والأسئلة الشائعة';
 
           return (
-            <div key={secId} className="relative">
+            <div key={secId} className="relative section-reveal">
               {isAdminMode && (
                 <div className="max-w-6xl mx-auto px-4 pt-3 flex items-center justify-between gap-2">
                   <span className="text-xs font-bold text-[#762b43] bg-[#faf8f5] px-3 py-1.5 rounded-full border border-[#e6ddd3]">
@@ -637,6 +763,33 @@ export default function App() {
       />
 
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+            {/* لوحة الإدارة العائمة */}
+      {isAdminMode && (
+        <div className="fixed bottom-5 right-5 z-40 flex flex-col gap-2 bg-white/95 backdrop-blur-md border border-[#e6ddd3] rounded-2xl shadow-xl p-3 max-w-[230px]">
+          <div className="text-[11px] font-bold text-[#762b43] text-center pb-1.5 border-b border-[#e6ddd3]">
+            ✏️ وضع الإدارة مفعّل
+          </div>
+          <p className="text-[10px] text-[#6e645e] text-center leading-relaxed">
+            مرّر الماوس على أي نص ← يبانلك <b>حذف 🗑️</b> و <b>صورة 🖼️</b>
+          </p>
+          <button
+            type="button"
+            onClick={handlePublishToCloud}
+            disabled={isSavingCloud}
+            className="px-3 py-2 rounded-xl bg-[#762b43] hover:bg-[#581e31] text-white text-xs font-bold transition-colors disabled:opacity-50 cursor-pointer"
+          >
+            {isSavingCloud ? '⏳ جاري النشر...' : '💾 حفظ ونشر'}
+          </button>
+          <button
+            type="button"
+            onClick={handleAdminLogout}
+            className="px-3 py-1.5 rounded-xl bg-[#faf8f5] hover:bg-[#f3eee8] text-[#1f1917] text-xs font-bold transition-colors cursor-pointer"
+          >
+            🚪 خروج
+          </button>
+        </div>
+      )}
+
     </div>
   );
 }
