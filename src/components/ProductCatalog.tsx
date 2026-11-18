@@ -636,7 +636,7 @@ function ProductDetailView({
             <div className="pt-3 border-t border-[#e6ddd3] space-y-2.5">
               {(isAdminMode || !product.hideAmericanShawl) && (
                 <div className={`p-3 rounded-2xl border border-[#e6ddd3] bg-[#faf8f5] space-y-2 ${product.hideAmericanShawl ? 'opacity-50' : ''}`}>
-                                    {isAdminMode && (
+                                    
                     <div className="flex flex-wrap items-center justify-end gap-1.5">
                       {onUpdateAddon && !product.hideAmericanShawl && (
                         <button
@@ -672,7 +672,7 @@ function ProductDetailView({
                         </button>
                       )}
                     </div>
-                  )}
+                  
 
                   {isAdminMode && isEditingAddon && !product.hideAmericanShawl && (
                     <div className="p-2.5 rounded-xl bg-white border border-[#e6ddd3] space-y-2">
@@ -738,10 +738,11 @@ function ProductDetailView({
                       />
                     </label>
                   )}
-
-                    </div>
+                                  </div>
             )}
           </div>
+          </div>
+
       
 
           <div className="pt-4 border-t border-[#e6ddd3] flex items-center justify-between gap-4">
