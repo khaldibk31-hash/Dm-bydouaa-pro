@@ -69,7 +69,7 @@ interface ProductCatalogProps {
 }
 
 // --- مكون عرض تفاصيل المنتج ---
-function ProductDetailView({
+
 function ProductDetailView({
   product,
   sectionTitle,
@@ -81,6 +81,7 @@ function ProductDetailView({
   onToggleField,
   onEdit,
   onDelete,
+  onReplaceImage,
 }: {
   product: Product;
   sectionTitle: string;
@@ -92,6 +93,7 @@ function ProductDetailView({
   onToggleField?: (field: 'hideSizing' | 'hideCapDetails' | 'hideAmericanShawl') => void;
   onEdit?: () => void;
   onDelete?: () => void;
+    onReplaceImage?: (file: File) => void;
 }) {
   const [selectedOptionIdx, setSelectedOptionIdx] = useState(0);
   const [selectedSecondary, setSelectedSecondary] = useState(product.secondaryOptions?.at(0) || '');
@@ -172,11 +174,40 @@ function ProductDetailView({
           <button type="button" onClick={onBackToSection} className="hover:text-[#762b43] underline cursor-pointer">{sectionTitle}</button>
           <ChevronLeft className="w-3.5 h-3.5" />
           <span className="text-[#1f1917]">{product.name}</span>
+        </div>        <div className="flex items-center gap-3">
+          {isAdminMode && onEdit && onDelete && (
+            <div className="flex items-center gap-2 border-l border-[#e6ddd3] pl-3">
+              <button
+                type="button"
+                onClick={onEdit}
+                className="inline-flex items-center gap-1 text-blue-700 hover:underline cursor-pointer font-bold"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                <span>تعديل</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (window.confirm('هل أنتِ متأكدة من حذف هذا الموديل نهائياً؟')) {
+                    onDelete();
+                  }
+                }}
+                className="inline-flex items-center gap-1 text-red-600 hover:underline cursor-pointer font-bold"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>حذف</span>
+              </button>
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={onBackToSection}
+            className="inline-flex items-center gap-1 text-[#762b43] hover:underline cursor-pointer"
+          >
+            <ArrowRight className="w-3.5 h-3.5" />
+            <span>رجوع للقسم</span>
+          </button>
         </div>
-        <button type="button" onClick={onBackToSection} className="inline-flex items-center gap-1 text-[#762b43] hover:underline cursor-pointer">
-          <ArrowRight className="w-3.5 h-3.5" />
-          <span>رجوع للقسم</span>
-        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-5 sm:p-8">
@@ -184,6 +215,26 @@ function ProductDetailView({
         <div className="relative aspect-[3/4] rounded-2xl bg-pink-50 overflow-hidden border border-pink-100">
           {activeImageUrl ? (
             <>
+                            {isAdminMode && (
+                <div className="absolute top-3 left-3 z-10">
+                  <label className="cursor-pointer bg-white/95 backdrop-blur-md text-[#1f1917] px-3 py-1.5 rounded-lg border border-[#e6ddd3] text-xs font-bold shadow-sm hover:bg-[#f3eee8] flex items-center gap-1.5">
+                    <ImagePlus className="w-4 h-4 text-[#762b43]" />
+                    تغيير الصورة
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file && onReplaceImage) {
+                          onReplaceImage(file);
+                        }
+                        e.target.value = '';
+                      }}
+                    />
+                  </label>
+                </div>
+              )}
               <img src={activeImageUrl} alt={product.name} className="w-full h-full object-contain transition-all duration-300" />
               <div className="absolute bottom-3 right-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-sm border border-[#e6ddd3] shadow-sm text-xs font-bold text-[#1f1917]">
                 <span className="w-3.5 h-3.5 rounded-full border border-black/15" style={{ backgroundColor: selectedColor.hex }} />
