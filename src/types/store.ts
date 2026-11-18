@@ -46,6 +46,9 @@ export interface StoreState {
   studioBgUrl: string;
   copy: StoreCopy;
   products: Product[];
+  sectionOrder?: string[];
+  customTexts?: Record<string, string>;
+  customImages?: Record<string, string>;
 }
 
 export interface CartItem {
