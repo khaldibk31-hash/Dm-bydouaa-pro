@@ -33,6 +33,11 @@ interface ProductCatalogProps {
     field: 'hideSizing' | 'hideCapDetails' | 'hideAmericanShawl'
   ) => void;
   onRemoveProductImage?: (productId: string) => void;
+    onUpdateProductAddon?: (
+    productId: string,
+    addon: { title: string; subtitle: string; price: number }
+  ) => void;
+
 }
 
 const MAIN_SECTIONS = [
@@ -100,6 +105,8 @@ function ProductDetailView({
   onAddToCart,
   onSetColorImage,
   onToggleField,
+    onUpdateAddon,
+
 }: {
   product: Product;
   sectionTitle: string;
@@ -109,6 +116,8 @@ function ProductDetailView({
   onAddToCart: (item: Omit<CartItem, 'id' | 'quantity'>) => void;
   onSetColorImage?: (colorName: string, file: File | null) => void;
   onToggleField?: (field: 'hideSizing' | 'hideCapDetails' | 'hideAmericanShawl') => void;
+    onUpdateAddon?: (addon: { title: string; subtitle: string; price: number }) => void;
+
 }) {
   const [selectedOptionIdx, setSelectedOptionIdx] = useState(0);
   const [selectedSecondary, setSelectedSecondary] = useState(
@@ -627,26 +636,99 @@ function ProductDetailView({
             <div className="pt-3 border-t border-[#e6ddd3] space-y-2.5">
               {(isAdminMode || !product.hideAmericanShawl) && (
                 <div className={`p-3 rounded-2xl border border-[#e6ddd3] bg-[#faf8f5] space-y-2 ${product.hideAmericanShawl ? 'opacity-50' : ''}`}>
-                  {isAdminMode && onToggleField && (
-                    <div className="flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() => onToggleField('hideAmericanShawl')}
-                        className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold cursor-pointer ${
-                          product.hideAmericanShawl ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-700'
-                        }`}
-                      >
-                        {product.hideAmericanShawl ? '+ إظهار الشال الأمريكي' : '✕ حذف الشال الأمريكي'}
-                      </button>
+                                    {isAdminMode && (
+                    <div className="flex flex-wrap items-center justify-end gap-1.5">
+                      {onUpdateAddon && !product.hideAmericanShawl && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAddonTitleDraft(
+                              product.americanShawlTitle ?? 'إضافة الشال الأمريكي V'
+                            );
+                            setAddonSubtitleDraft(
+                              product.americanShawlSubtitle ?? 'يُلبس على الكتفين ويتدلى بأناقة'
+                            );
+                            setAddonPriceDraft(String(product.americanShawlPrice ?? 900));
+                            setIsEditingAddon((prev) => !prev);
+                          }}
+                          className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-900 cursor-pointer"
+                        >
+                          {isEditingAddon ? 'إلغاء' : '✎ تعديل النص والسعر'}
+                        </button>
+                      )}
+                      {onToggleField && (
+                        <button
+                          type="button"
+                          onClick={() => onToggleField('hideAmericanShawl')}
+                          className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold cursor-pointer ${
+                            product.hideAmericanShawl
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : 'bg-rose-100 text-rose-700'
+                          }`}
+                        >
+                          {product.hideAmericanShawl
+                            ? '+ إظهار الإضافة'
+                            : '✕ حذف وإخفاء'}
+                        </button>
+                      )}
                     </div>
                   )}
+
+                  {isAdminMode && isEditingAddon && !product.hideAmericanShawl && (
+                    <div className="p-2.5 rounded-xl bg-white border border-[#e6ddd3] space-y-2">
+                      <input
+                        type="text"
+                        value={addonTitleDraft}
+                        onChange={(e) => setAddonTitleDraft(e.target.value)}
+                        placeholder="عنوان الإضافة..."
+                        className="w-full px-2.5 py-1.5 rounded-lg border border-[#e6ddd3] text-xs font-bold"
+                      />
+                      <input
+                        type="text"
+                        value={addonSubtitleDraft}
+                        onChange={(e) => setAddonSubtitleDraft(e.target.value)}
+                        placeholder="الوصف الفرعي..."
+                        className="w-full px-2.5 py-1.5 rounded-lg border border-[#e6ddd3] text-xs"
+                      />
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          min={0}
+                          value={addonPriceDraft}
+                          onChange={(e) => setAddonPriceDraft(e.target.value)}
+                          placeholder="السعر (دج)"
+                          className="w-28 px-2.5 py-1.5 rounded-lg border border-[#e6ddd3] text-xs font-bold"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onUpdateAddon?.({
+                              title: addonTitleDraft.trim() || 'إضافة الشال الأمريكي V',
+                              subtitle: addonSubtitleDraft.trim(),
+                              price: Math.max(0, Number(addonPriceDraft) || 0),
+                            });
+                            setIsEditingAddon(false);
+                          }}
+                          className="px-3 py-1.5 rounded-lg bg-[#762b43] text-white text-xs font-bold cursor-pointer"
+                        >
+                          تطبيق
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   {!product.hideAmericanShawl && (
                     <label className="flex items-center justify-between cursor-pointer">
                       <div>
                         <span className="block text-xs font-bold text-[#1f1917]">
-                          إضافة الشال الأمريكي V (+900 دج)
+                          {product.americanShawlTitle ?? 'إضافة الشال الأمريكي V'} (+
+                          {effectiveAddonPrice.toLocaleString('en-US')} دج)
                         </span>
-                        <span className="text-[11px] text-[#6e645e]">يُلبس على الكتفين ويتدلى بأناقة</span>
+                        {(product.americanShawlSubtitle ?? 'يُلبس على الكتفين ويتدلى بأناقة') && (
+                          <span className="text-[11px] text-[#6e645e]">
+                            {product.americanShawlSubtitle ?? 'يُلبس على الكتفين ويتدلى بأناقة'}
+                          </span>
+                        )}
                       </div>
                       <input
                         type="checkbox"
@@ -656,16 +738,7 @@ function ProductDetailView({
                       />
                     </label>
                   )}
-                </div>
-              )}
 
-              <input
-                type="text"
-                value={customNotes}
-                onChange={(e) => setCustomNotes(e.target.value)}
-                placeholder="ملاحظات إضافية للوشاح أو التطريز (اختياري)..."
-                className="w-full px-3 py-2.5 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
-              />
             </div>
           </div>
 
@@ -932,8 +1005,13 @@ export function ProductCatalog({
               onSetProductColorImage?.(selectedProduct.id, colorName, file)
             }
             onToggleField={(field) => onToggleProductField?.(selectedProduct.id, field)}
+                      onUpdateAddon={(addon) =>
+            onUpdateProductAddon?.(selectedProduct.id, addon)
+          }
+
           />
         ) : selectedSection && activeSectionMeta ? (
+      
           <div>
             <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
               <div className="flex items-center gap-1.5 text-xs font-bold text-[#6e645e]">
