@@ -70,6 +70,7 @@ interface ProductCatalogProps {
 
 // --- مكون عرض تفاصيل المنتج ---
 function ProductDetailView({
+function ProductDetailView({
   product,
   sectionTitle,
   isAdminMode,
@@ -77,6 +78,9 @@ function ProductDetailView({
   onBackToSection,
   onAddToCart,
   onSetColorImage,
+  onToggleField,
+  onEdit,
+  onDelete,
 }: {
   product: Product;
   sectionTitle: string;
@@ -85,6 +89,9 @@ function ProductDetailView({
   onBackToSection: () => void;
   onAddToCart: (item: Omit<CartItem, 'id' | 'quantity'>) => void;
   onSetColorImage?: (colorName: string, file: File | null) => void;
+  onToggleField?: (field: 'hideSizing' | 'hideCapDetails' | 'hideAmericanShawl') => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }) {
   const [selectedOptionIdx, setSelectedOptionIdx] = useState(0);
   const [selectedSecondary, setSelectedSecondary] = useState(product.secondaryOptions?.at(0) || '');
