@@ -98,18 +98,10 @@ function CapCardGraphic({ shape }: { shape: 'round' | 'triangle' | 'tuxedo' }) {
             <stop offset="100%" stopColor="#d97706" />
           </linearGradient>
         </defs>
-
-        {/* قاعدة وأكتاف المانيكان */}
         <path d="M36 172 C36 146, 54 140, 70 140 C86 140, 104 146, 104 172 Z" fill="url(#mannequinNeck)" />
-        {/* رقبة المانيكان */}
         <path d="M58 112 L56 144 Q70 148 84 144 L82 112 Z" fill="url(#mannequinNeck)" />
-        {/* رأس المانيكان */}
         <ellipse cx="70" cy="92" rx="22" ry="28" fill="url(#mannequinHead)" />
-
-        {/* طاقية القبعة السفلية */}
         <path d="M47 68 Q70 79 93 68 L91 79 Q70 89 49 79 Z" fill="url(#capFabric)" />
-
-        {/* أعلى القبعة حسب النوع */}
         {shape === 'round' && (
           <>
             <ellipse cx="70" cy="60" rx="43" ry="13" fill="url(#capFabric)" />
@@ -129,8 +121,6 @@ function CapCardGraphic({ shape }: { shape: 'round' | 'triangle' | 'tuxedo' }) {
             <path d="M49 74 Q70 84 91 74" stroke="#71717a" strokeWidth="0.8" fill="none" />
           </>
         )}
-
-        {/* الزر العلوي والشرابة الذهبية */}
         <ellipse cx="70" cy="59" rx="3.5" ry="2" fill="url(#goldTassel)" />
         <path d="M70 59 L101 66 L101 94" stroke="url(#goldTassel)" strokeWidth="2.4" fill="none" strokeLinecap="round" />
         <rect x="98.5" y="92" width="5" height="4" rx="1" fill="#b45309" />
@@ -162,10 +152,10 @@ function ProductDetailView({
 }) {
   const [selectedOptionIdx, setSelectedOptionIdx] = useState(0);
   const [selectedSecondary, setSelectedSecondary] = useState(
-    product.secondaryOptions?.at(0) || ''
+    (product.secondaryOptions && product.secondaryOptions[0]) || ''
   );
-  const [selectedColor, setSelectedColor] = useState(CAP_SWATCHES.at(0)!);
-  const [selectedCapStyle, setSelectedCapStyle] = useState(CAP_STYLES.at(0)!);
+  const [selectedColor, setSelectedColor] = useState(CAP_SWATCHES[0]);
+  const [selectedCapStyle, setSelectedCapStyle] = useState(CAP_STYLES[0]);
 
   const [gender, setGender] = useState<'نسائي' | 'رجالي'>('نسائي');
   const [standardSize, setStandardSize] = useState('M');
@@ -174,7 +164,7 @@ function ProductDetailView({
   const [shoulderAndSleeve, setShoulderAndSleeve] = useState('');
 
   const [capSameColor, setCapSameColor] = useState(true);
-  const [capCustomColor, setCapCustomColor] = useState(CAP_SWATCHES.at(0)!);
+  const [capCustomColor, setCapCustomColor] = useState(CAP_SWATCHES[0]);
   const [headSize, setHeadSize] = useState('');
   const [capEmbroideryPos, setCapEmbroideryPos] = useState<'سطح القبعة' | 'جبهة القبعة'>('سطح القبعة');
   const [capNotes, setCapNotes] = useState('');
@@ -210,7 +200,7 @@ function ProductDetailView({
   const hasDedicatedColorImg = Boolean(product.colorImages?.[selectedColor.name]);
 
   const handleColorFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.item(0);
+    const file = e.target.files?.[0];
     if (file && onSetColorImage) {
       onSetColorImage(selectedColor.name, file);
       e.target.value = '';
@@ -255,7 +245,7 @@ function ProductDetailView({
       unitPrice: displayPrice,
     });
   };
-  return (
+    return (
     <div className="bg-white border border-[#e6ddd3] rounded-3xl overflow-hidden shadow-sm">
       <div className="px-5 py-3.5 bg-[#faf8f5] border-b border-[#e6ddd3] flex flex-wrap items-center justify-between gap-2 text-xs font-bold text-[#6e645e]">
         <div className="flex items-center gap-1.5">
@@ -384,6 +374,7 @@ function ProductDetailView({
                 </div>
               </div>
             )}
+
             <div>
               <label className="block text-xs font-bold text-[#1f1917] mb-2">
                 اختر اللون: <span className="text-[#762b43]">{selectedColor.name}</span>
@@ -553,7 +544,7 @@ function ProductDetailView({
                 )}
               </div>
             )}
-                        {product.category !== 'accessories' && product.category !== 'cap' && (isAdminMode || !product.hideCapDetails) && (
+            {product.category !== 'accessories' && product.category !== 'cap' && (isAdminMode || !product.hideCapDetails) && (
               <div className={`pt-3 border-t border-[#e6ddd3] space-y-3 ${product.hideCapDetails ? 'opacity-50' : ''}`}>
                 <div className="flex items-center justify-between">
                   <label className="block text-xs font-bold text-[#1f1917]">القبعة وتفاصيلها:</label>
@@ -748,7 +739,7 @@ function ProductDetailView({
                           value={addonPriceDraft}
                           onChange={(e) => setAddonPriceDraft(e.target.value)}
                           placeholder="السعر (دج)"
-
+                          
 function SectionCard({
   product,
   isAdminMode,
@@ -770,7 +761,7 @@ function SectionCard({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.item(0);
+    const file = e.target.files?.[0];
     if (file) {
       setImgError(false);
       onReplaceImage(file);
@@ -900,6 +891,7 @@ function SectionCard({
     </article>
   );
 }
+
 export function ProductCatalog({
   products,
   isAdminMode,
@@ -1018,130 +1010,3 @@ export function ProductCatalog({
                   onClick={handleBackToHome}
                   className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-[#e6ddd3] text-xs font-bold text-[#1f1917] hover:bg-[#f3eee8] cursor-pointer"
                 >
-                  <ArrowRight className="w-3.5 h-3.5" />
-                  <span>كل الأقسام</span>
-                </button>
-
-                {isAdminMode && (
-                  <button
-                    type="button"
-                    onClick={() => onOpenAddProduct(selectedSection)}
-                    className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-lg bg-[#1f1917] text-white text-xs font-bold cursor-pointer"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>إضافة قطعة للقسم</span>
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <div className="mb-6">
-              <h2 className="font-editorial text-3xl sm:text-4xl font-bold text-[#1f1917]">
-                {activeSectionMeta.title}
-              </h2>
-              <p className="text-sm text-[#6e645e] mt-1.5 max-w-xl">
-                {activeSectionMeta.subtitle}
-              </p>
-            </div>
-
-            {branches.length > 1 && (
-              <div className="flex flex-wrap items-center gap-1.5 mb-6 pb-3 border-b border-[#e6ddd3]">
-                {branches.map((branch) => {
-                  const active = activeBranch === branch;
-                  return (
-                    <button
-                      key={branch}
-                      type="button"
-                      onClick={() => setActiveBranch(branch)}
-                      className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer ${
-                        active
-                          ? 'bg-[#762b43] text-white'
-                          : 'bg-white border border-[#e6ddd3] text-[#6e645e] hover:text-[#1f1917]'
-                      }`}
-                    >
-                      {branch}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-
-            {filteredProducts.length === 0 ? (
-              <div className="bg-white border border-[#e6ddd3] rounded-2xl p-10 text-center">
-                <p className="text-sm font-semibold text-[#6e645e]">
-                  لا توجد قطع في هذا القسم حالياً.
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
-                {filteredProducts.map((product) => (
-                  <SectionCard
-                    key={product.id}
-                    product={product}
-                    isAdminMode={isAdminMode}
-                    onSelect={() => handleOpenProduct(product.id)}
-                    onEdit={() => onEditProduct(product)}
-                    onDelete={() => onDeleteProduct(product.id)}
-                    onReplaceImage={(file) => onReplaceProductImage(product.id, file)}
-                    onRemoveImage={() => onRemoveProductImage?.(product.id)}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        ) : (
-          <div>
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
-              <div>
-                <p className="text-xs font-bold text-[#762b43] mb-1">
-                  اختر القسم المناسب
-                </p>
-                <h2 className="font-editorial text-2xl sm:text-3xl font-bold text-[#1f1917]">
-                  أقسام دار الأزياء
-                </h2>
-              </div>
-
-              {isAdminMode && (
-                <button
-                  type="button"
-                  onClick={() => onOpenAddProduct('shawl')}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#1f1917] hover:bg-[#3a312d] text-white text-xs font-bold cursor-pointer"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>إضافة موديل جديد</span>
-                </button>
-              )}
-            </div>
-
-            <div className="space-y-5">
-              {MAIN_SECTIONS.map((sec) => {
-                const firstProdWithImg = products.find(
-                  (p) =>
-                    (sec.id === 'accessories'
-                      ? p.category === 'accessories' || p.category === 'cap'
-                      : p.category === sec.id) && p.imageUrl
-                );
-                const coverImg = firstProdWithImg?.imageUrl || sec.fallbackImg;
-
-                return (
-                  <div
-                    key={sec.id}
-                    onClick={() => handleOpenSection(sec.id)}
-                    className="group bg-white border border-[#e6ddd3] rounded-3xl overflow-hidden grid grid-cols-1 sm:grid-cols-12 cursor-pointer transition-all duration-200 hover:shadow-md hover:border-[#762b43]/40"
-                  >
-                    <div className="sm:col-span-7 p-6 sm:p-8 flex flex-col justify-between">
-                      <div>
-                        <h3 className="font-editorial text-2xl sm:text-3xl font-bold text-[#1f1917]">
-                          {sec.title}
-                        </h3>
-                        <p className="text-sm text-[#6e645e] leading-relaxed mt-2">
-                          {sec.subtitle}
-                        </p>
-                        <p className="text-base font-extrabold text-[#762b43] mt-3">
-                          {sec.priceLabel}
-                        </p>
-                      </div>
-
-                      <div className="mt-5">
-                        <span className="inline-flex items-center justify-center w-full sm:w-auto px-7 py-3 rounded-full bg-[#762b43] group-hover:bg-[#581e31] text-white text-sm font-bold transition-colors">
-                          {sec.buttonText}
