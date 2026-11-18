@@ -32,12 +32,11 @@ interface ProductCatalogProps {
     productId: string,
     field: 'hideSizing' | 'hideCapDetails' | 'hideAmericanShawl'
   ) => void;
-  onRemoveProductImage?: (productId: string) => void;
-    onUpdateProductAddon?: (
+  onUpdateProductAddon?: (
     productId: string,
     addon: { title: string; subtitle: string; price: number }
   ) => void;
-
+  onRemoveProductImage?: (productId: string) => void;
 }
 
 const MAIN_SECTIONS = [
@@ -75,23 +74,67 @@ const CAP_STYLES = [
 
 function CapCardGraphic({ shape }: { shape: 'round' | 'triangle' | 'tuxedo' }) {
   return (
-    <div className="w-full aspect-[4/5] rounded-xl bg-[#f9eef2] flex items-center justify-center p-2">
-      <svg viewBox="0 0 120 140" className="w-full h-full">
-        <path d="M35 135 C35 112, 85 112, 85 135 Z" fill="#ffffff" />
-        <rect x="52" y="92" width="16" height="24" rx="6" fill="#ffffff" />
-        <ellipse cx="60" cy="76" rx="18" ry="23" fill="#ffffff" />
-        <path d="M41 56 Q60 66 79 56 L77 65 Q60 74 43 65 Z" fill="#1c1917" />
-        {shape === 'round' && <ellipse cx="60" cy="49" rx="34" ry="12" fill="#292524" />}
-        {shape === 'triangle' && <polygon points="60,34 98,50 60,64 22,50" fill="#292524" />}
-        {shape === 'tuxedo' && (
+    <div className="w-full aspect-[4/5] rounded-xl bg-gradient-to-b from-[#faeef3] to-[#f4e2ea] flex items-center justify-center p-1.5 overflow-hidden">
+      <svg viewBox="0 0 140 175" className="w-full h-full drop-shadow-sm">
+        <defs>
+          <radialGradient id="mannequinHead" cx="42%" cy="38%" r="60%">
+            <stop offset="0%" stopColor="#ffffff" />
+            <stop offset="65%" stopColor="#f3f4f6" />
+            <stop offset="100%" stopColor="#d1d5db" />
+          </radialGradient>
+          <linearGradient id="mannequinNeck" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#e5e7eb" />
+            <stop offset="45%" stopColor="#ffffff" />
+            <stop offset="100%" stopColor="#d1d5db" />
+          </linearGradient>
+          <linearGradient id="capFabric" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#3f3f46" />
+            <stop offset="50%" stopColor="#18181b" />
+            <stop offset="100%" stopColor="#09090b" />
+          </linearGradient>
+          <linearGradient id="goldTassel" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#b45309" />
+            <stop offset="50%" stopColor="#f59e0b" />
+            <stop offset="100%" stopColor="#d97706" />
+          </linearGradient>
+        </defs>
+
+        {/* قاعدة وأكتاف المانيكان */}
+        <path d="M36 172 C36 146, 54 140, 70 140 C86 140, 104 146, 104 172 Z" fill="url(#mannequinNeck)" />
+        {/* رقبة المانيكان */}
+        <path d="M58 112 L56 144 Q70 148 84 144 L82 112 Z" fill="url(#mannequinNeck)" />
+        {/* رأس المانيكان */}
+        <ellipse cx="70" cy="92" rx="22" ry="28" fill="url(#mannequinHead)" />
+
+        {/* طاقية القبعة السفلية */}
+        <path d="M47 68 Q70 79 93 68 L91 79 Q70 89 49 79 Z" fill="url(#capFabric)" />
+
+        {/* أعلى القبعة حسب النوع */}
+        {shape === 'round' && (
           <>
-            <polygon points="60,33 98,49 60,63 22,49" fill="#18181b" />
-            <path d="M43 63 Q60 72 77 63" stroke="#d4af37" strokeWidth="2.5" fill="none" />
+            <ellipse cx="70" cy="60" rx="43" ry="13" fill="url(#capFabric)" />
+            <ellipse cx="70" cy="59" rx="41" ry="11" fill="none" stroke="#52525b" strokeWidth="0.6" />
           </>
         )}
-        <circle cx="60" cy="49" r="2.5" fill="#d4af37" />
-        <path d="M60 49 L85 56 L85 84" stroke="#d4af37" strokeWidth="2.2" fill="none" />
-        <rect x="82.5" y="81" width="5" height="12" rx="2" fill="#d4af37" />
+        {shape === 'triangle' && (
+          <>
+            <polygon points="70,42 118,60 70,76 22,60" fill="url(#capFabric)" />
+            <polyline points="22,60 70,76 118,60" fill="none" stroke="#52525b" strokeWidth="0.8" />
+          </>
+        )}
+        {shape === 'tuxedo' && (
+          <>
+            <polygon points="70,40 118,59 70,75 22,59" fill="#09090b" />
+            <path d="M48 77 Q70 87 92 77" stroke="url(#goldTassel)" strokeWidth="3" fill="none" />
+            <path d="M49 74 Q70 84 91 74" stroke="#71717a" strokeWidth="0.8" fill="none" />
+          </>
+        )}
+
+        {/* الزر العلوي والشرابة الذهبية */}
+        <ellipse cx="70" cy="59" rx="3.5" ry="2" fill="url(#goldTassel)" />
+        <path d="M70 59 L101 66 L101 94" stroke="url(#goldTassel)" strokeWidth="2.4" fill="none" strokeLinecap="round" />
+        <rect x="98.5" y="92" width="5" height="4" rx="1" fill="#b45309" />
+        <path d="M98.5 96 L97.5 114 L104.5 114 L103.5 96 Z" fill="url(#goldTassel)" />
       </svg>
     </div>
   );
@@ -105,8 +148,7 @@ function ProductDetailView({
   onAddToCart,
   onSetColorImage,
   onToggleField,
-    onUpdateAddon,
-
+  onUpdateAddon,
 }: {
   product: Product;
   sectionTitle: string;
@@ -116,8 +158,7 @@ function ProductDetailView({
   onAddToCart: (item: Omit<CartItem, 'id' | 'quantity'>) => void;
   onSetColorImage?: (colorName: string, file: File | null) => void;
   onToggleField?: (field: 'hideSizing' | 'hideCapDetails' | 'hideAmericanShawl') => void;
-    onUpdateAddon?: (addon: { title: string; subtitle: string; price: number }) => void;
-
+  onUpdateAddon?: (addon: { title: string; subtitle: string; price: number }) => void;
 }) {
   const [selectedOptionIdx, setSelectedOptionIdx] = useState(0);
   const [selectedSecondary, setSelectedSecondary] = useState(
@@ -140,6 +181,16 @@ function ProductDetailView({
 
   const [addAmericanShawl, setAddAmericanShawl] = useState(false);
   const [customNotes, setCustomNotes] = useState('');
+  const [isEditingAddon, setIsEditingAddon] = useState(false);
+  const [addonTitleDraft, setAddonTitleDraft] = useState(
+    product.americanShawlTitle ?? 'إضافة الشال الأمريكي V'
+  );
+  const [addonSubtitleDraft, setAddonSubtitleDraft] = useState(
+    product.americanShawlSubtitle ?? 'يُلبس على الكتفين ويتدلى بأناقة'
+  );
+  const [addonPriceDraft, setAddonPriceDraft] = useState(
+    String(product.americanShawlPrice ?? 900)
+  );
   const colorFileRef = useRef<HTMLInputElement>(null);
 
   const activeOption = product.options[selectedOptionIdx];
@@ -150,7 +201,9 @@ function ProductDetailView({
     !product.hideCapDetails;
   const capStyleSurcharge = showCapSection ? selectedCapStyle.extraPrice : 0;
   const tuxedoSurcharge = selectedSecondary.includes('+100') ? 100 : 0;
-  const americanShawlSurcharge = !product.hideAmericanShawl && addAmericanShawl ? 900 : 0;
+  const effectiveAddonPrice = product.americanShawlPrice ?? 900;
+  const americanShawlSurcharge =
+    !product.hideAmericanShawl && addAmericanShawl ? effectiveAddonPrice : 0;
   const displayPrice = basePrice + capStyleSurcharge + tuxedoSurcharge + americanShawlSurcharge;
 
   const activeImageUrl = product.colorImages?.[selectedColor.name] || product.imageUrl;
@@ -190,7 +243,9 @@ function ProductDetailView({
       if (capNotes.trim()) detailParts.push(`ملاحظة القبعة: ${capNotes.trim()}`);
     }
 
-    if (!product.hideAmericanShawl && addAmericanShawl) detailParts.push('+ شال أمريكي V');
+    if (!product.hideAmericanShawl && addAmericanShawl) {
+      detailParts.push(`+ ${product.americanShawlTitle ?? 'شال أمريكي V'}`);
+    }
     if (customNotes.trim()) detailParts.push(`ملاحظة: ${customNotes.trim()}`);
 
     onAddToCart({
@@ -304,6 +359,7 @@ function ProductDetailView({
                 </div>
               </div>
             )}
+
             {product.secondaryOptions && product.secondaryOptions.length > 0 && (
               <div>
                 <label className="block text-xs font-bold text-[#1f1917] mb-2">خيار إضافي:</label>
@@ -328,7 +384,6 @@ function ProductDetailView({
                 </div>
               </div>
             )}
-
             <div>
               <label className="block text-xs font-bold text-[#1f1917] mb-2">
                 اختر اللون: <span className="text-[#762b43]">{selectedColor.name}</span>
@@ -402,7 +457,7 @@ function ProductDetailView({
                 </div>
               )}
             </div>
-            {/* المقاسات التفصيلية */}
+
             {(isAdminMode || !product.hideSizing) && (
               <div className={`pt-3 border-t border-[#e6ddd3] space-y-3 ${product.hideSizing ? 'opacity-50' : ''}`}>
                 <div className="flex items-center justify-between">
@@ -498,8 +553,7 @@ function ProductDetailView({
                 )}
               </div>
             )}
-                        {/* تفاصيل القبعة والتطريز */}
-            {product.category !== 'accessories' && product.category !== 'cap' && (isAdminMode || !product.hideCapDetails) && (
+                        {product.category !== 'accessories' && product.category !== 'cap' && (isAdminMode || !product.hideCapDetails) && (
               <div className={`pt-3 border-t border-[#e6ddd3] space-y-3 ${product.hideCapDetails ? 'opacity-50' : ''}`}>
                 <div className="flex items-center justify-between">
                   <label className="block text-xs font-bold text-[#1f1917]">القبعة وتفاصيلها:</label>
@@ -632,11 +686,10 @@ function ProductDetailView({
               </div>
             )}
 
-            {/* إضافات اختيارية وملاحظات عامة */}
             <div className="pt-3 border-t border-[#e6ddd3] space-y-2.5">
               {(isAdminMode || !product.hideAmericanShawl) && (
                 <div className={`p-3 rounded-2xl border border-[#e6ddd3] bg-[#faf8f5] space-y-2 ${product.hideAmericanShawl ? 'opacity-50' : ''}`}>
-                                    
+                  {isAdminMode && (
                     <div className="flex flex-wrap items-center justify-end gap-1.5">
                       {onUpdateAddon && !product.hideAmericanShawl && (
                         <button
@@ -666,13 +719,11 @@ function ProductDetailView({
                               : 'bg-rose-100 text-rose-700'
                           }`}
                         >
-                          {product.hideAmericanShawl
-                            ? '+ إظهار الإضافة'
-                            : '✕ حذف وإخفاء'}
+                          {product.hideAmericanShawl ? '+ إظهار الإضافة' : '✕ حذف وإخفاء'}
                         </button>
                       )}
                     </div>
-                  
+                  )}
 
                   {isAdminMode && isEditingAddon && !product.hideAmericanShawl && (
                     <div className="p-2.5 rounded-xl bg-white border border-[#e6ddd3] space-y-2">
@@ -697,77 +748,7 @@ function ProductDetailView({
                           value={addonPriceDraft}
                           onChange={(e) => setAddonPriceDraft(e.target.value)}
                           placeholder="السعر (دج)"
-                          className="w-28 px-2.5 py-1.5 rounded-lg border border-[#e6ddd3] text-xs font-bold"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            onUpdateAddon?.({
-                              title: addonTitleDraft.trim() || 'إضافة الشال الأمريكي V',
-                              subtitle: addonSubtitleDraft.trim(),
-                              price: Math.max(0, Number(addonPriceDraft) || 0),
-                            });
-                            setIsEditingAddon(false);
-                          }}
-                          className="px-3 py-1.5 rounded-lg bg-[#762b43] text-white text-xs font-bold cursor-pointer"
-                        >
-                          تطبيق
-                        </button>
-                      </div>
-                    </div>
-                  )}
 
-                  {!product.hideAmericanShawl && (
-                    <label className="flex items-center justify-between cursor-pointer">
-                      <div>
-                        <span className="block text-xs font-bold text-[#1f1917]">
-                          {product.americanShawlTitle ?? 'إضافة الشال الأمريكي V'} (+
-                          {effectiveAddonPrice.toLocaleString('en-US')} دج)
-                        </span>
-                        {(product.americanShawlSubtitle ?? 'يُلبس على الكتفين ويتدلى بأناقة') && (
-                          <span className="text-[11px] text-[#6e645e]">
-                            {product.americanShawlSubtitle ?? 'يُلبس على الكتفين ويتدلى بأناقة'}
-                          </span>
-                        )}
-                      </div>
-                      <input
-                        type="checkbox"
-                        checked={addAmericanShawl}
-                        onChange={(e) => setAddAmericanShawl(e.target.checked)}
-                        className="w-4 h-4 accent-[#762b43]"
-                      />
-                    </label>
-                  )}
-                                  </div>
-            )}
-          </div>
-          </div>
-
-      
-
-          <div className="pt-4 border-t border-[#e6ddd3] flex items-center justify-between gap-4">
-            <div>
-              <span className="block text-xs text-[#6e645e]">الإجمالي</span>
-              <span className="text-2xl font-extrabold text-[#1f1917]">
-                {displayPrice.toLocaleString('en-US')} دج
-              </span>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleAdd}
-              className="flex-1 max-w-xs inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-[#762b43] hover:bg-[#581e31] text-white text-sm font-bold shadow-md transition-colors cursor-pointer"
-            >
-              <ShoppingBag className="w-4 h-4" />
-              <span>أضف إلى السلة</span>
-            </button>
-          </div>
-        </div>
-      </div>
-      </div>
-
-  );
-}
 function SectionCard({
   product,
   isAdminMode,
@@ -841,6 +822,7 @@ function SectionCard({
             )}
           </div>
         )}
+
         {isAdminMode && (
           <div
             onClick={(e) => e.stopPropagation()}
@@ -929,6 +911,7 @@ export function ProductCatalog({
   onRemoveProductImage,
   onSetProductColorImage,
   onToggleProductField,
+  onUpdateProductAddon,
 }: ProductCatalogProps) {
   const [selectedSection, setSelectedSection] = useState<CategoryId | null>(null);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
@@ -994,6 +977,7 @@ export function ProductCatalog({
     if (activeBranch !== 'الكل' && p.branch !== activeBranch) return false;
     return true;
   });
+
   return (
     <section id="catalog-sec" className="py-12 sm:py-16 border-b border-[#e6ddd3]">
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
@@ -1009,13 +993,11 @@ export function ProductCatalog({
               onSetProductColorImage?.(selectedProduct.id, colorName, file)
             }
             onToggleField={(field) => onToggleProductField?.(selectedProduct.id, field)}
-                      onUpdateAddon={(addon) =>
-            onUpdateProductAddon?.(selectedProduct.id, addon)
-          }
-
+            onUpdateAddon={(addon) =>
+              onUpdateProductAddon?.(selectedProduct.id, addon)
+            }
           />
         ) : selectedSection && activeSectionMeta ? (
-      
           <div>
             <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
               <div className="flex items-center gap-1.5 text-xs font-bold text-[#6e645e]">
@@ -1163,24 +1145,3 @@ export function ProductCatalog({
                       <div className="mt-5">
                         <span className="inline-flex items-center justify-center w-full sm:w-auto px-7 py-3 rounded-full bg-[#762b43] group-hover:bg-[#581e31] text-white text-sm font-bold transition-colors">
                           {sec.buttonText}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="sm:col-span-5 aspect-[4/3] sm:aspect-auto bg-[#f3eee8] overflow-hidden">
-                      <img
-                        src={coverImg}
-                        alt={sec.title}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-      </div>
-    </section>
-  );
-}
