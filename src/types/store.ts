@@ -18,6 +18,9 @@ export interface Product {
   hideCapDetails?: boolean;
   hideAmericanShawl?: boolean;
 
+  americanShawlTitle?: string;
+  americanShawlSubtitle?: string;
+  americanShawlPrice?: number;
 
   options: ProductOption[];
   secondaryOptions?: string[];
