@@ -159,3 +159,54 @@ header {
     animation: none !important;
   }
 }
+/* =========================================================
+   Smooth Section & Product Transitions (زدناهم هنا)
+   ========================================================= */
+
+/* 1. أنيميشن دخول الصفحة/القسم (Fade + Slide up) */
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.catalog-enter {
+  animation: fadeSlideUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* 2. تأثير المودال تاع الحذف (Modal) */
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-in.zoom-in-95 {
+  animation: zoomIn 0.2s ease-out forwards;
+}
+
+/* 3. تأثير الإشعار (Toast) */
+@keyframes slideInFromBottom {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.animate-in.slide-in-from-bottom-5 {
+  animation: slideInFromBottom 0.3s ease-out forwards;
+}
