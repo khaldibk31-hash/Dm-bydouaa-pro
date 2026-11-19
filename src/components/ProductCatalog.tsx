@@ -66,13 +66,121 @@ const MAIN_SECTIONS = [
   },
 ];
 
-// ⚠️ هنا: المسارات ديال الصور (تأكد بلي الصور كاينين فمجلد public/caps)
-
 const CAP_STYLES = [
   { id: 'round', label: 'القبعة الدائرية', extraPrice: 0, priceText: 'مشمولة', image: capRoundImg },
   { id: 'triangle', label: 'القبعة المثلثة', extraPrice: 0, priceText: 'مشمولة', image: capTriangleImg },
   { id: 'tuxedo', label: 'قبعة توكسيدو', extraPrice: 100, priceText: '+100 دج', image: capTuxedoImg },
-];
+] as const;
+
+type IllustrationKey = 'round' | 'triangle' | 'tuxedo' | 'americanShawl';
+type CustomIllustrationsMap = Partial<Record<IllustrationKey, string | null>>;
+
+const ILLUSTRATIONS_STORAGE_KEY = 'dg_custom_illustrations_v1';
+
+function loadSavedIllustrations(): CustomIllustrationsMap {
+  try {
+    const raw = localStorage.getItem(ILLUSTRATIONS_STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as CustomIllustrationsMap) : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveIllustrations(data: CustomIllustrationsMap) {
+  try {
+    localStorage.setItem(ILLUSTRATIONS_STORAGE_KEY, JSON.stringify(data));
+  } catch {
+    // تجاهل في حال امتلاء التخزين المحلي
+  }
+}
+
+function compressImageFile(file: File, maxSize = 600): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Failed to read file'));
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      const img = new Image();
+      img.onload = () => {
+        const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(dataUrl);
+          return;
+        }
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/webp', 0.85));
+      };
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+/* مجسم القبعة التوضيحي (يظهر كخلفية أساسية وتُعرض الصورة المضافة فوقه تماماً) */
+function CapMannequinSvg({ styleId }: { styleId: 'round' | 'triangle' | 'tuxedo' }) {
+  return (
+    <svg viewBox="0 0 120 120" className="w-full h-full p-2 select-none" aria-hidden="true">
+      {/* الرقبة والكتفين */}
+      <path
+        d="M36 116 C36 96, 46 90, 60 90 C74 90, 84 96, 84 116 Z"
+        fill="#e5e5e5"
+      />
+      {/* الرأس */}
+      <ellipse cx="60" cy="64" rx="16" ry="20" fill="#f2f2f2" />
+      <rect x="54" y="80" width="12" height="12" rx="4" fill="#e5e5e5" />
+
+      {/* القبعة حسب النوع */}
+      {styleId === 'round' && (
+        <>
+          <path d="M38 42 C38 50, 82 50, 82 42 L80 34 L40 34 Z" fill="#262223" />
+          <ellipse cx="60" cy="34" rx="28" ry="11" fill="#1b1819" />
+          <circle cx="60" cy="33" r="3" fill="#eab308" />
+          <path d="M60 33 Q78 36 78 52" stroke="#eab308" strokeWidth="2.2" fill="none" />
+          <path d="M75 52 L81 52 L82 64 L74 64 Z" fill="#eab308" />
+        </>
+      )}
+
+      {styleId === 'triangle' && (
+        <>
+          <path d="M40 42 L60 50 L80 42 L78 33 L42 33 Z" fill="#262223" />
+          <polygon points="60,18 92,33 60,46 28,33" fill="#1b1819" />
+          <circle cx="60" cy="32" r="2.8" fill="#eab308" />
+          <path d="M60 32 Q78 35 78 52" stroke="#eab308" strokeWidth="2.2" fill="none" />
+          <path d="M75 52 L81 52 L82 64 L74 64 Z" fill="#eab308" />
+        </>
+      )}
+
+      {styleId === 'tuxedo' && (
+        <>
+          <path d="M39 43 L60 51 L81 43 L79 34 L41 34 Z" fill="#262223" />
+          <polygon points="60,16 94,32 60,45 26,32" fill="#1b1819" />
+          <polygon points="60,19 88,32 60,42 32,32" fill="none" stroke="#d4af37" strokeWidth="1" opacity="0.55" />
+          <circle cx="60" cy="31" r="2.8" fill="#eab308" />
+          <path d="M60 31 Q79 34 79 52" stroke="#eab308" strokeWidth="2.2" fill="none" />
+          <path d="M76 52 L82 52 L83 65 L75 65 Z" fill="#eab308" />
+        </>
+      )}
+    </svg>
+  );
+}
+
+/* مجسم الشال الأمريكي V */
+function AmericanShawlSvg() {
+  return (
+    <svg viewBox="0 0 100 100" className="w-full h-full p-1.5 select-none" aria-hidden="true">
+      <circle cx="50" cy="24" r="11" fill="#e5e5e5" />
+      <path d="M24 92 C24 62, 34 44, 50 44 C66 44, 76 62, 76 92 Z" fill="#ece7e1" />
+      <path d="M38 44 L50 78 L62 44 L56 42 L50 64 L44 42 Z" fill="#762b43" />
+      <path d="M37 44 L44 42 L50 64 L47 78 L33 60 Z" fill="#581e31" opacity="0.25" />
+    </svg>
+  );
+}
+
 /* =========================================================
    View Transitions API helper
    ========================================================= */
@@ -123,7 +231,9 @@ function ProductDetailView({
     product.secondaryOptions?.at(0) || ''
   );
   const [selectedColor, setSelectedColor] = useState(CAP_SWATCHES.at(0)!);
-  const [selectedCapStyle, setSelectedCapStyle] = useState(CAP_STYLES.at(0)!);
+  const [selectedCapStyle, setSelectedCapStyle] = useState<(typeof CAP_STYLES)[number]>(
+    CAP_STYLES[0]
+  );
 
   const [gender, setGender] = useState<'نسائي' | 'رجالي'>('نسائي');
   const [standardSize, setStandardSize] = useState('M');
@@ -140,6 +250,42 @@ function ProductDetailView({
   const [addAmericanShawl, setAddAmericanShawl] = useState(false);
   const [customNotes, setCustomNotes] = useState('');
   const colorFileRef = useRef<HTMLInputElement>(null);
+
+  // صور توضيحية مخصصة للقبعات والشال الأمريكي (تُحفظ محلياً وتظهر فوق المجسمات دون إفساد التصميم)
+  const [customIllustrations, setCustomIllustrations] = useState<CustomIllustrationsMap>(() =>
+    loadSavedIllustrations()
+  );
+  const [failedImages, setFailedImages] = useState<Partial<Record<IllustrationKey, boolean>>>({});
+
+  const handleUploadIllustration = async (key: IllustrationKey, file: File) => {
+    try {
+      const compressed = await compressImageFile(file, 600);
+      setFailedImages((prev) => ({ ...prev, [key]: false }));
+      setCustomIllustrations((prev) => {
+        const next = { ...prev, [key]: compressed };
+        saveIllustrations(next);
+        return next;
+      });
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleRemoveIllustration = (key: IllustrationKey) => {
+    setCustomIllustrations((prev) => {
+      const next = { ...prev, [key]: null };
+      saveIllustrations(next);
+      return next;
+    });
+  };
+
+  const getIllustrationSrc = (key: IllustrationKey, defaultImg?: string) => {
+    if (failedImages[key]) return null;
+    const saved = customIllustrations[key];
+    if (saved === null) return null; // محذوفة يدوياً للعودة إلى المجسم
+    if (typeof saved === 'string' && saved.length > 0) return saved;
+    return defaultImg || null;
+  };
 
   const activeOption = product.options[selectedOptionIdx];
   const basePrice = activeOption ? activeOption.price : product.basePrice;
@@ -200,6 +346,8 @@ function ProductDetailView({
     });
   };
 
+  const americanShawlImgSrc = getIllustrationSrc('americanShawl');
+
   return (
     <div className="bg-white border border-[#e6ddd3] rounded-3xl overflow-hidden shadow-sm">
       <div className="px-5 py-3.5 bg-[#faf8f5] border-b border-[#e6ddd3] flex flex-wrap items-center justify-between gap-2 text-xs font-bold text-[#6e645e]">
@@ -259,11 +407,8 @@ function ProductDetailView({
         </div>
       </div>
 
-      {/* التعديل هنا: زدنا items-start باش الصورة ما تتمططش وتغطي على السعر */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-5 sm:p-8 items-start">
-        
-        {/* التعديل هنا: زدنا min-w-0 للصورة باش ما تخرجش على إطارها */}
-        <div className="relative aspect-[3/4] min-w-0 rounded-2xl bg-[#faf8f5] overflow-hidden border border-[#e6ddd3]">
+        <div className="relative w-full aspect-[3/4] min-w-0 rounded-2xl bg-[#faf8f5] overflow-hidden border border-[#e6ddd3]">
           {isAdminMode && (
             <div className="absolute top-3 left-3 z-10">
               <label className="cursor-pointer bg-white/95 backdrop-blur-md text-[#1f1917] px-3 py-1.5 rounded-lg border border-[#e6ddd3] text-xs font-bold shadow-sm hover:bg-[#f3eee8] flex items-center gap-1.5">
@@ -311,8 +456,8 @@ function ProductDetailView({
           )}
         </div>
 
-        <div className="flex flex-col justify-between space-y-5 min-w-0">
-          <div className="space-y-4">
+        <div className="flex flex-col justify-between space-y-5 min-w-0 w-full [&_img]:max-w-full">
+          <div className="space-y-4 min-w-0">
             <div>
               <span className="inline-block text-xs font-bold text-[#762b43] mb-1">
                 {product.branch}
@@ -341,7 +486,7 @@ function ProductDetailView({
                         key={opt.label}
                         type="button"
                         onClick={() => setSelectedOptionIdx(idx)}
-                        className={`p-3 rounded-2xl border text-right transition-all cursor-pointer ${
+                        className={`min-w-0 p-3 rounded-2xl border text-right transition-all cursor-pointer ${
                           active ? 'border-[#762b43] bg-[#faf8f5]' : 'border-[#e6ddd3] bg-white'
                         }`}
                       >
@@ -509,7 +654,7 @@ function ProductDetailView({
                     </div>
 
                     <div className="grid grid-cols-2 gap-2.5">
-                      <div>
+                      <div className="min-w-0">
                         <label className="block text-[11px] font-bold text-[#6e645e] mb-1">
                           أو رقم مقاسك (34 - 70):
                         </label>
@@ -523,7 +668,7 @@ function ProductDetailView({
                           className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
                         />
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <label className="block text-[11px] font-bold text-[#6e645e] mb-1">
                           الطول الكامل (80 - 200 سم):
                         </label>
@@ -570,38 +715,82 @@ function ProductDetailView({
 
                 {!product.hideCapDetails && (
                   <>
-                    {/* التعديل هنا: حينا الرسمة وزدنا الصورة الحقيقية مقيدة بـ overflow-hidden */}
+                    {/* بطاقات القبعات: المجسم بالخلف والصورة التوضيحية فوقه داخل إطار مقيد تماماً */}
                     <div className="grid grid-cols-3 gap-2">
                       {CAP_STYLES.map((cap) => {
                         const active = selectedCapStyle.id === cap.id;
+                        const capImgSrc = getIllustrationSrc(cap.id, cap.image);
+
                         return (
-                          <button
+                          <div
                             key={cap.id}
-                            type="button"
-                            onClick={() => setSelectedCapStyle(cap)}
-                            className={`p-1.5 sm:p-2 rounded-2xl border text-center cursor-pointer flex flex-col items-center justify-between overflow-hidden ${
+                            className={`min-w-0 w-full p-1.5 sm:p-2 rounded-2xl border flex flex-col justify-between overflow-hidden transition-all ${
                               active
                                 ? 'border-[#762b43] ring-2 ring-[#762b43]/20 bg-[#faf8f5]'
                                 : 'border-[#e6ddd3] bg-white'
                             }`}
                           >
-                            <div className="w-full aspect-[4/5] rounded-xl overflow-hidden bg-[#f9eef2]">
-                              <img 
-                                src={cap.image} 
-                                alt={cap.label} 
-                                className="w-full h-full object-cover" 
-                              />
-                            </div>
-                            
-                            <div className="mt-2 w-full flex flex-col items-center">
-                              <span className="block text-[10px] sm:text-[11px] font-extrabold text-[#1f1917] leading-tight text-center">
-                                {cap.label}
-                              </span>
-                              <span className="text-[10px] sm:text-[11px] font-bold text-[#762b43] mt-0.5">
-                                {cap.priceText}
-                              </span>
-                            </div>
-                          </button>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedCapStyle(cap)}
+                              className="w-full flex flex-col items-center text-center cursor-pointer min-w-0"
+                            >
+                              {/* إطار المجسم + الصورة المضافة فوقه */}
+                              <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-[#f9eef2] border border-[#e6ddd3]/60">
+                                <CapMannequinSvg styleId={cap.id} />
+
+                                {capImgSrc && (
+                                  <img
+                                    src={capImgSrc}
+                                    alt={cap.label}
+                                    onError={() =>
+                                      setFailedImages((prev) => ({ ...prev, [cap.id]: true }))
+                                    }
+                                    className="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none"
+                                  />
+                                )}
+                              </div>
+
+                              <div className="mt-2 w-full flex flex-col items-center">
+                                <span className="block text-[10px] sm:text-[11px] font-extrabold text-[#1f1917] leading-tight text-center">
+                                  {cap.label}
+                                </span>
+                                <span className="text-[10px] sm:text-[11px] font-bold text-[#762b43] mt-0.5">
+                                  {cap.priceText}
+                                </span>
+                              </div>
+                            </button>
+
+                            {/* أزرار إضافة / تغيير / حذف الصورة فوق المجسم (تظهر في وضع الإدارة فقط) */}
+                            {isAdminMode && (
+                              <div className="mt-2 pt-1.5 border-t border-[#e6ddd3] flex items-center justify-center gap-1">
+                                <label className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-[#762b43] text-white text-[10px] font-bold cursor-pointer hover:bg-[#581e31]">
+                                  <ImagePlus className="w-3 h-3" />
+                                  <span>{capImgSrc ? 'تغيير' : 'صورة'}</span>
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={(e) => {
+                                      const file = e.target.files?.[0];
+                                      if (file) handleUploadIllustration(cap.id, file);
+                                      e.target.value = '';
+                                    }}
+                                  />
+                                </label>
+                                {capImgSrc && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveIllustration(cap.id)}
+                                    title="حذف الصورة والرجوع للمجسم"
+                                    className="p-1 rounded-md bg-rose-50 text-red-600 border border-rose-200 hover:bg-rose-100 cursor-pointer"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                          </div>
                         );
                       })}
                     </div>
@@ -696,9 +885,36 @@ function ProductDetailView({
 
             <div className="pt-3 border-t border-[#e6ddd3] space-y-2.5">
               {(isAdminMode || !product.hideAmericanShawl) && (
-                <div className={`p-3 rounded-2xl border border-[#e6ddd3] bg-[#faf8f5] space-y-2 ${product.hideAmericanShawl ? 'opacity-50' : ''}`}>
+                <div className={`p-3 rounded-2xl border border-[#e6ddd3] bg-[#faf8f5] space-y-2 overflow-hidden ${product.hideAmericanShawl ? 'opacity-50' : ''}`}>
                   {isAdminMode && onToggleField && (
-                    <div className="flex justify-end">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5">
+                        <label className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#762b43] text-white text-[11px] font-bold cursor-pointer hover:bg-[#581e31]">
+                          <ImagePlus className="w-3 h-3" />
+                          <span>{americanShawlImgSrc ? 'تغيير صورة الشال' : 'إضافة صورة للشال'}</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleUploadIllustration('americanShawl', file);
+                              e.target.value = '';
+                            }}
+                          />
+                        </label>
+                        {americanShawlImgSrc && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveIllustration('americanShawl')}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white text-red-600 border border-red-200 text-[11px] font-bold cursor-pointer"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                            <span>حذف الصورة</span>
+                          </button>
+                        )}
+                      </div>
+
                       <button
                         type="button"
                         onClick={() => onToggleField('hideAmericanShawl')}
@@ -710,19 +926,38 @@ function ProductDetailView({
                       </button>
                     </div>
                   )}
+
                   {!product.hideAmericanShawl && (
-                    <label className="flex items-center justify-between cursor-pointer">
-                      <div>
-                        <span className="block text-xs font-bold text-[#1f1917]">
-                          إضافة الشال الأمريكي V (+900 دج)
-                        </span>
-                        <span className="text-[11px] text-[#6e645e]">يُلبس على الكتفين ويتدلى بأناقة</span>
+                    <label className="flex items-center justify-between gap-3 cursor-pointer">
+                      <div className="flex items-center gap-3 min-w-0">
+                        {/* إطار مصغر ومقيد لمجسم وصورة الشال الأمريكي */}
+                        <div className="relative w-14 h-14 sm:w-16 sm:h-16 shrink-0 rounded-xl overflow-hidden bg-[#f9eef2] border border-[#e6ddd3]">
+                          <AmericanShawlSvg />
+                          {americanShawlImgSrc && (
+                            <img
+                              src={americanShawlImgSrc}
+                              alt="الشال الأمريكي V"
+                              onError={() =>
+                                setFailedImages((prev) => ({ ...prev, americanShawl: true }))
+                              }
+                              className="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none"
+                            />
+                          )}
+                        </div>
+
+                        <div className="min-w-0">
+                          <span className="block text-xs font-bold text-[#1f1917]">
+                            إضافة الشال الأمريكي V (+900 دج)
+                          </span>
+                          <span className="text-[11px] text-[#6e645e]">يُلبس على الكتفين ويتدلى بأناقة</span>
+                        </div>
                       </div>
+
                       <input
                         type="checkbox"
                         checked={addAmericanShawl}
                         onChange={(e) => setAddAmericanShawl(e.target.checked)}
-                        className="w-4 h-4 accent-[#762b43]"
+                        className="w-4 h-4 shrink-0 accent-[#762b43]"
                       />
                     </label>
                   )}
