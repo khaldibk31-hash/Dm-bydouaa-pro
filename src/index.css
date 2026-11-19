@@ -210,3 +210,25 @@ header {
 .animate-in.slide-in-from-bottom-5 {
   animation: slideInFromBottom 0.3s ease-out forwards;
 }
+/* التدرج السلس للدخول للأقسام */
+@keyframes smoothEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(15px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.catalog-enter {
+  animation: smoothEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* تحسين أنيميشن الـ View Transitions (للصورة والتنقل) */
+::view-transition-old(product-hero),
+::view-transition-new(product-hero) {
+  animation-duration: 0.4s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
