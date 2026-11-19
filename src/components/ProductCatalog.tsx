@@ -96,9 +96,6 @@ function CapCardGraphic({ shape }: { shape: 'round' | 'triangle' | 'tuxedo' }) {
   );
 }
 
-/* =========================================================
-   View Transitions API helper
-   ========================================================= */
 function withViewTransition(update: () => void, cleanup?: () => void) {
   if (typeof document === 'undefined' || !('startViewTransition' in document)) {
     update();
@@ -303,11 +300,12 @@ function ProductDetailView({
 
           {activeImageUrl ? (
             <>
+              {/* 🟢 التعديل هنا: object-contain باش الصورة تبان كاملة */}
               <img
                 src={activeImageUrl}
                 alt={product.name}
                 style={isMorphing ? MORPH_STYLE : undefined}
-                className="w-full h-full object-cover object-center transition-all duration-300"
+                className="w-full h-full object-contain object-center transition-all duration-300 p-2"
               />
               <div className="absolute bottom-3 right-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-sm border border-[#e6ddd3] shadow-sm text-xs font-bold text-[#1f1917]">
                 <span
@@ -811,8 +809,8 @@ function SectionCard({
       onClick={onSelect}
       className="group bg-white border border-[#e6ddd3] rounded-2xl overflow-hidden flex flex-col cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-[#762b43]/30"
     >
-      {/* 🟢 هنا درنا التعديل باش الصورة تولي كبيرة في الموبايل */}
-      <div className="relative aspect-[4/5] sm:aspect-[3/4] w-full bg-[#f3eee8] overflow-hidden">
+      {/* 🟢 التعديل هنا: زدنا p-3 وبدلنا bg باش الصورة تبان كاملة */}
+      <div className="relative aspect-[4/5] sm:aspect-[3/4] w-full bg-[#faf8f5] overflow-hidden p-3">
         {hasValidImage ? (
           <img
             src={product.imageUrl}
@@ -820,7 +818,8 @@ function SectionCard({
             referrerPolicy="no-referrer"
             onError={() => setImgError(true)}
             style={isMorphing ? MORPH_STYLE : undefined}
-            className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.05]"
+            /* 🟢 التعديل هنا: object-contain */
+            className="w-full h-full object-contain object-center transition-transform duration-500 group-hover:scale-[1.03]"
           />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center p-5 text-center bg-gradient-to-br from-[#f3eee8] to-[#ebe2d8]">
@@ -847,7 +846,8 @@ function SectionCard({
         {isAdminMode && (
           <div
             onClick={(e) => e.stopPropagation()}
-            className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 z-10"
+            /* 🟢 التعديل هنا: زدنا opacity-0 group-hover:opacity-100 باش يبانو غير كي دوز الماوس */
+            className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           >
             <input
               ref={fileInputRef}
@@ -857,7 +857,7 @@ function SectionCard({
               onChange={handleImageChange}
             />
             
-            <div className="flex items-center gap-1.5 bg-white/90 backdrop-blur-md p-1 rounded-xl shadow-sm border border-white/50">
+            <div className="flex items-center gap-1.5 bg-white/95 backdrop-blur-md p-1.5 rounded-xl shadow-md border border-[#e6ddd3]">
               <button
                 type="button"
                 title="تغيير الصورة"
@@ -879,7 +879,7 @@ function SectionCard({
               )}
             </div>
 
-            <div className="flex items-center gap-1.5 bg-white/90 backdrop-blur-md p-1 rounded-xl shadow-sm border border-white/50">
+            <div className="flex items-center gap-1.5 bg-white/95 backdrop-blur-md p-1.5 rounded-xl shadow-md border border-[#e6ddd3]">
               <button
                 type="button"
                 title="تعديل المنتج"
@@ -1146,7 +1146,6 @@ export function ProductCatalog({
                     </p>
                   </div>
                 ) : (
-                  {/* 🟢 هنا التعديل الثاني: خلي الكارت ياخد العرض كامل في الموبايل */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                     {filteredProducts.map((product) => (
                       <SectionCard
