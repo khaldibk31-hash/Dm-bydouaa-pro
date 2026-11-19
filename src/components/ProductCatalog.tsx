@@ -10,6 +10,9 @@ import {
   Plus,
   ShoppingBag,
   Trash2,
+  X,
+  AlertTriangle,
+  CheckCircle2
 } from 'lucide-react';
 import {
   BOUQUET_IMAGE_PATH,
@@ -256,11 +259,7 @@ function ProductDetailView({
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  if (window.confirm('هل أنتِ متأكدة من حذف هذا الموديل نهائياً؟')) {
-                    onDelete();
-                  }
-                }}
+                onClick={onDelete}
                 className="inline-flex items-center gap-1 text-red-600 hover:underline cursor-pointer font-bold"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -800,11 +799,10 @@ function SectionCard({
     }
   };
 
+  // Now we just call onDelete and let the parent handle the confirmation
   const handleConfirmDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (window.confirm(`هل أنتِ متأكدة من حذف هذا الموديل نهائياً؟\n\n"${product.name}"`)) {
-      onDelete();
-    }
+    onDelete();
   };
 
   const hasValidImage = Boolean(product.imageUrl) && !imgError;
@@ -940,6 +938,20 @@ export function ProductCatalog({
   const [activeBranch, setActiveBranch] = useState<string>('الكل');
   const [morphProductId, setMorphProductId] = useState<string | null>(null);
 
+  // New states for Toast and Confirm Modal
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000); // يختفي بعد 3 ثواني
+  };
+
+  const handleAddToCartClick = (item: Omit<CartItem, 'id' | 'quantity'>) => {
+    onAddToCart(item);
+    showToast(`تمت إضافة "${item.title}" إلى السلة بنجاح!`);
+  };
+
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
       withViewTransition(() => {
@@ -971,10 +983,7 @@ export function ProductCatalog({
   };
 
   const handleOpenProduct = (productId: string) => {
-    // 1) نعطي الكارت اسم "product-hero" قبل الـ snapshot باش الـ morph يلقى مصدره
     flushSync(() => setMorphProductId(productId));
-
-    // 2) نبدأ الـ transition ونبدلو الـ view
     withViewTransition(
       () => {
         window.history.pushState(
@@ -983,7 +992,6 @@ export function ProductCatalog({
         );
         setSelectedProductId(productId);
       },
-      // 3) بعد ما تخلص، نمسحو الـ morph name
       () => setMorphProductId(null)
     );
   };
@@ -999,7 +1007,6 @@ export function ProductCatalog({
   const handleBackToSection = () => {
     const pid = selectedProductId;
     if (pid) {
-      // الـ detail صورة عندها الاسم قبل الـ snapshot
       flushSync(() => setMorphProductId(pid));
     }
     withViewTransition(
@@ -1029,198 +1036,274 @@ export function ProductCatalog({
     return true;
   });
 
+  // Confirm Delete logic
+  const confirmDeleteProduct = () => {
+    if (deleteTarget) {
+      onDeleteProduct(deleteTarget.id);
+      showToast(`تم حذف "${deleteTarget.name}" نهائياً`, 'error');
+      setDeleteTarget(null);
+      if (selectedProductId === deleteTarget.id) {
+        handleBackToHome();
+      }
+    }
+  };
+
   return (
-    <div key={selectedProductId || selectedSection || 'home'} className="catalog-enter">
-      <section id="catalog-sec" className="py-12 sm:py-16 border-b border-[#e6ddd3]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          {selectedProduct && activeSectionMeta ? (
-            <ProductDetailView
-              product={selectedProduct}
-              sectionTitle={activeSectionMeta.title}
-              onBackToHome={handleBackToHome}
-              onBackToSection={handleBackToSection}
-              onAddToCart={onAddToCart}
-              isAdminMode={isAdminMode}
-              isMorphing={morphProductId === selectedProduct.id}
-              onSetColorImage={(colorName, file) =>
-                onSetProductColorImage?.(selectedProduct.id, colorName, file)
-              }
-              onToggleField={(field) => onToggleProductField?.(selectedProduct.id, field)}
-              onEdit={() => onEditProduct(selectedProduct)}
-              onDelete={() => {
-                onDeleteProduct(selectedProduct.id);
-                handleBackToHome();
-              }}
-              onReplaceImage={(file) => onReplaceProductImage(selectedProduct.id, file)}
-            />
-          ) : selectedSection && activeSectionMeta ? (
-            <div>
-              <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-[#6e645e]">
-                  <button
-                    type="button"
-                    onClick={handleBackToHome}
-                    className="hover:text-[#762b43] underline cursor-pointer"
-                  >
-                    الرئيسية
-                  </button>
-                  <ChevronLeft className="w-3.5 h-3.5" />
-                  <span className="text-[#1f1917]">{activeSectionMeta.title}</span>
+    <>
+      <div key={selectedProductId || selectedSection || 'home'} className="catalog-enter">
+        <section id="catalog-sec" className="py-12 sm:py-16 border-b border-[#e6ddd3]">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6">
+            {selectedProduct && activeSectionMeta ? (
+              <ProductDetailView
+                product={selectedProduct}
+                sectionTitle={activeSectionMeta.title}
+                onBackToHome={handleBackToHome}
+                onBackToSection={handleBackToSection}
+                onAddToCart={handleAddToCartClick}
+                isAdminMode={isAdminMode}
+                isMorphing={morphProductId === selectedProduct.id}
+                onSetColorImage={(colorName, file) =>
+                  onSetProductColorImage?.(selectedProduct.id, colorName, file)
+                }
+                onToggleField={(field) => onToggleProductField?.(selectedProduct.id, field)}
+                onEdit={() => onEditProduct(selectedProduct)}
+                onDelete={() => setDeleteTarget({ id: selectedProduct.id, name: selectedProduct.name })}
+                onReplaceImage={(file) => onReplaceProductImage(selectedProduct.id, file)}
+              />
+            ) : selectedSection && activeSectionMeta ? (
+              <div>
+                <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-[#6e645e]">
+                    <button
+                      type="button"
+                      onClick={handleBackToHome}
+                      className="hover:text-[#762b43] underline cursor-pointer"
+                    >
+                      الرئيسية
+                    </button>
+                    <ChevronLeft className="w-3.5 h-3.5" />
+                    <span className="text-[#1f1917]">{activeSectionMeta.title}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleBackToHome}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-[#e6ddd3] text-xs font-bold text-[#1f1917] hover:bg-[#f3eee8] cursor-pointer"
+                    >
+                      <ArrowRight className="w-3.5 h-3.5" />
+                      <span>كل الأقسام</span>
+                    </button>
+
+                    {isAdminMode && (
+                      <button
+                        type="button"
+                        onClick={() => onOpenAddProduct(selectedSection)}
+                        className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-lg bg-[#1f1917] text-white text-xs font-bold cursor-pointer"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>إضافة قطعة للقسم</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={handleBackToHome}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-[#e6ddd3] text-xs font-bold text-[#1f1917] hover:bg-[#f3eee8] cursor-pointer"
-                  >
-                    <ArrowRight className="w-3.5 h-3.5" />
-                    <span>كل الأقسام</span>
-                  </button>
+                <div className="mb-6">
+                  <h2 className="font-editorial text-3xl sm:text-4xl font-bold text-[#1f1917]">
+                    {activeSectionMeta.title}
+                  </h2>
+                  <p className="text-sm text-[#6e645e] mt-1.5 max-w-xl">
+                    {activeSectionMeta.subtitle}
+                  </p>
+                </div>
+
+                {branches.length > 1 && (
+                  <div className="flex flex-wrap items-center gap-1.5 mb-6 pb-3 border-b border-[#e6ddd3]">
+                    {branches.map((branch) => {
+                      const active = activeBranch === branch;
+                      return (
+                        <button
+                          key={branch}
+                          type="button"
+                          onClick={() => setActiveBranch(branch)}
+                          className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer ${
+                            active
+                              ? 'bg-[#762b43] text-white'
+                              : 'bg-white border border-[#e6ddd3] text-[#6e645e] hover:text-[#1f1917]'
+                          }`}
+                        >
+                          {branch}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {filteredProducts.length === 0 ? (
+                  <div className="bg-white border border-[#e6ddd3] rounded-2xl p-10 text-center">
+                    <p className="text-sm font-semibold text-[#6e645e]">
+                      لا توجد قطع في هذا القسم حالياً.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
+                    {filteredProducts.map((product) => (
+                      <SectionCard
+                        key={product.id}
+                        product={product}
+                        isAdminMode={isAdminMode}
+                        isMorphing={morphProductId === product.id}
+                        onSelect={() => handleOpenProduct(product.id)}
+                        onEdit={() => onEditProduct(product)}
+                        onDelete={() => setDeleteTarget({ id: product.id, name: product.name })}
+                        onReplaceImage={(file) => onReplaceProductImage(product.id, file)}
+                        onRemoveImage={() => onRemoveProductImage?.(product.id)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div>
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+                  <div>
+                    <p className="text-xs font-bold text-[#762b43] mb-1">
+                      اختر القسم المناسب
+                    </p>
+                    <h2 className="font-editorial text-2xl sm:text-3xl font-bold text-[#1f1917]">
+                      أقسام دار الأزياء
+                    </h2>
+                  </div>
 
                   {isAdminMode && (
                     <button
                       type="button"
-                      onClick={() => onOpenAddProduct(selectedSection)}
-                      className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-lg bg-[#1f1917] text-white text-xs font-bold cursor-pointer"
+                      onClick={() => onOpenAddProduct('shawl')}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#1f1917] hover:bg-[#3a312d] text-white text-xs font-bold cursor-pointer"
                     >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>إضافة قطعة للقسم</span>
+                      <Plus className="w-4 h-4" />
+                      <span>إضافة موديل جديد</span>
                     </button>
                   )}
                 </div>
-              </div>
 
-              <div className="mb-6">
-                <h2 className="font-editorial text-3xl sm:text-4xl font-bold text-[#1f1917]">
-                  {activeSectionMeta.title}
-                </h2>
-                <p className="text-sm text-[#6e645e] mt-1.5 max-w-xl">
-                  {activeSectionMeta.subtitle}
-                </p>
-              </div>
+                <div className="space-y-5">
+                  {MAIN_SECTIONS.map((sec) => {
+                    const firstProdWithImg = products.find(
+                      (p) =>
+                        (sec.id === 'accessories'
+                          ? p.category === 'accessories' || p.category === 'cap'
+                          : p.category === sec.id) && p.imageUrl
+                    );
+                    const coverImg = firstProdWithImg?.imageUrl || sec.fallbackImg;
 
-              {branches.length > 1 && (
-                <div className="flex flex-wrap items-center gap-1.5 mb-6 pb-3 border-b border-[#e6ddd3]">
-                  {branches.map((branch) => {
-                    const active = activeBranch === branch;
                     return (
-                      <button
-                        key={branch}
-                        type="button"
-                        onClick={() => setActiveBranch(branch)}
-                        className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer ${
-                          active
-                            ? 'bg-[#762b43] text-white'
-                            : 'bg-white border border-[#e6ddd3] text-[#6e645e] hover:text-[#1f1917]'
-                        }`}
+                      <div
+                        key={sec.id}
+                        onClick={() => handleOpenSection(sec.id)}
+                        className="group bg-white border border-[#e6ddd3] rounded-3xl overflow-hidden grid grid-cols-1 sm:grid-cols-12 cursor-pointer transition-all duration-200 hover:shadow-md hover:border-[#762b43]/40"
                       >
-                        {branch}
-                      </button>
+                        <div className="sm:col-span-7 p-6 sm:p-8 flex flex-col justify-between">
+                          <div>
+                            <h3 className="font-editorial text-2xl sm:text-3xl font-bold text-[#1f1917]">
+                              {sec.title}
+                            </h3>
+                            <p className="text-sm text-[#6e645e] leading-relaxed mt-2">
+                              {sec.subtitle}
+                            </p>
+                            <p className="text-base font-extrabold text-[#762b43] mt-3">
+                              {sec.priceLabel}
+                            </p>
+                          </div>
+
+                          <div className="mt-5">
+                            <span className="inline-flex items-center justify-center w-full sm:w-auto px-7 py-3 rounded-full bg-[#762b43] group-hover:bg-[#581e31] text-white text-sm font-bold transition-colors">
+                              {sec.buttonText}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="sm:col-span-5 aspect-[4/3] sm:aspect-auto bg-[#f3eee8] overflow-hidden">
+                          <img
+                            src={coverImg}
+                            alt={sec.title}
+                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          />
+                        </div>
+                      </div>
                     );
                   })}
                 </div>
-              )}
-
-              {filteredProducts.length === 0 ? (
-                <div className="bg-white border border-[#e6ddd3] rounded-2xl p-10 text-center">
-                  <p className="text-sm font-semibold text-[#6e645e]">
-                    لا توجد قطع في هذا القسم حالياً.
-                  </p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
-                  {filteredProducts.map((product) => (
-                    <SectionCard
-                      key={product.id}
-                      product={product}
-                      isAdminMode={isAdminMode}
-                      isMorphing={morphProductId === product.id}
-                      onSelect={() => handleOpenProduct(product.id)}
-                      onEdit={() => onEditProduct(product)}
-                      onDelete={() => onDeleteProduct(product.id)}
-                      onReplaceImage={(file) => onReplaceProductImage(product.id, file)}
-                      onRemoveImage={() => onRemoveProductImage?.(product.id)}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          ) : (
-            <div>
-              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
-                <div>
-                  <p className="text-xs font-bold text-[#762b43] mb-1">
-                    اختر القسم المناسب
-                  </p>
-                  <h2 className="font-editorial text-2xl sm:text-3xl font-bold text-[#1f1917]">
-                    أقسام دار الأزياء
-                  </h2>
-                </div>
-
-                {isAdminMode && (
-                  <button
-                    type="button"
-                    onClick={() => onOpenAddProduct('shawl')}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#1f1917] hover:bg-[#3a312d] text-white text-xs font-bold cursor-pointer"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>إضافة موديل جديد</span>
-                  </button>
-                )}
               </div>
+            )}
+          </div>
+        </section>
+      </div>
 
-              <div className="space-y-5">
-                {MAIN_SECTIONS.map((sec) => {
-                  const firstProdWithImg = products.find(
-                    (p) =>
-                      (sec.id === 'accessories'
-                        ? p.category === 'accessories' || p.category === 'cap'
-                        : p.category === sec.id) && p.imageUrl
-                  );
-                  const coverImg = firstProdWithImg?.imageUrl || sec.fallbackImg;
-
-                  return (
-                    <div
-                      key={sec.id}
-                      onClick={() => handleOpenSection(sec.id)}
-                      className="group bg-white border border-[#e6ddd3] rounded-3xl overflow-hidden grid grid-cols-1 sm:grid-cols-12 cursor-pointer transition-all duration-200 hover:shadow-md hover:border-[#762b43]/40"
-                    >
-                      <div className="sm:col-span-7 p-6 sm:p-8 flex flex-col justify-between">
-                        <div>
-                          <h3 className="font-editorial text-2xl sm:text-3xl font-bold text-[#1f1917]">
-                            {sec.title}
-                          </h3>
-                          <p className="text-sm text-[#6e645e] leading-relaxed mt-2">
-                            {sec.subtitle}
-                          </p>
-                          <p className="text-base font-extrabold text-[#762b43] mt-3">
-                            {sec.priceLabel}
-                          </p>
-                        </div>
-
-                        <div className="mt-5">
-                          <span className="inline-flex items-center justify-center w-full sm:w-auto px-7 py-3 rounded-full bg-[#762b43] group-hover:bg-[#581e31] text-white text-sm font-bold transition-colors">
-                            {sec.buttonText}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="sm:col-span-5 aspect-[4/3] sm:aspect-auto bg-[#f3eee8] overflow-hidden">
-                        <img
-                          src={coverImg}
-                          alt={sec.title}
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+      {/* =========================================================
+          Custom Toast Notification
+          ========================================================= */}
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-bottom-5 fade-in duration-300">
+          <div
+            className={`flex items-center gap-2 px-5 py-3 rounded-full shadow-2xl text-white font-bold text-sm ${
+              toast.type === 'success' ? 'bg-emerald-600' : 'bg-red-600'
+            }`}
+          >
+            {toast.type === 'success' ? (
+              <CheckCircle2 className="w-5 h-5" />
+            ) : (
+              <AlertTriangle className="w-5 h-5" />
+            )}
+            <span>{toast.message}</span>
+          </div>
         </div>
-      </section>
-    </div>
+      )}
+
+      {/* =========================================================
+          Custom Confirm Delete Modal
+          ========================================================= */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200"
+            onClick={() => setDeleteTarget(null)}
+          />
+          {/* Modal Box */}
+          <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 text-center animate-in zoom-in-95 duration-200">
+            <button
+              onClick={() => setDeleteTarget(null)}
+              className="absolute top-4 left-4 text-gray-400 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 p-1.5 rounded-full transition-colors cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Trash2 className="w-8 h-8" />
+            </div>
+            <h3 className="text-lg font-bold text-[#1f1917] mb-2 font-editorial">
+              تأكيد الحذف
+            </h3>
+            <p className="text-sm text-[#6e645e] mb-6 leading-relaxed">
+              هل أنتِ متأكدة من حذف الموديل <span className="font-bold text-[#762b43]">"{deleteTarget.name}"</span> نهائياً؟ لا يمكن التراجع عن هذا الإجراء.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                className="flex-1 py-3 px-4 rounded-xl border border-[#e6ddd3] bg-white text-[#1f1917] font-bold text-sm hover:bg-[#faf8f5] transition-colors cursor-pointer"
+              >
+                إلغاء
+              </button>
+              <button
+                onClick={confirmDeleteProduct}
+                className="flex-1 py-3 px-4 rounded-xl bg-red-600 text-white font-bold text-sm shadow-md hover:bg-red-700 transition-colors cursor-pointer"
+              >
+                نعم، احذفي
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
