@@ -63,35 +63,12 @@ const MAIN_SECTIONS = [
   },
 ];
 
+// ⚠️ هنا: المسارات ديال الصور (تأكد بلي الصور كاينين فمجلد public/caps)
 const CAP_STYLES = [
-  { id: 'round', label: 'القبعة الدائرية', extraPrice: 0, priceText: 'مشمولة', shape: 'round' as const },
-  { id: 'triangle', label: 'القبعة المثلثة', extraPrice: 0, priceText: 'مشمولة', shape: 'triangle' as const },
-  { id: 'tuxedo', label: 'قبعة توكسيدو', extraPrice: 100, priceText: '+100 دج', shape: 'tuxedo' as const },
+  { id: 'round', label: 'القبعة الدائرية', extraPrice: 0, priceText: 'مشمولة', image: '/caps/cap-round.png' },
+  { id: 'triangle', label: 'القبعة المثلثة', extraPrice: 0, priceText: 'مشمولة', image: '/caps/cap-triangle.png' },
+  { id: 'tuxedo', label: 'قبعة توكسيدو', extraPrice: 100, priceText: '+100 دج', image: '/caps/cap-tuxedo.png' },
 ];
-
-function CapCardGraphic({ shape }: { shape: 'round' | 'triangle' | 'tuxedo' }) {
-  return (
-    <div className="w-full aspect-[4/5] rounded-xl bg-[#f9eef2] flex items-center justify-center p-2">
-      <svg viewBox="0 0 120 140" className="w-full h-full">
-        <path d="M35 135 C35 112, 85 112, 85 135 Z" fill="#ffffff" />
-        <rect x="52" y="92" width="16" height="24" rx="6" fill="#ffffff" />
-        <ellipse cx="60" cy="76" rx="18" ry="23" fill="#ffffff" />
-        <path d="M41 56 Q60 66 79 56 L77 65 Q60 74 43 65 Z" fill="#1c1917" />
-        {shape === 'round' && <ellipse cx="60" cy="49" rx="34" ry="12" fill="#292524" />}
-        {shape === 'triangle' && <polygon points="60,34 98,50 60,64 22,50" fill="#292524" />}
-        {shape === 'tuxedo' && (
-          <>
-            <polygon points="60,33 98,49 60,63 22,49" fill="#18181b" />
-            <path d="M43 63 Q60 72 77 63" stroke="#d4af37" strokeWidth="2.5" fill="none" />
-          </>
-        )}
-        <circle cx="60" cy="49" r="2.5" fill="#d4af37" />
-        <path d="M60 49 L85 56 L85 84" stroke="#d4af37" strokeWidth="2.2" fill="none" />
-        <rect x="82.5" y="81" width="5" height="12" rx="2" fill="#d4af37" />
-      </svg>
-    </div>
-  );
-}
 
 /* =========================================================
    View Transitions API helper
@@ -279,8 +256,11 @@ function ProductDetailView({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-5 sm:p-8">
-        <div className="relative aspect-[3/4] rounded-2xl bg-[#faf8f5] overflow-hidden border border-[#e6ddd3]">
+      {/* التعديل هنا: زدنا items-start باش الصورة ما تتمططش وتغطي على السعر */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-5 sm:p-8 items-start">
+        
+        {/* التعديل هنا: زدنا min-w-0 للصورة باش ما تخرجش على إطارها */}
+        <div className="relative aspect-[3/4] min-w-0 rounded-2xl bg-[#faf8f5] overflow-hidden border border-[#e6ddd3]">
           {isAdminMode && (
             <div className="absolute top-3 left-3 z-10">
               <label className="cursor-pointer bg-white/95 backdrop-blur-md text-[#1f1917] px-3 py-1.5 rounded-lg border border-[#e6ddd3] text-xs font-bold shadow-sm hover:bg-[#f3eee8] flex items-center gap-1.5">
@@ -328,7 +308,7 @@ function ProductDetailView({
           )}
         </div>
 
-        <div className="flex flex-col justify-between space-y-5">
+        <div className="flex flex-col justify-between space-y-5 min-w-0">
           <div className="space-y-4">
             <div>
               <span className="inline-block text-xs font-bold text-[#762b43] mb-1">
@@ -587,6 +567,7 @@ function ProductDetailView({
 
                 {!product.hideCapDetails && (
                   <>
+                    {/* التعديل هنا: حينا الرسمة وزدنا الصورة الحقيقية مقيدة بـ overflow-hidden */}
                     <div className="grid grid-cols-3 gap-2">
                       {CAP_STYLES.map((cap) => {
                         const active = selectedCapStyle.id === cap.id;
@@ -595,19 +576,28 @@ function ProductDetailView({
                             key={cap.id}
                             type="button"
                             onClick={() => setSelectedCapStyle(cap)}
-                            className={`p-2 rounded-2xl border text-center cursor-pointer flex flex-col items-center ${
+                            className={`p-1.5 sm:p-2 rounded-2xl border text-center cursor-pointer flex flex-col items-center justify-between overflow-hidden ${
                               active
                                 ? 'border-[#762b43] ring-2 ring-[#762b43]/20 bg-[#faf8f5]'
                                 : 'border-[#e6ddd3] bg-white'
                             }`}
                           >
-                            <CapCardGraphic shape={cap.shape} />
-                            <span className="mt-2 block text-[11px] font-extrabold text-[#1f1917] leading-tight">
-                              {cap.label}
-                            </span>
-                            <span className="text-[11px] font-bold text-[#762b43] mt-0.5">
-                              {cap.priceText}
-                            </span>
+                            <div className="w-full aspect-[4/5] rounded-xl overflow-hidden bg-[#f9eef2]">
+                              <img 
+                                src={cap.image} 
+                                alt={cap.label} 
+                                className="w-full h-full object-cover" 
+                              />
+                            </div>
+                            
+                            <div className="mt-2 w-full flex flex-col items-center">
+                              <span className="block text-[10px] sm:text-[11px] font-extrabold text-[#1f1917] leading-tight text-center">
+                                {cap.label}
+                              </span>
+                              <span className="text-[10px] sm:text-[11px] font-bold text-[#762b43] mt-0.5">
+                                {cap.priceText}
+                              </span>
+                            </div>
                           </button>
                         );
                       })}
@@ -971,10 +961,8 @@ export function ProductCatalog({
   };
 
   const handleOpenProduct = (productId: string) => {
-    // 1) نعطي الكارت اسم "product-hero" قبل الـ snapshot باش الـ morph يلقى مصدره
     flushSync(() => setMorphProductId(productId));
 
-    // 2) نبدأ الـ transition ونبدلو الـ view
     withViewTransition(
       () => {
         window.history.pushState(
@@ -983,7 +971,6 @@ export function ProductCatalog({
         );
         setSelectedProductId(productId);
       },
-      // 3) بعد ما تخلص، نمسحو الـ morph name
       () => setMorphProductId(null)
     );
   };
@@ -999,7 +986,6 @@ export function ProductCatalog({
   const handleBackToSection = () => {
     const pid = selectedProductId;
     if (pid) {
-      // الـ detail صورة عندها الاسم قبل الـ snapshot
       flushSync(() => setMorphProductId(pid));
     }
     withViewTransition(
