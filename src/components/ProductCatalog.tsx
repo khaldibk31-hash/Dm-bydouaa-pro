@@ -811,8 +811,8 @@ function SectionCard({
       onClick={onSelect}
       className="group bg-white border border-[#e6ddd3] rounded-2xl overflow-hidden flex flex-col cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-[#762b43]/30"
     >
-      {/* 📸 تم تعديل الإطار هنا ليكون طولي (3/4) باش الصورة تبان كاملة وتعمّر الكارت */}
-      <div className="relative aspect-[3/4] w-full bg-[#f3eee8] overflow-hidden">
+      {/* 🟢 هنا درنا التعديل باش الصورة تولي كبيرة في الموبايل */}
+      <div className="relative aspect-[4/5] sm:aspect-[3/4] w-full bg-[#f3eee8] overflow-hidden">
         {hasValidImage ? (
           <img
             src={product.imageUrl}
@@ -844,7 +844,6 @@ function SectionCard({
           </div>
         )}
 
-        {/* ✨ أزرار الأدمن الاحترافية (Floating Glassmorphism) */}
         {isAdminMode && (
           <div
             onClick={(e) => e.stopPropagation()}
@@ -1147,7 +1146,8 @@ export function ProductCatalog({
                     </p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
+                  {/* 🟢 هنا التعديل الثاني: خلي الكارت ياخد العرض كامل في الموبايل */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                     {filteredProducts.map((product) => (
                       <SectionCard
                         key={product.id}
