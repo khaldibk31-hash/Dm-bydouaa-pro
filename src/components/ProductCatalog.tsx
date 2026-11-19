@@ -1,4 +1,5 @@
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import {
   ArrowRight,
   Check,
@@ -92,6 +93,24 @@ function CapCardGraphic({ shape }: { shape: 'round' | 'triangle' | 'tuxedo' }) {
   );
 }
 
+/* =========================================================
+   View Transitions API helper
+   ========================================================= */
+function withViewTransition(update: () => void, cleanup?: () => void) {
+  if (typeof document === 'undefined' || !('startViewTransition' in document)) {
+    update();
+    cleanup?.();
+    return;
+  }
+  document
+    .startViewTransition(() => {
+      flushSync(update);
+    })
+    .finished.finally(() => cleanup?.());
+}
+
+const MORPH_STYLE = { viewTransitionName: 'product-hero' } as React.CSSProperties;
+
 function ProductDetailView({
   product,
   sectionTitle,
@@ -104,6 +123,7 @@ function ProductDetailView({
   onEdit,
   onDelete,
   onReplaceImage,
+  isMorphing,
 }: {
   product: Product;
   sectionTitle: string;
@@ -116,6 +136,7 @@ function ProductDetailView({
   onEdit?: () => void;
   onDelete?: () => void;
   onReplaceImage?: (file: File) => void;
+  isMorphing?: boolean;
 }) {
   const [selectedOptionIdx, setSelectedOptionIdx] = useState(0);
   const [selectedSecondary, setSelectedSecondary] = useState(
@@ -286,6 +307,7 @@ function ProductDetailView({
               <img
                 src={activeImageUrl}
                 alt={product.name}
+                style={isMorphing ? MORPH_STYLE : undefined}
                 className="w-full h-full object-cover transition-all duration-300"
               />
               <div className="absolute bottom-3 right-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-sm border border-[#e6ddd3] shadow-sm text-xs font-bold text-[#1f1917]">
@@ -755,6 +777,7 @@ function SectionCard({
   onDelete,
   onReplaceImage,
   onRemoveImage,
+  isMorphing,
 }: {
   product: Product;
   isAdminMode: boolean;
@@ -763,6 +786,7 @@ function SectionCard({
   onDelete: () => void;
   onReplaceImage: (file: File) => void;
   onRemoveImage: () => void;
+  isMorphing?: boolean;
 }) {
   const [imgError, setImgError] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -797,6 +821,7 @@ function SectionCard({
             alt={product.name}
             referrerPolicy="no-referrer"
             onError={() => setImgError(true)}
+            style={isMorphing ? MORPH_STYLE : undefined}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
           />
         ) : (
@@ -913,20 +938,23 @@ export function ProductCatalog({
   const [selectedSection, setSelectedSection] = useState<CategoryId | null>(null);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [activeBranch, setActiveBranch] = useState<string>('الكل');
+  const [morphProductId, setMorphProductId] = useState<string | null>(null);
 
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
-      const state = event.state;
-      if (state && state.catalogLevel === 'product') {
-        setSelectedSection(state.section || null);
-        setSelectedProductId(state.productId || null);
-      } else if (state && state.catalogLevel === 'section') {
-        setSelectedSection(state.section || null);
-        setSelectedProductId(null);
-      } else {
-        setSelectedSection(null);
-        setSelectedProductId(null);
-      }
+      withViewTransition(() => {
+        const state = event.state;
+        if (state && state.catalogLevel === 'product') {
+          setSelectedSection(state.section || null);
+          setSelectedProductId(state.productId || null);
+        } else if (state && state.catalogLevel === 'section') {
+          setSelectedSection(state.section || null);
+          setSelectedProductId(null);
+        } else {
+          setSelectedSection(null);
+          setSelectedProductId(null);
+        }
+      });
     };
 
     window.addEventListener('popstate', handlePopState);
@@ -934,24 +962,50 @@ export function ProductCatalog({
   }, []);
 
   const handleOpenSection = (cat: CategoryId) => {
-    window.history.pushState({ catalogLevel: 'section', section: cat }, '');
-    setSelectedSection(cat);
-    setSelectedProductId(null);
-    setActiveBranch('الكل');
+    withViewTransition(() => {
+      window.history.pushState({ catalogLevel: 'section', section: cat }, '');
+      setSelectedSection(cat);
+      setSelectedProductId(null);
+      setActiveBranch('الكل');
+    });
   };
 
   const handleOpenProduct = (productId: string) => {
-    window.history.pushState(
-      { catalogLevel: 'product', section: selectedSection, productId },
-      ''
+    // 1) نعطي الكارت اسم "product-hero" قبل الـ snapshot باش الـ morph يلقى مصدره
+    flushSync(() => setMorphProductId(productId));
+
+    // 2) نبدأ الـ transition ونبدلو الـ view
+    withViewTransition(
+      () => {
+        window.history.pushState(
+          { catalogLevel: 'product', section: selectedSection, productId },
+          ''
+        );
+        setSelectedProductId(productId);
+      },
+      // 3) بعد ما تخلص، نمسحو الـ morph name
+      () => setMorphProductId(null)
     );
-    setSelectedProductId(productId);
   };
 
   const handleBackToHome = () => {
-    setSelectedSection(null);
-    setSelectedProductId(null);
-    setActiveBranch('الكل');
+    withViewTransition(() => {
+      setSelectedSection(null);
+      setSelectedProductId(null);
+      setActiveBranch('الكل');
+    });
+  };
+
+  const handleBackToSection = () => {
+    const pid = selectedProductId;
+    if (pid) {
+      // الـ detail صورة عندها الاسم قبل الـ snapshot
+      flushSync(() => setMorphProductId(pid));
+    }
+    withViewTransition(
+      () => setSelectedProductId(null),
+      () => setMorphProductId(null)
+    );
   };
 
   const activeSectionMeta = MAIN_SECTIONS.find((s) => s.id === selectedSection);
@@ -984,9 +1038,10 @@ export function ProductCatalog({
               product={selectedProduct}
               sectionTitle={activeSectionMeta.title}
               onBackToHome={handleBackToHome}
-              onBackToSection={() => setSelectedProductId(null)}
+              onBackToSection={handleBackToSection}
               onAddToCart={onAddToCart}
               isAdminMode={isAdminMode}
+              isMorphing={morphProductId === selectedProduct.id}
               onSetColorImage={(colorName, file) =>
                 onSetProductColorImage?.(selectedProduct.id, colorName, file)
               }
@@ -1080,6 +1135,7 @@ export function ProductCatalog({
                       key={product.id}
                       product={product}
                       isAdminMode={isAdminMode}
+                      isMorphing={morphProductId === product.id}
                       onSelect={() => handleOpenProduct(product.id)}
                       onEdit={() => onEditProduct(product)}
                       onDelete={() => onDeleteProduct(product.id)}
