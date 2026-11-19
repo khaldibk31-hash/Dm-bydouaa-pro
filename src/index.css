@@ -225,10 +225,3 @@ header {
 .catalog-enter {
   animation: smoothEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
-
-/* تحسين أنيميشن الـ View Transitions (للصورة والتنقل) */
-::view-transition-old(product-hero),
-::view-transition-new(product-hero) {
-  animation-duration: 0.4s;
-  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-}
