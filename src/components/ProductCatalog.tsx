@@ -19,6 +19,9 @@ import {
   SHAWL_IMAGE_PATH,
 } from '../data/defaultStore';
 import { CartItem, CategoryId, Product } from '../types/store';
+import capRoundImg from '../assets/images/round.webp';
+import capTriangleImg from '../assets/images/triangle.webp';
+import capTuxedoImg from '../assets/images/tuxedo.webp';
 
 interface ProductCatalogProps {
   products: Product[];
@@ -64,12 +67,12 @@ const MAIN_SECTIONS = [
 ];
 
 // ⚠️ هنا: المسارات ديال الصور (تأكد بلي الصور كاينين فمجلد public/caps)
-const CAP_STYLES = [
-  { id: 'round', label: 'القبعة الدائرية', extraPrice: 0, priceText: 'مشمولة', image: '/caps/cap-round.png' },
-  { id: 'triangle', label: 'القبعة المثلثة', extraPrice: 0, priceText: 'مشمولة', image: '/caps/cap-triangle.png' },
-  { id: 'tuxedo', label: 'قبعة توكسيدو', extraPrice: 100, priceText: '+100 دج', image: '/caps/cap-tuxedo.png' },
-];
 
+const CAP_STYLES = [
+  { id: 'round', label: 'القبعة الدائرية', extraPrice: 0, priceText: 'مشمولة', image: capRoundImg },
+  { id: 'triangle', label: 'القبعة المثلثة', extraPrice: 0, priceText: 'مشمولة', image: capTriangleImg },
+  { id: 'tuxedo', label: 'قبعة توكسيدو', extraPrice: 100, priceText: '+100 دج', image: capTuxedoImg },
+];
 /* =========================================================
    View Transitions API helper
    ========================================================= */
