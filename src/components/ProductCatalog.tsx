@@ -307,7 +307,7 @@ function ProductDetailView({
                 src={activeImageUrl}
                 alt={product.name}
                 style={isMorphing ? MORPH_STYLE : undefined}
-                className="w-full h-full object-cover transition-all duration-300"
+                className="w-full h-full object-cover object-center transition-all duration-300"
               />
               <div className="absolute bottom-3 right-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-sm border border-[#e6ddd3] shadow-sm text-xs font-bold text-[#1f1917]">
                 <span
@@ -799,7 +799,6 @@ function SectionCard({
     }
   };
 
-  // Now we just call onDelete and let the parent handle the confirmation
   const handleConfirmDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     onDelete();
@@ -810,9 +809,10 @@ function SectionCard({
   return (
     <article
       onClick={onSelect}
-      className="group bg-white border border-[#e6ddd3] rounded-2xl overflow-hidden flex flex-col cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+      className="group bg-white border border-[#e6ddd3] rounded-2xl overflow-hidden flex flex-col cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-[#762b43]/30"
     >
-      <div className="relative aspect-[4/3] w-full bg-[#f3eee8] overflow-hidden">
+      {/* 📸 تم تعديل الإطار هنا ليكون طولي (3/4) باش الصورة تبان كاملة وتعمّر الكارت */}
+      <div className="relative aspect-[3/4] w-full bg-[#f3eee8] overflow-hidden">
         {hasValidImage ? (
           <img
             src={product.imageUrl}
@@ -820,11 +820,11 @@ function SectionCard({
             referrerPolicy="no-referrer"
             onError={() => setImgError(true)}
             style={isMorphing ? MORPH_STYLE : undefined}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+            className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.05]"
           />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center p-5 text-center bg-gradient-to-br from-[#f3eee8] to-[#ebe2d8]">
-            <ShoppingBag className="w-7 h-7 text-[#762b43] mb-2 opacity-80" />
+            <ShoppingBag className="w-8 h-8 text-[#762b43] mb-2 opacity-80" />
             <span className="font-editorial text-sm font-bold text-[#1f1917]">
               {product.name}
             </span>
@@ -835,7 +835,7 @@ function SectionCard({
                   e.stopPropagation();
                   fileInputRef.current?.click();
                 }}
-                className="mt-2.5 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#762b43] text-white text-xs font-bold shadow-sm cursor-pointer"
+                className="mt-3 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#762b43] text-white text-xs font-bold shadow-sm cursor-pointer hover:bg-[#581e31] transition-colors"
               >
                 <ImagePlus className="w-3.5 h-3.5" />
                 <span>إضافة صورة</span>
@@ -843,10 +843,12 @@ function SectionCard({
             )}
           </div>
         )}
+
+        {/* ✨ أزرار الأدمن الاحترافية (Floating Glassmorphism) */}
         {isAdminMode && (
           <div
             onClick={(e) => e.stopPropagation()}
-            className="absolute top-2 left-2 right-2 flex flex-wrap items-center justify-between gap-1 z-10"
+            className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 z-10"
           >
             <input
               ref={fileInputRef}
@@ -855,44 +857,45 @@ function SectionCard({
               className="hidden"
               onChange={handleImageChange}
             />
-            <div className="flex items-center gap-1">
+            
+            <div className="flex items-center gap-1.5 bg-white/90 backdrop-blur-md p-1 rounded-xl shadow-sm border border-white/50">
               <button
                 type="button"
+                title="تغيير الصورة"
                 onClick={() => fileInputRef.current?.click()}
-                className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white/95 text-[#1f1917] border border-[#e6ddd3] text-[11px] font-bold shadow-sm hover:bg-[#f3eee8] cursor-pointer"
+                className="p-1.5 rounded-lg text-[#1f1917] hover:bg-[#f3eee8] transition-colors cursor-pointer"
               >
-                <ImagePlus className="w-3 h-3 text-[#762b43]" />
-                <span>{hasValidImage ? 'تغيير' : 'إضافة'}</span>
+                <ImagePlus className="w-4 h-4 text-[#762b43]" />
               </button>
 
               {hasValidImage && (
                 <button
                   type="button"
+                  title="حذف الصورة"
                   onClick={onRemoveImage}
-                  className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white/95 text-amber-800 border border-amber-200 text-[11px] font-bold shadow-sm hover:bg-amber-50 cursor-pointer"
+                  className="p-1.5 rounded-lg text-amber-700 hover:bg-amber-50 transition-colors cursor-pointer"
                 >
-                  <ImageOff className="w-3 h-3" />
-                  <span>حذف الصورة</span>
+                  <ImageOff className="w-4 h-4" />
                 </button>
               )}
             </div>
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5 bg-white/90 backdrop-blur-md p-1 rounded-xl shadow-sm border border-white/50">
               <button
                 type="button"
+                title="تعديل المنتج"
                 onClick={onEdit}
-                className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white/95 text-[#1f1917] border border-[#e6ddd3] text-[11px] font-bold shadow-sm hover:bg-[#f3eee8] cursor-pointer"
+                className="p-1.5 rounded-lg text-blue-700 hover:bg-blue-50 transition-colors cursor-pointer"
               >
-                <Pencil className="w-3 h-3" />
-                <span>تعديل</span>
+                <Pencil className="w-4 h-4" />
               </button>
               <button
                 type="button"
+                title="حذف المنتج"
                 onClick={handleConfirmDelete}
-                className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-red-600 text-white text-[11px] font-bold shadow-sm hover:bg-red-700 cursor-pointer"
+                className="p-1.5 rounded-lg text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
               >
-                <Trash2 className="w-3 h-3" />
-                <span>حذف</span>
+                <Trash2 className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -901,7 +904,7 @@ function SectionCard({
 
       <div className="p-4 text-center flex-1 flex flex-col justify-between">
         <div>
-          <h3 className="font-editorial text-lg font-bold text-[#1f1917] leading-snug">
+          <h3 className="font-editorial text-lg font-bold text-[#1f1917] leading-snug group-hover:text-[#762b43] transition-colors">
             {product.name}
           </h3>
           <p className="text-xs sm:text-sm font-extrabold text-[#762b43] mt-1">
@@ -910,8 +913,8 @@ function SectionCard({
           <p className="text-[11px] text-[#6e645e] mt-0.5">{product.branch}</p>
         </div>
 
-        <div className="mt-3 pt-2.5 border-t border-[#f3eee8]">
-          <span className="inline-flex items-center gap-1 text-xs font-bold text-[#762b43] group-hover:underline">
+        <div className="mt-4 pt-3 border-t border-[#f3eee8]">
+          <span className="inline-flex items-center justify-center w-full gap-1 px-3 py-2 rounded-xl bg-[#faf8f5] text-xs font-bold text-[#762b43] group-hover:bg-[#762b43] group-hover:text-white transition-all duration-300">
             <span>اختيار اللون والمقاس</span>
             <ChevronLeft className="w-3.5 h-3.5" />
           </span>
@@ -938,13 +941,12 @@ export function ProductCatalog({
   const [activeBranch, setActiveBranch] = useState<string>('الكل');
   const [morphProductId, setMorphProductId] = useState<string | null>(null);
 
-  // New states for Toast and Confirm Modal
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     setToast({ message, type });
-    setTimeout(() => setToast(null), 3000); // يختفي بعد 3 ثواني
+    setTimeout(() => setToast(null), 3000);
   };
 
   const handleAddToCartClick = (item: Omit<CartItem, 'id' | 'quantity'>) => {
@@ -1036,7 +1038,6 @@ export function ProductCatalog({
     return true;
   });
 
-  // Confirm Delete logic
   const confirmDeleteProduct = () => {
     if (deleteTarget) {
       onDeleteProduct(deleteTarget.id);
@@ -1201,7 +1202,7 @@ export function ProductCatalog({
                       <div
                         key={sec.id}
                         onClick={() => handleOpenSection(sec.id)}
-                        className="group bg-white border border-[#e6ddd3] rounded-3xl overflow-hidden grid grid-cols-1 sm:grid-cols-12 cursor-pointer transition-all duration-200 hover:shadow-md hover:border-[#762b43]/40"
+                        className="group bg-white border border-[#e6ddd3] rounded-3xl overflow-hidden grid grid-cols-1 sm:grid-cols-12 cursor-pointer transition-all duration-300 hover:shadow-xl hover:border-[#762b43]/40 hover:-translate-y-1"
                       >
                         <div className="sm:col-span-7 p-6 sm:p-8 flex flex-col justify-between">
                           <div>
@@ -1217,7 +1218,7 @@ export function ProductCatalog({
                           </div>
 
                           <div className="mt-5">
-                            <span className="inline-flex items-center justify-center w-full sm:w-auto px-7 py-3 rounded-full bg-[#762b43] group-hover:bg-[#581e31] text-white text-sm font-bold transition-colors">
+                            <span className="inline-flex items-center justify-center w-full sm:w-auto px-7 py-3 rounded-full bg-[#762b43] group-hover:bg-[#581e31] text-white text-sm font-bold transition-colors shadow-md">
                               {sec.buttonText}
                             </span>
                           </div>
@@ -1227,7 +1228,7 @@ export function ProductCatalog({
                           <img
                             src={coverImg}
                             alt={sec.title}
-                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
                           />
                         </div>
                       </div>
@@ -1240,9 +1241,6 @@ export function ProductCatalog({
         </section>
       </div>
 
-      {/* =========================================================
-          Custom Toast Notification
-          ========================================================= */}
       {toast && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-bottom-5 fade-in duration-300">
           <div
@@ -1260,17 +1258,12 @@ export function ProductCatalog({
         </div>
       )}
 
-      {/* =========================================================
-          Custom Confirm Delete Modal
-          ========================================================= */}
       {deleteTarget && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
-          {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200"
             onClick={() => setDeleteTarget(null)}
           />
-          {/* Modal Box */}
           <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 text-center animate-in zoom-in-95 duration-200">
             <button
               onClick={() => setDeleteTarget(null)}
