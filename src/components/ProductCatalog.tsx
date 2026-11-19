@@ -42,145 +42,37 @@ interface ProductCatalogProps {
 const MAIN_SECTIONS = [
   {
     id: 'shawl' as CategoryId,
-    title: 'الوشاح',
-    subtitle: 'شال ميس أو عادي أو بالظهر مع القبعة، بقماش الكريب أو الدان، وتصمّمه باسمك وشعارك.',
-    priceLabel: 'من 3,800 دج مع القبعة',
-    buttonText: 'صمّم وشاحك',
+    title: 'Ø§Ù„ÙˆØ´Ø§Ø­',
+    subtitle: 'Ø´Ø§Ù„ Ù…ÙŠØ³ Ø£Ùˆ Ø¹Ø§Ø¯ÙŠ Ø£Ùˆ Ø¨Ø§Ù„Ø¸Ù‡Ø± Ù…Ø¹ Ø§Ù„Ù‚Ø¨Ø¹Ø©ØŒ Ø¨Ù‚Ù…Ø§Ø´ Ø§Ù„ÙƒØ±ÙŠØ¨ Ø£Ùˆ Ø§Ù„Ø¯Ø§Ù†ØŒ ÙˆØªØµÙ…Ù‘Ù…Ù‡ Ø¨Ø§Ø³Ù…Ùƒ ÙˆØ´Ø¹Ø§Ø±Ùƒ.',
+    priceLabel: 'Ù…Ù† 3,800 Ø¯Ø¬ Ù…Ø¹ Ø§Ù„Ù‚Ø¨Ø¹Ø©',
+    buttonText: 'ØµÙ…Ù‘Ù… ÙˆØ´Ø§Ø­Ùƒ',
     fallbackImg: SHAWL_IMAGE_PATH,
   },
   {
     id: 'robe' as CategoryId,
-    title: 'الروب',
-    subtitle: 'روب التخرج بألوان ملكية ومقاس رجالي أو نسائي أو بقياساتك الخاصة بدقة.',
-    priceLabel: 'من 2,500 دج',
-    buttonText: 'اختر روبك',
+    title: 'Ø§Ù„Ø±ÙˆØ¨',
+    subtitle: 'Ø±ÙˆØ¨ Ø§Ù„ØªØ®Ø±Ø¬ Ø¨Ø£Ù„ÙˆØ§Ù† Ù…Ù„ÙƒÙŠØ© ÙˆÙ…Ù‚Ø§Ø³ Ø±Ø¬Ø§Ù„ÙŠ Ø£Ùˆ Ù†Ø³Ø§Ø¦ÙŠ Ø£Ùˆ Ø¨Ù‚ÙŠØ§Ø³Ø§ØªÙƒ Ø§Ù„Ø®Ø§ØµØ© Ø¨Ø¯Ù‚Ø©.',
+    priceLabel: 'Ù…Ù† 2,500 Ø¯Ø¬',
+    buttonText: 'Ø§Ø®ØªØ± Ø±ÙˆØ¨Ùƒ',
     fallbackImg: ROBE_IMAGE_PATH,
   },
   {
     id: 'accessories' as CategoryId,
-    title: 'ورد وإكسسوارات',
-    subtitle: 'باقات ورد التخرج الفاخرة والقبعات المنفردة لإكمال إطلالة تخرجك.',
-    priceLabel: 'تشكيلة مميزة',
-    buttonText: 'تصفح الإكسسوارات',
+    title: 'ÙˆØ±Ø¯ ÙˆØ¥ÙƒØ³Ø³ÙˆØ§Ø±Ø§Øª',
+    subtitle: 'Ø¨Ø§Ù‚Ø§Øª ÙˆØ±Ø¯ Ø§Ù„ØªØ®Ø±Ø¬ Ø§Ù„ÙØ§Ø®Ø±Ø© ÙˆØ§Ù„Ù‚Ø¨Ø¹Ø§Øª Ø§Ù„Ù…Ù†ÙØ±Ø¯Ø© Ù„Ø¥ÙƒÙ…Ø§Ù„ Ø¥Ø·Ù„Ø§Ù„Ø© ØªØ®Ø±Ø¬Ùƒ.',
+    priceLabel: 'ØªØ´ÙƒÙŠÙ„Ø© Ù…Ù…ÙŠØ²Ø©',
+    buttonText: 'ØªØµÙØ­ Ø§Ù„Ø¥ÙƒØ³Ø³ÙˆØ§Ø±Ø§Øª',
     fallbackImg: BOUQUET_IMAGE_PATH,
   },
 ];
 
+// âš ï¸ Ù‡Ù†Ø§: Ø§Ù„Ù…Ø³Ø§Ø±Ø§Øª Ø¯ÙŠØ§Ù„ Ø§Ù„ØµÙˆØ± (ØªØ£ÙƒØ¯ Ø¨Ù„ÙŠ Ø§Ù„ØµÙˆØ± ÙƒØ§ÙŠÙ†ÙŠÙ† ÙÙ…Ø¬Ù„Ø¯ public/caps)
+
 const CAP_STYLES = [
-  { id: 'round', label: 'القبعة الدائرية', extraPrice: 0, priceText: 'مشمولة', image: capRoundImg },
-  { id: 'triangle', label: 'القبعة المثلثة', extraPrice: 0, priceText: 'مشمولة', image: capTriangleImg },
-  { id: 'tuxedo', label: 'قبعة توكسيدو', extraPrice: 100, priceText: '+100 دج', image: capTuxedoImg },
-] as const;
-
-type IllustrationKey = 'round' | 'triangle' | 'tuxedo' | 'americanShawl';
-type CustomIllustrationsMap = Partial<Record<IllustrationKey, string | null>>;
-
-const ILLUSTRATIONS_STORAGE_KEY = 'dg_custom_illustrations_v1';
-
-function loadSavedIllustrations(): CustomIllustrationsMap {
-  try {
-    const raw = localStorage.getItem(ILLUSTRATIONS_STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as CustomIllustrationsMap) : {};
-  } catch {
-    return {};
-  }
-}
-
-function saveIllustrations(data: CustomIllustrationsMap) {
-  try {
-    localStorage.setItem(ILLUSTRATIONS_STORAGE_KEY, JSON.stringify(data));
-  } catch {
-    // تجاهل في حال امتلاء التخزين المحلي
-  }
-}
-
-function compressImageFile(file: File, maxSize = 600): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error('Failed to read file'));
-    reader.onload = () => {
-      const dataUrl = reader.result as string;
-      const img = new Image();
-      img.onload = () => {
-        const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
-        const canvas = document.createElement('canvas');
-        canvas.width = Math.round(img.width * scale);
-        canvas.height = Math.round(img.height * scale);
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          resolve(dataUrl);
-          return;
-        }
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL('image/webp', 0.85));
-      };
-      img.onerror = () => resolve(dataUrl);
-      img.src = dataUrl;
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-/* مجسم القبعة التوضيحي (يظهر كخلفية أساسية وتُعرض الصورة المضافة فوقه تماماً) */
-function CapMannequinSvg({ styleId }: { styleId: 'round' | 'triangle' | 'tuxedo' }) {
-  return (
-    <svg viewBox="0 0 120 120" className="w-full h-full p-2 select-none" aria-hidden="true">
-      {/* الرقبة والكتفين */}
-      <path
-        d="M36 116 C36 96, 46 90, 60 90 C74 90, 84 96, 84 116 Z"
-        fill="#e5e5e5"
-      />
-      {/* الرأس */}
-      <ellipse cx="60" cy="64" rx="16" ry="20" fill="#f2f2f2" />
-      <rect x="54" y="80" width="12" height="12" rx="4" fill="#e5e5e5" />
-
-      {/* القبعة حسب النوع */}
-      {styleId === 'round' && (
-        <>
-          <path d="M38 42 C38 50, 82 50, 82 42 L80 34 L40 34 Z" fill="#262223" />
-          <ellipse cx="60" cy="34" rx="28" ry="11" fill="#1b1819" />
-          <circle cx="60" cy="33" r="3" fill="#eab308" />
-          <path d="M60 33 Q78 36 78 52" stroke="#eab308" strokeWidth="2.2" fill="none" />
-          <path d="M75 52 L81 52 L82 64 L74 64 Z" fill="#eab308" />
-        </>
-      )}
-
-      {styleId === 'triangle' && (
-        <>
-          <path d="M40 42 L60 50 L80 42 L78 33 L42 33 Z" fill="#262223" />
-          <polygon points="60,18 92,33 60,46 28,33" fill="#1b1819" />
-          <circle cx="60" cy="32" r="2.8" fill="#eab308" />
-          <path d="M60 32 Q78 35 78 52" stroke="#eab308" strokeWidth="2.2" fill="none" />
-          <path d="M75 52 L81 52 L82 64 L74 64 Z" fill="#eab308" />
-        </>
-      )}
-
-      {styleId === 'tuxedo' && (
-        <>
-          <path d="M39 43 L60 51 L81 43 L79 34 L41 34 Z" fill="#262223" />
-          <polygon points="60,16 94,32 60,45 26,32" fill="#1b1819" />
-          <polygon points="60,19 88,32 60,42 32,32" fill="none" stroke="#d4af37" strokeWidth="1" opacity="0.55" />
-          <circle cx="60" cy="31" r="2.8" fill="#eab308" />
-          <path d="M60 31 Q79 34 79 52" stroke="#eab308" strokeWidth="2.2" fill="none" />
-          <path d="M76 52 L82 52 L83 65 L75 65 Z" fill="#eab308" />
-        </>
-      )}
-    </svg>
-  );
-}
-
-/* مجسم الشال الأمريكي V */
-function AmericanShawlSvg() {
-  return (
-    <svg viewBox="0 0 100 100" className="w-full h-full p-1.5 select-none" aria-hidden="true">
-      <circle cx="50" cy="24" r="11" fill="#e5e5e5" />
-      <path d="M24 92 C24 62, 34 44, 50 44 C66 44, 76 62, 76 92 Z" fill="#ece7e1" />
-      <path d="M38 44 L50 78 L62 44 L56 42 L50 64 L44 42 Z" fill="#762b43" />
-      <path d="M37 44 L44 42 L50 64 L47 78 L33 60 Z" fill="#581e31" opacity="0.25" />
-    </svg>
-  );
-}
-
+  { id: 'round', label: 'Ø§Ù„Ù‚Ø¨Ø¹Ø© Ø§Ù„Ø¯Ø§Ø¦Ø±ÙŠØ©', extraPrice: 0, priceText: 'Ù…Ø´Ù…ÙˆÙ„Ø©', image: capRoundImg },
+  { id: 'triangle', label: 'Ø§Ù„Ù‚Ø¨Ø¹Ø© Ø§Ù„Ù…Ø«Ù„Ø«Ø©', extraPrice: 0, priceText: 'Ù…Ø´Ù…ÙˆÙ„Ø©', image: capTriangleImg },
+  { id: 'tuxedo', label: 'Ù‚Ø¨Ø¹Ø© ØªÙˆÙƒØ³ÙŠØ¯Ùˆ', extraPrice: 100, priceText: '+100 Ø¯Ø¬', image: capTuxedoImg },
+];
 /* =========================================================
    View Transitions API helper
    ========================================================= */
@@ -231,11 +123,9 @@ function ProductDetailView({
     product.secondaryOptions?.at(0) || ''
   );
   const [selectedColor, setSelectedColor] = useState(CAP_SWATCHES.at(0)!);
-  const [selectedCapStyle, setSelectedCapStyle] = useState<(typeof CAP_STYLES)[number]>(
-    CAP_STYLES[0]
-  );
+  const [selectedCapStyle, setSelectedCapStyle] = useState(CAP_STYLES.at(0)!);
 
-  const [gender, setGender] = useState<'نسائي' | 'رجالي'>('نسائي');
+  const [gender, setGender] = useState<'Ù†Ø³Ø§Ø¦ÙŠ' | 'Ø±Ø¬Ø§Ù„ÙŠ'>('Ù†Ø³Ø§Ø¦ÙŠ');
   const [standardSize, setStandardSize] = useState('M');
   const [numericSize, setNumericSize] = useState('');
   const [fullLength, setFullLength] = useState('');
@@ -244,48 +134,12 @@ function ProductDetailView({
   const [capSameColor, setCapSameColor] = useState(true);
   const [capCustomColor, setCapCustomColor] = useState(CAP_SWATCHES.at(0)!);
   const [headSize, setHeadSize] = useState('');
-  const [capEmbroideryPos, setCapEmbroideryPos] = useState<'سطح القبعة' | 'جبهة القبعة'>('سطح القبعة');
+  const [capEmbroideryPos, setCapEmbroideryPos] = useState<'Ø³Ø·Ø­ Ø§Ù„Ù‚Ø¨Ø¹Ø©' | 'Ø¬Ø¨Ù‡Ø© Ø§Ù„Ù‚Ø¨Ø¹Ø©'>('Ø³Ø·Ø­ Ø§Ù„Ù‚Ø¨Ø¹Ø©');
   const [capNotes, setCapNotes] = useState('');
 
   const [addAmericanShawl, setAddAmericanShawl] = useState(false);
   const [customNotes, setCustomNotes] = useState('');
   const colorFileRef = useRef<HTMLInputElement>(null);
-
-  // صور توضيحية مخصصة للقبعات والشال الأمريكي (تُحفظ محلياً وتظهر فوق المجسمات دون إفساد التصميم)
-  const [customIllustrations, setCustomIllustrations] = useState<CustomIllustrationsMap>(() =>
-    loadSavedIllustrations()
-  );
-  const [failedImages, setFailedImages] = useState<Partial<Record<IllustrationKey, boolean>>>({});
-
-  const handleUploadIllustration = async (key: IllustrationKey, file: File) => {
-    try {
-      const compressed = await compressImageFile(file, 600);
-      setFailedImages((prev) => ({ ...prev, [key]: false }));
-      setCustomIllustrations((prev) => {
-        const next = { ...prev, [key]: compressed };
-        saveIllustrations(next);
-        return next;
-      });
-    } catch {
-      // ignore
-    }
-  };
-
-  const handleRemoveIllustration = (key: IllustrationKey) => {
-    setCustomIllustrations((prev) => {
-      const next = { ...prev, [key]: null };
-      saveIllustrations(next);
-      return next;
-    });
-  };
-
-  const getIllustrationSrc = (key: IllustrationKey, defaultImg?: string) => {
-    if (failedImages[key]) return null;
-    const saved = customIllustrations[key];
-    if (saved === null) return null; // محذوفة يدوياً للعودة إلى المجسم
-    if (typeof saved === 'string' && saved.length > 0) return saved;
-    return defaultImg || null;
-  };
 
   const activeOption = product.options[selectedOptionIdx];
   const basePrice = activeOption ? activeOption.price : product.basePrice;
@@ -313,40 +167,38 @@ function ProductDetailView({
     const detailParts: string[] = [];
     if (activeOption) detailParts.push(activeOption.label);
     if (selectedSecondary) detailParts.push(selectedSecondary);
-    if (selectedColor) detailParts.push(`اللون: ${selectedColor.name}`);
+    if (selectedColor) detailParts.push(`Ø§Ù„Ù„ÙˆÙ†: ${selectedColor.name}`);
 
     if (!product.hideSizing) {
-      detailParts.push(`الفئة: ${gender}`);
+      detailParts.push(`Ø§Ù„ÙØ¦Ø©: ${gender}`);
       if (numericSize.trim()) {
-        detailParts.push(`المقاس: ${numericSize.trim()}`);
+        detailParts.push(`Ø§Ù„Ù…Ù‚Ø§Ø³: ${numericSize.trim()}`);
       } else {
-        detailParts.push(`المقاس: ${standardSize}`);
+        detailParts.push(`Ø§Ù„Ù…Ù‚Ø§Ø³: ${standardSize}`);
       }
-      if (fullLength.trim()) detailParts.push(`الطول: ${fullLength.trim()} سم`);
-      if (shoulderAndSleeve.trim()) detailParts.push(`الكتف/الكم: ${shoulderAndSleeve.trim()}`);
+      if (fullLength.trim()) detailParts.push(`Ø§Ù„Ø·ÙˆÙ„: ${fullLength.trim()} Ø³Ù…`);
+      if (shoulderAndSleeve.trim()) detailParts.push(`Ø§Ù„ÙƒØªÙ/Ø§Ù„ÙƒÙ…: ${shoulderAndSleeve.trim()}`);
     }
 
     if (showCapSection) {
-      detailParts.push(`شكل القبعة: ${selectedCapStyle.label}`);
+      detailParts.push(`Ø´ÙƒÙ„ Ø§Ù„Ù‚Ø¨Ø¹Ø©: ${selectedCapStyle.label}`);
       const finalCapColor = capSameColor ? selectedColor.name : capCustomColor.name;
-      detailParts.push(`لون القبعة: ${finalCapColor}`);
-      if (headSize.trim()) detailParts.push(`محيط الرأس: ${headSize.trim()} سم`);
-      detailParts.push(`تطريز القبعة: ${capEmbroideryPos}`);
-      if (capNotes.trim()) detailParts.push(`ملاحظة القبعة: ${capNotes.trim()}`);
+      detailParts.push(`Ù„ÙˆÙ† Ø§Ù„Ù‚Ø¨Ø¹Ø©: ${finalCapColor}`);
+      if (headSize.trim()) detailParts.push(`Ù…Ø­ÙŠØ· Ø§Ù„Ø±Ø£Ø³: ${headSize.trim()} Ø³Ù…`);
+      detailParts.push(`ØªØ·Ø±ÙŠØ² Ø§Ù„Ù‚Ø¨Ø¹Ø©: ${capEmbroideryPos}`);
+      if (capNotes.trim()) detailParts.push(`Ù…Ù„Ø§Ø­Ø¸Ø© Ø§Ù„Ù‚Ø¨Ø¹Ø©: ${capNotes.trim()}`);
     }
 
-    if (!product.hideAmericanShawl && addAmericanShawl) detailParts.push('+ شال أمريكي V');
-    if (customNotes.trim()) detailParts.push(`ملاحظة: ${customNotes.trim()}`);
+    if (!product.hideAmericanShawl && addAmericanShawl) detailParts.push('+ Ø´Ø§Ù„ Ø£Ù…Ø±ÙŠÙƒÙŠ V');
+    if (customNotes.trim()) detailParts.push(`Ù…Ù„Ø§Ø­Ø¸Ø©: ${customNotes.trim()}`);
 
     onAddToCart({
       category: product.category,
       title: product.name,
-      details: detailParts.join(' · '),
+      details: detailParts.join(' Â· '),
       unitPrice: displayPrice,
     });
   };
-
-  const americanShawlImgSrc = getIllustrationSrc('americanShawl');
 
   return (
     <div className="bg-white border border-[#e6ddd3] rounded-3xl overflow-hidden shadow-sm">
@@ -357,7 +209,7 @@ function ProductDetailView({
             onClick={onBackToHome}
             className="hover:text-[#762b43] underline cursor-pointer"
           >
-            الرئيسية
+            Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠØ©
           </button>
           <ChevronLeft className="w-3.5 h-3.5" />
           <button
@@ -380,19 +232,19 @@ function ProductDetailView({
                 className="inline-flex items-center gap-1 text-blue-700 hover:underline cursor-pointer font-bold"
               >
                 <Pencil className="w-3.5 h-3.5" />
-                <span>تعديل</span>
+                <span>ØªØ¹Ø¯ÙŠÙ„</span>
               </button>
               <button
                 type="button"
                 onClick={() => {
-                  if (window.confirm('هل أنتِ متأكدة من حذف هذا الموديل نهائياً؟')) {
+                  if (window.confirm('Ù‡Ù„ Ø£Ù†ØªÙ Ù…ØªØ£ÙƒØ¯Ø© Ù…Ù† Ø­Ø°Ù Ù‡Ø°Ø§ Ø§Ù„Ù…ÙˆØ¯ÙŠÙ„ Ù†Ù‡Ø§Ø¦ÙŠØ§Ù‹ØŸ')) {
                     onDelete();
                   }
                 }}
                 className="inline-flex items-center gap-1 text-red-600 hover:underline cursor-pointer font-bold"
               >
                 <Trash2 className="w-3.5 h-3.5" />
-                <span>حذف</span>
+                <span>Ø­Ø°Ù</span>
               </button>
             </div>
           )}
@@ -402,18 +254,21 @@ function ProductDetailView({
             className="inline-flex items-center gap-1 text-[#762b43] hover:underline cursor-pointer"
           >
             <ArrowRight className="w-3.5 h-3.5" />
-            <span>رجوع للقسم</span>
+            <span>Ø±Ø¬ÙˆØ¹ Ù„Ù„Ù‚Ø³Ù…</span>
           </button>
         </div>
       </div>
 
+      {/* Ø§Ù„ØªØ¹Ø¯ÙŠÙ„ Ù‡Ù†Ø§: Ø²Ø¯Ù†Ø§ items-start Ø¨Ø§Ø´ Ø§Ù„ØµÙˆØ±Ø© Ù…Ø§ ØªØªÙ…Ø·Ø·Ø´ ÙˆØªØºØ·ÙŠ Ø¹Ù„Ù‰ Ø§Ù„Ø³Ø¹Ø± */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-5 sm:p-8 items-start">
-        <div className="relative w-full aspect-[3/4] min-w-0 rounded-2xl bg-[#faf8f5] overflow-hidden border border-[#e6ddd3]">
+        
+        {/* Ø§Ù„ØªØ¹Ø¯ÙŠÙ„ Ù‡Ù†Ø§: Ø²Ø¯Ù†Ø§ min-w-0 Ù„Ù„ØµÙˆØ±Ø© Ø¨Ø§Ø´ Ù…Ø§ ØªØ®Ø±Ø¬Ø´ Ø¹Ù„Ù‰ Ø¥Ø·Ø§Ø±Ù‡Ø§ */}
+        <div className="relative aspect-[3/4] min-w-0 rounded-2xl bg-[#faf8f5] overflow-hidden border border-[#e6ddd3]">
           {isAdminMode && (
             <div className="absolute top-3 left-3 z-10">
               <label className="cursor-pointer bg-white/95 backdrop-blur-md text-[#1f1917] px-3 py-1.5 rounded-lg border border-[#e6ddd3] text-xs font-bold shadow-sm hover:bg-[#f3eee8] flex items-center gap-1.5">
                 <ImagePlus className="w-4 h-4 text-[#762b43]" />
-                تغيير الصورة
+                ØªØºÙŠÙŠØ± Ø§Ù„ØµÙˆØ±Ø©
                 <input
                   type="file"
                   accept="image/*"
@@ -443,7 +298,7 @@ function ProductDetailView({
                   className="w-3.5 h-3.5 rounded-full border border-black/15"
                   style={{ backgroundColor: selectedColor.hex }}
                 />
-                <span>اللون: {selectedColor.name}</span>
+                <span>Ø§Ù„Ù„ÙˆÙ†: {selectedColor.name}</span>
               </div>
             </>
           ) : (
@@ -456,8 +311,8 @@ function ProductDetailView({
           )}
         </div>
 
-        <div className="flex flex-col justify-between space-y-5 min-w-0 w-full [&_img]:max-w-full">
-          <div className="space-y-4 min-w-0">
+        <div className="flex flex-col justify-between space-y-5 min-w-0">
+          <div className="space-y-4">
             <div>
               <span className="inline-block text-xs font-bold text-[#762b43] mb-1">
                 {product.branch}
@@ -466,7 +321,7 @@ function ProductDetailView({
                 {product.name}
               </h3>
               <p className="text-xl font-extrabold text-[#762b43] mt-1.5">
-                {displayPrice.toLocaleString('en-US')} دج
+                {displayPrice.toLocaleString('en-US')} Ø¯Ø¬
               </p>
               <p className="text-sm text-[#6e645e] leading-relaxed mt-2">
                 {product.description}
@@ -476,7 +331,7 @@ function ProductDetailView({
             {product.options.length > 0 && (
               <div>
                 <label className="block text-xs font-bold text-[#1f1917] mb-2">
-                  اختر القماش أو المقاس:
+                  Ø§Ø®ØªØ± Ø§Ù„Ù‚Ù…Ø§Ø´ Ø£Ùˆ Ø§Ù„Ù…Ù‚Ø§Ø³:
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   {product.options.map((opt, idx) => {
@@ -486,13 +341,13 @@ function ProductDetailView({
                         key={opt.label}
                         type="button"
                         onClick={() => setSelectedOptionIdx(idx)}
-                        className={`min-w-0 p-3 rounded-2xl border text-right transition-all cursor-pointer ${
+                        className={`p-3 rounded-2xl border text-right transition-all cursor-pointer ${
                           active ? 'border-[#762b43] bg-[#faf8f5]' : 'border-[#e6ddd3] bg-white'
                         }`}
                       >
                         <span className="block text-xs font-bold text-[#1f1917]">{opt.label}</span>
                         <span className="text-[11px] font-extrabold text-[#762b43]">
-                          {opt.price.toLocaleString('en-US')} دج
+                          {opt.price.toLocaleString('en-US')} Ø¯Ø¬
                         </span>
                       </button>
                     );
@@ -503,7 +358,7 @@ function ProductDetailView({
 
             {product.secondaryOptions && product.secondaryOptions.length > 0 && (
               <div>
-                <label className="block text-xs font-bold text-[#1f1917] mb-2">خيار إضافي:</label>
+                <label className="block text-xs font-bold text-[#1f1917] mb-2">Ø®ÙŠØ§Ø± Ø¥Ø¶Ø§ÙÙŠ:</label>
                 <div className="flex flex-wrap gap-2">
                   {product.secondaryOptions.map((sec) => {
                     const active = sec === selectedSecondary;
@@ -528,7 +383,7 @@ function ProductDetailView({
 
             <div>
               <label className="block text-xs font-bold text-[#1f1917] mb-2">
-                اختر اللون: <span className="text-[#762b43]">{selectedColor.name}</span>
+                Ø§Ø®ØªØ± Ø§Ù„Ù„ÙˆÙ†: <span className="text-[#762b43]">{selectedColor.name}</span>
               </label>
               <div className="flex flex-wrap items-center gap-2.5">
                 {CAP_SWATCHES.map((swatch) => {
@@ -574,7 +429,7 @@ function ProductDetailView({
                     onChange={handleColorFileChange}
                   />
                   <span className="text-xs font-bold text-[#1f1917]">
-                    صورة لون "{selectedColor.name}":
+                    ØµÙˆØ±Ø© Ù„ÙˆÙ† "{selectedColor.name}":
                   </span>
                   <div className="flex items-center gap-1.5">
                     <button
@@ -583,7 +438,7 @@ function ProductDetailView({
                       className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#762b43] text-white text-xs font-bold cursor-pointer"
                     >
                       <ImagePlus className="w-3.5 h-3.5" />
-                      <span>{hasDedicatedColorImg ? 'تغيير صورة اللون' : 'رفع صورة لهذا اللون'}</span>
+                      <span>{hasDedicatedColorImg ? 'ØªØºÙŠÙŠØ± ØµÙˆØ±Ø© Ø§Ù„Ù„ÙˆÙ†' : 'Ø±ÙØ¹ ØµÙˆØ±Ø© Ù„Ù‡Ø°Ø§ Ø§Ù„Ù„ÙˆÙ†'}</span>
                     </button>
                     {hasDedicatedColorImg && (
                       <button
@@ -592,7 +447,7 @@ function ProductDetailView({
                         className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white text-red-600 border border-red-200 text-xs font-bold cursor-pointer"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
-                        <span>حذف</span>
+                        <span>Ø­Ø°Ù</span>
                       </button>
                     )}
                   </div>
@@ -603,7 +458,7 @@ function ProductDetailView({
             {(isAdminMode || !product.hideSizing) && (
               <div className={`pt-3 border-t border-[#e6ddd3] space-y-3 ${product.hideSizing ? 'opacity-50' : ''}`}>
                 <div className="flex items-center justify-between">
-                  <label className="block text-xs font-bold text-[#1f1917]">المقاس:</label>
+                  <label className="block text-xs font-bold text-[#1f1917]">Ø§Ù„Ù…Ù‚Ø§Ø³:</label>
                   {isAdminMode && onToggleField && (
                     <button
                       type="button"
@@ -612,14 +467,14 @@ function ProductDetailView({
                         product.hideSizing ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-700'
                       }`}
                     >
-                      {product.hideSizing ? '+ إظهار للزبائن' : '✕ حذف وإخفاء'}
+                      {product.hideSizing ? '+ Ø¥Ø¸Ù‡Ø§Ø± Ù„Ù„Ø²Ø¨Ø§Ø¦Ù†' : 'âœ• Ø­Ø°Ù ÙˆØ¥Ø®ÙØ§Ø¡'}
                     </button>
                   )}
                 </div>
                 {!product.hideSizing && (
                   <>
                     <div className="grid grid-cols-2 gap-2 p-1 rounded-full bg-[#f3eee8]">
-                      {(['نسائي', 'رجالي'] as const).map((g) => (
+                      {(['Ù†Ø³Ø§Ø¦ÙŠ', 'Ø±Ø¬Ø§Ù„ÙŠ'] as const).map((g) => (
                         <button
                           key={g}
                           type="button"
@@ -654,9 +509,9 @@ function ProductDetailView({
                     </div>
 
                     <div className="grid grid-cols-2 gap-2.5">
-                      <div className="min-w-0">
+                      <div>
                         <label className="block text-[11px] font-bold text-[#6e645e] mb-1">
-                          أو رقم مقاسك (34 - 70):
+                          Ø£Ùˆ Ø±Ù‚Ù… Ù…Ù‚Ø§Ø³Ùƒ (34 - 70):
                         </label>
                         <input
                           type="number"
@@ -668,9 +523,9 @@ function ProductDetailView({
                           className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
                         />
                       </div>
-                      <div className="min-w-0">
+                      <div>
                         <label className="block text-[11px] font-bold text-[#6e645e] mb-1">
-                          الطول الكامل (80 - 200 سم):
+                          Ø§Ù„Ø·ÙˆÙ„ Ø§Ù„ÙƒØ§Ù…Ù„ (80 - 200 Ø³Ù…):
                         </label>
                         <input
                           type="number"
@@ -678,7 +533,7 @@ function ProductDetailView({
                           max={200}
                           value={fullLength}
                           onChange={(e) => setFullLength(e.target.value)}
-                          placeholder="سم"
+                          placeholder="Ø³Ù…"
                           className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
                         />
                       </div>
@@ -688,7 +543,7 @@ function ProductDetailView({
                       type="text"
                       value={shoulderAndSleeve}
                       onChange={(e) => setShoulderAndSleeve(e.target.value)}
-                      placeholder="عرض الكتفين وطول الكم (اختياري)..."
+                      placeholder="Ø¹Ø±Ø¶ Ø§Ù„ÙƒØªÙÙŠÙ† ÙˆØ·ÙˆÙ„ Ø§Ù„ÙƒÙ… (Ø§Ø®ØªÙŠØ§Ø±ÙŠ)..."
                       className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
                     />
                   </>
@@ -699,7 +554,7 @@ function ProductDetailView({
             {product.category !== 'accessories' && product.category !== 'cap' && (isAdminMode || !product.hideCapDetails) && (
               <div className={`pt-3 border-t border-[#e6ddd3] space-y-3 ${product.hideCapDetails ? 'opacity-50' : ''}`}>
                 <div className="flex items-center justify-between">
-                  <label className="block text-xs font-bold text-[#1f1917]">القبعة وتفاصيلها:</label>
+                  <label className="block text-xs font-bold text-[#1f1917]">Ø§Ù„Ù‚Ø¨Ø¹Ø© ÙˆØªÙØ§ØµÙŠÙ„Ù‡Ø§:</label>
                   {isAdminMode && onToggleField && (
                     <button
                       type="button"
@@ -708,94 +563,50 @@ function ProductDetailView({
                         product.hideCapDetails ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-700'
                       }`}
                     >
-                      {product.hideCapDetails ? '+ إظهار للزبائن' : '✕ حذف وإخفاء'}
+                      {product.hideCapDetails ? '+ Ø¥Ø¸Ù‡Ø§Ø± Ù„Ù„Ø²Ø¨Ø§Ø¦Ù†' : 'âœ• Ø­Ø°Ù ÙˆØ¥Ø®ÙØ§Ø¡'}
                     </button>
                   )}
                 </div>
 
                 {!product.hideCapDetails && (
                   <>
-                    {/* بطاقات القبعات: المجسم بالخلف والصورة التوضيحية فوقه داخل إطار مقيد تماماً */}
+                    {/* Ø§Ù„ØªØ¹Ø¯ÙŠÙ„ Ù‡Ù†Ø§: Ø­ÙŠÙ†Ø§ Ø§Ù„Ø±Ø³Ù…Ø© ÙˆØ²Ø¯Ù†Ø§ Ø§Ù„ØµÙˆØ±Ø© Ø§Ù„Ø­Ù‚ÙŠÙ‚ÙŠØ© Ù…Ù‚ÙŠØ¯Ø© Ø¨Ù€ overflow-hidden */}
                     <div className="grid grid-cols-3 gap-2">
                       {CAP_STYLES.map((cap) => {
                         const active = selectedCapStyle.id === cap.id;
-                        const capImgSrc = getIllustrationSrc(cap.id, cap.image);
-
                         return (
-                          <div
+                          <button
                             key={cap.id}
-                            className={`min-w-0 w-full p-1.5 sm:p-2 rounded-2xl border flex flex-col justify-between overflow-hidden transition-all ${
+                            type="button"
+                            onClick={() => setSelectedCapStyle(cap)}
+                            className={`p-1.5 sm:p-2 rounded-2xl border text-center cursor-pointer flex flex-col items-center justify-between overflow-hidden ${
                               active
                                 ? 'border-[#762b43] ring-2 ring-[#762b43]/20 bg-[#faf8f5]'
                                 : 'border-[#e6ddd3] bg-white'
                             }`}
                           >
-                            <button
-                              type="button"
-                              onClick={() => setSelectedCapStyle(cap)}
-                              className="w-full flex flex-col items-center text-center cursor-pointer min-w-0"
-                            >
-                              {/* إطار المجسم + الصورة المضافة فوقه */}
-                              <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-[#f9eef2] border border-[#e6ddd3]/60">
-                                <CapMannequinSvg styleId={cap.id} />
-
-                                {capImgSrc && (
-                                  <img
-                                    src={capImgSrc}
-                                    alt={cap.label}
-                                    onError={() =>
-                                      setFailedImages((prev) => ({ ...prev, [cap.id]: true }))
-                                    }
-                                    className="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none"
-                                  />
-                                )}
-                              </div>
-
-                              <div className="mt-2 w-full flex flex-col items-center">
-                                <span className="block text-[10px] sm:text-[11px] font-extrabold text-[#1f1917] leading-tight text-center">
-                                  {cap.label}
-                                </span>
-                                <span className="text-[10px] sm:text-[11px] font-bold text-[#762b43] mt-0.5">
-                                  {cap.priceText}
-                                </span>
-                              </div>
-                            </button>
-
-                            {/* أزرار إضافة / تغيير / حذف الصورة فوق المجسم (تظهر في وضع الإدارة فقط) */}
-                            {isAdminMode && (
-                              <div className="mt-2 pt-1.5 border-t border-[#e6ddd3] flex items-center justify-center gap-1">
-                                <label className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-[#762b43] text-white text-[10px] font-bold cursor-pointer hover:bg-[#581e31]">
-                                  <ImagePlus className="w-3 h-3" />
-                                  <span>{capImgSrc ? 'تغيير' : 'صورة'}</span>
-                                  <input
-                                    type="file"
-                                    accept="image/*"
-                                    className="hidden"
-                                    onChange={(e) => {
-                                      const file = e.target.files?.[0];
-                                      if (file) handleUploadIllustration(cap.id, file);
-                                      e.target.value = '';
-                                    }}
-                                  />
-                                </label>
-                                {capImgSrc && (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleRemoveIllustration(cap.id)}
-                                    title="حذف الصورة والرجوع للمجسم"
-                                    className="p-1 rounded-md bg-rose-50 text-red-600 border border-rose-200 hover:bg-rose-100 cursor-pointer"
-                                  >
-                                    <Trash2 className="w-3 h-3" />
-                                  </button>
-                                )}
-                              </div>
-                            )}
-                          </div>
+                            <div className="w-full aspect-[4/5] rounded-xl overflow-hidden bg-[#f9eef2]">
+                              <img 
+                                src={cap.image} 
+                                alt={cap.label} 
+                                className="w-full h-full object-cover" 
+                              />
+                            </div>
+                            
+                            <div className="mt-2 w-full flex flex-col items-center">
+                              <span className="block text-[10px] sm:text-[11px] font-extrabold text-[#1f1917] leading-tight text-center">
+                                {cap.label}
+                              </span>
+                              <span className="text-[10px] sm:text-[11px] font-bold text-[#762b43] mt-0.5">
+                                {cap.priceText}
+                              </span>
+                            </div>
+                          </button>
                         );
                       })}
                     </div>
 
-                    <label className="block text-xs font-bold text-[#1f1917] pt-1">لون القبعة:</label>
+                    <label className="block text-xs font-bold text-[#1f1917] pt-1">Ù„ÙˆÙ† Ø§Ù„Ù‚Ø¨Ø¹Ø©:</label>
                     <div className="grid grid-cols-2 gap-2 p-1 rounded-full bg-[#f3eee8]">
                       <button
                         type="button"
@@ -804,7 +615,7 @@ function ProductDetailView({
                           capSameColor ? 'bg-white text-[#762b43] shadow-sm' : 'text-[#6e645e]'
                         }`}
                       >
-                        نفس لون الوشاح
+                        Ù†ÙØ³ Ù„ÙˆÙ† Ø§Ù„ÙˆØ´Ø§Ø­
                       </button>
                       <button
                         type="button"
@@ -813,7 +624,7 @@ function ProductDetailView({
                           !capSameColor ? 'bg-white text-[#762b43] shadow-sm' : 'text-[#6e645e]'
                         }`}
                       >
-                        لون آخر
+                        Ù„ÙˆÙ† Ø¢Ø®Ø±
                       </button>
                     </div>
 
@@ -841,7 +652,7 @@ function ProductDetailView({
 
                     <div>
                       <label className="block text-xs font-bold text-[#1f1917] mb-1">
-                        محيط الرأس (اختياري، 45 - 70 سم):
+                        Ù…Ø­ÙŠØ· Ø§Ù„Ø±Ø£Ø³ (Ø§Ø®ØªÙŠØ§Ø±ÙŠØŒ 45 - 70 Ø³Ù…):
                       </label>
                       <input
                         type="number"
@@ -849,13 +660,13 @@ function ProductDetailView({
                         max={70}
                         value={headSize}
                         onChange={(e) => setHeadSize(e.target.value)}
-                        placeholder="45 - 70 سم"
+                        placeholder="45 - 70 Ø³Ù…"
                         className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
                       />
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
-                      {(['سطح القبعة', 'جبهة القبعة'] as const).map((pos) => (
+                      {(['Ø³Ø·Ø­ Ø§Ù„Ù‚Ø¨Ø¹Ø©', 'Ø¬Ø¨Ù‡Ø© Ø§Ù„Ù‚Ø¨Ø¹Ø©'] as const).map((pos) => (
                         <button
                           key={pos}
                           type="button"
@@ -866,7 +677,7 @@ function ProductDetailView({
                               : 'bg-white text-[#1f1917] border-[#e6ddd3]'
                           }`}
                         >
-                          طرّز على {pos}
+                          Ø·Ø±Ù‘Ø² Ø¹Ù„Ù‰ {pos}
                         </button>
                       ))}
                     </div>
@@ -875,7 +686,7 @@ function ProductDetailView({
                       type="text"
                       value={capNotes}
                       onChange={(e) => setCapNotes(e.target.value)}
-                      placeholder="ملاحظات للقبعة (مثلاً: الاسم على الجبهة بخيط ذهبي)..."
+                      placeholder="Ù…Ù„Ø§Ø­Ø¸Ø§Øª Ù„Ù„Ù‚Ø¨Ø¹Ø© (Ù…Ø«Ù„Ø§Ù‹: Ø§Ù„Ø§Ø³Ù… Ø¹Ù„Ù‰ Ø§Ù„Ø¬Ø¨Ù‡Ø© Ø¨Ø®ÙŠØ· Ø°Ù‡Ø¨ÙŠ)..."
                       className="w-full px-3 py-2 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
                     />
                   </>
@@ -885,36 +696,9 @@ function ProductDetailView({
 
             <div className="pt-3 border-t border-[#e6ddd3] space-y-2.5">
               {(isAdminMode || !product.hideAmericanShawl) && (
-                <div className={`p-3 rounded-2xl border border-[#e6ddd3] bg-[#faf8f5] space-y-2 overflow-hidden ${product.hideAmericanShawl ? 'opacity-50' : ''}`}>
+                <div className={`p-3 rounded-2xl border border-[#e6ddd3] bg-[#faf8f5] space-y-2 ${product.hideAmericanShawl ? 'opacity-50' : ''}`}>
                   {isAdminMode && onToggleField && (
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div className="flex items-center gap-1.5">
-                        <label className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#762b43] text-white text-[11px] font-bold cursor-pointer hover:bg-[#581e31]">
-                          <ImagePlus className="w-3 h-3" />
-                          <span>{americanShawlImgSrc ? 'تغيير صورة الشال' : 'إضافة صورة للشال'}</span>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) handleUploadIllustration('americanShawl', file);
-                              e.target.value = '';
-                            }}
-                          />
-                        </label>
-                        {americanShawlImgSrc && (
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveIllustration('americanShawl')}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white text-red-600 border border-red-200 text-[11px] font-bold cursor-pointer"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                            <span>حذف الصورة</span>
-                          </button>
-                        )}
-                      </div>
-
+                    <div className="flex justify-end">
                       <button
                         type="button"
                         onClick={() => onToggleField('hideAmericanShawl')}
@@ -922,42 +706,23 @@ function ProductDetailView({
                           product.hideAmericanShawl ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-700'
                         }`}
                       >
-                        {product.hideAmericanShawl ? '+ إظهار الشال الأمريكي' : '✕ حذف الشال الأمريكي'}
+                        {product.hideAmericanShawl ? '+ Ø¥Ø¸Ù‡Ø§Ø± Ø§Ù„Ø´Ø§Ù„ Ø§Ù„Ø£Ù…Ø±ÙŠÙƒÙŠ' : 'âœ• Ø­Ø°Ù Ø§Ù„Ø´Ø§Ù„ Ø§Ù„Ø£Ù…Ø±ÙŠÙƒÙŠ'}
                       </button>
                     </div>
                   )}
-
                   {!product.hideAmericanShawl && (
-                    <label className="flex items-center justify-between gap-3 cursor-pointer">
-                      <div className="flex items-center gap-3 min-w-0">
-                        {/* إطار مصغر ومقيد لمجسم وصورة الشال الأمريكي */}
-                        <div className="relative w-14 h-14 sm:w-16 sm:h-16 shrink-0 rounded-xl overflow-hidden bg-[#f9eef2] border border-[#e6ddd3]">
-                          <AmericanShawlSvg />
-                          {americanShawlImgSrc && (
-                            <img
-                              src={americanShawlImgSrc}
-                              alt="الشال الأمريكي V"
-                              onError={() =>
-                                setFailedImages((prev) => ({ ...prev, americanShawl: true }))
-                              }
-                              className="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none"
-                            />
-                          )}
-                        </div>
-
-                        <div className="min-w-0">
-                          <span className="block text-xs font-bold text-[#1f1917]">
-                            إضافة الشال الأمريكي V (+900 دج)
-                          </span>
-                          <span className="text-[11px] text-[#6e645e]">يُلبس على الكتفين ويتدلى بأناقة</span>
-                        </div>
+                    <label className="flex items-center justify-between cursor-pointer">
+                      <div>
+                        <span className="block text-xs font-bold text-[#1f1917]">
+                          Ø¥Ø¶Ø§ÙØ© Ø§Ù„Ø´Ø§Ù„ Ø§Ù„Ø£Ù…Ø±ÙŠÙƒÙŠ V (+900 Ø¯Ø¬)
+                        </span>
+                        <span className="text-[11px] text-[#6e645e]">ÙŠÙÙ„Ø¨Ø³ Ø¹Ù„Ù‰ Ø§Ù„ÙƒØªÙÙŠÙ† ÙˆÙŠØªØ¯Ù„Ù‰ Ø¨Ø£Ù†Ø§Ù‚Ø©</span>
                       </div>
-
                       <input
                         type="checkbox"
                         checked={addAmericanShawl}
                         onChange={(e) => setAddAmericanShawl(e.target.checked)}
-                        className="w-4 h-4 shrink-0 accent-[#762b43]"
+                        className="w-4 h-4 accent-[#762b43]"
                       />
                     </label>
                   )}
@@ -968,7 +733,7 @@ function ProductDetailView({
                 type="text"
                 value={customNotes}
                 onChange={(e) => setCustomNotes(e.target.value)}
-                placeholder="ملاحظات إضافية للوشاح أو التطريز (اختياري)..."
+                placeholder="Ù…Ù„Ø§Ø­Ø¸Ø§Øª Ø¥Ø¶Ø§ÙÙŠØ© Ù„Ù„ÙˆØ´Ø§Ø­ Ø£Ùˆ Ø§Ù„ØªØ·Ø±ÙŠØ² (Ø§Ø®ØªÙŠØ§Ø±ÙŠ)..."
                 className="w-full px-3 py-2.5 rounded-xl border border-[#e6ddd3] bg-[#faf8f5] text-xs"
               />
             </div>
@@ -976,9 +741,9 @@ function ProductDetailView({
 
           <div className="pt-4 border-t border-[#e6ddd3] flex items-center justify-between gap-4">
             <div>
-              <span className="block text-xs text-[#6e645e]">الإجمالي</span>
+              <span className="block text-xs text-[#6e645e]">Ø§Ù„Ø¥Ø¬Ù…Ø§Ù„ÙŠ</span>
               <span className="text-2xl font-extrabold text-[#1f1917]">
-                {displayPrice.toLocaleString('en-US')} دج
+                {displayPrice.toLocaleString('en-US')} Ø¯Ø¬
               </span>
             </div>
 
@@ -988,7 +753,7 @@ function ProductDetailView({
               className="flex-1 max-w-xs inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-[#762b43] hover:bg-[#581e31] text-white text-sm font-bold shadow-md transition-colors cursor-pointer"
             >
               <ShoppingBag className="w-4 h-4" />
-              <span>أضف إلى السلة</span>
+              <span>Ø£Ø¶Ù Ø¥Ù„Ù‰ Ø§Ù„Ø³Ù„Ø©</span>
             </button>
           </div>
         </div>
@@ -1030,7 +795,7 @@ function SectionCard({
 
   const handleConfirmDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (window.confirm(`هل أنتِ متأكدة من حذف هذا الموديل نهائياً؟\n\n"${product.name}"`)) {
+    if (window.confirm(`Ù‡Ù„ Ø£Ù†ØªÙ Ù…ØªØ£ÙƒØ¯Ø© Ù…Ù† Ø­Ø°Ù Ù‡Ø°Ø§ Ø§Ù„Ù…ÙˆØ¯ÙŠÙ„ Ù†Ù‡Ø§Ø¦ÙŠØ§Ù‹ØŸ\n\n"${product.name}"`)) {
       onDelete();
     }
   };
@@ -1068,7 +833,7 @@ function SectionCard({
                 className="mt-2.5 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#762b43] text-white text-xs font-bold shadow-sm cursor-pointer"
               >
                 <ImagePlus className="w-3.5 h-3.5" />
-                <span>إضافة صورة</span>
+                <span>Ø¥Ø¶Ø§ÙØ© ØµÙˆØ±Ø©</span>
               </button>
             )}
           </div>
@@ -1092,7 +857,7 @@ function SectionCard({
                 className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white/95 text-[#1f1917] border border-[#e6ddd3] text-[11px] font-bold shadow-sm hover:bg-[#f3eee8] cursor-pointer"
               >
                 <ImagePlus className="w-3 h-3 text-[#762b43]" />
-                <span>{hasValidImage ? 'تغيير' : 'إضافة'}</span>
+                <span>{hasValidImage ? 'ØªØºÙŠÙŠØ±' : 'Ø¥Ø¶Ø§ÙØ©'}</span>
               </button>
 
               {hasValidImage && (
@@ -1102,7 +867,7 @@ function SectionCard({
                   className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white/95 text-amber-800 border border-amber-200 text-[11px] font-bold shadow-sm hover:bg-amber-50 cursor-pointer"
                 >
                   <ImageOff className="w-3 h-3" />
-                  <span>حذف الصورة</span>
+                  <span>Ø­Ø°Ù Ø§Ù„ØµÙˆØ±Ø©</span>
                 </button>
               )}
             </div>
@@ -1114,7 +879,7 @@ function SectionCard({
                 className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white/95 text-[#1f1917] border border-[#e6ddd3] text-[11px] font-bold shadow-sm hover:bg-[#f3eee8] cursor-pointer"
               >
                 <Pencil className="w-3 h-3" />
-                <span>تعديل</span>
+                <span>ØªØ¹Ø¯ÙŠÙ„</span>
               </button>
               <button
                 type="button"
@@ -1122,7 +887,7 @@ function SectionCard({
                 className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-red-600 text-white text-[11px] font-bold shadow-sm hover:bg-red-700 cursor-pointer"
               >
                 <Trash2 className="w-3 h-3" />
-                <span>حذف</span>
+                <span>Ø­Ø°Ù</span>
               </button>
             </div>
           </div>
@@ -1135,14 +900,14 @@ function SectionCard({
             {product.name}
           </h3>
           <p className="text-xs sm:text-sm font-extrabold text-[#762b43] mt-1">
-            من {product.basePrice.toLocaleString('en-US')} دج
+            Ù…Ù† {product.basePrice.toLocaleString('en-US')} Ø¯Ø¬
           </p>
           <p className="text-[11px] text-[#6e645e] mt-0.5">{product.branch}</p>
         </div>
 
         <div className="mt-3 pt-2.5 border-t border-[#f3eee8]">
           <span className="inline-flex items-center gap-1 text-xs font-bold text-[#762b43] group-hover:underline">
-            <span>اختيار اللون والمقاس</span>
+            <span>Ø§Ø®ØªÙŠØ§Ø± Ø§Ù„Ù„ÙˆÙ† ÙˆØ§Ù„Ù…Ù‚Ø§Ø³</span>
             <ChevronLeft className="w-3.5 h-3.5" />
           </span>
         </div>
@@ -1165,7 +930,7 @@ export function ProductCatalog({
 }: ProductCatalogProps) {
   const [selectedSection, setSelectedSection] = useState<CategoryId | null>(null);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
-  const [activeBranch, setActiveBranch] = useState<string>('الكل');
+  const [activeBranch, setActiveBranch] = useState<string>('Ø§Ù„ÙƒÙ„');
   const [morphProductId, setMorphProductId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -1194,7 +959,7 @@ export function ProductCatalog({
       window.history.pushState({ catalogLevel: 'section', section: cat }, '');
       setSelectedSection(cat);
       setSelectedProductId(null);
-      setActiveBranch('الكل');
+      setActiveBranch('Ø§Ù„ÙƒÙ„');
     });
   };
 
@@ -1217,7 +982,7 @@ export function ProductCatalog({
     withViewTransition(() => {
       setSelectedSection(null);
       setSelectedProductId(null);
-      setActiveBranch('الكل');
+      setActiveBranch('Ø§Ù„ÙƒÙ„');
     });
   };
 
@@ -1249,7 +1014,7 @@ export function ProductCatalog({
       : [];
 
   const filteredProducts = sectionProducts.filter((p) => {
-    if (activeBranch !== 'الكل' && p.branch !== activeBranch) return false;
+    if (activeBranch !== 'Ø§Ù„ÙƒÙ„' && p.branch !== activeBranch) return false;
     return true;
   });
 
@@ -1286,7 +1051,7 @@ export function ProductCatalog({
                     onClick={handleBackToHome}
                     className="hover:text-[#762b43] underline cursor-pointer"
                   >
-                    الرئيسية
+                    Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠØ©
                   </button>
                   <ChevronLeft className="w-3.5 h-3.5" />
                   <span className="text-[#1f1917]">{activeSectionMeta.title}</span>
@@ -1299,7 +1064,7 @@ export function ProductCatalog({
                     className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-[#e6ddd3] text-xs font-bold text-[#1f1917] hover:bg-[#f3eee8] cursor-pointer"
                   >
                     <ArrowRight className="w-3.5 h-3.5" />
-                    <span>كل الأقسام</span>
+                    <span>ÙƒÙ„ Ø§Ù„Ø£Ù‚Ø³Ø§Ù…</span>
                   </button>
 
                   {isAdminMode && (
@@ -1309,7 +1074,7 @@ export function ProductCatalog({
                       className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-lg bg-[#1f1917] text-white text-xs font-bold cursor-pointer"
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      <span>إضافة قطعة للقسم</span>
+                      <span>Ø¥Ø¶Ø§ÙØ© Ù‚Ø·Ø¹Ø© Ù„Ù„Ù‚Ø³Ù…</span>
                     </button>
                   )}
                 </div>
@@ -1349,7 +1114,7 @@ export function ProductCatalog({
               {filteredProducts.length === 0 ? (
                 <div className="bg-white border border-[#e6ddd3] rounded-2xl p-10 text-center">
                   <p className="text-sm font-semibold text-[#6e645e]">
-                    لا توجد قطع في هذا القسم حالياً.
+                    Ù„Ø§ ØªÙˆØ¬Ø¯ Ù‚Ø·Ø¹ ÙÙŠ Ù‡Ø°Ø§ Ø§Ù„Ù‚Ø³Ù… Ø­Ø§Ù„ÙŠØ§Ù‹.
                   </p>
                 </div>
               ) : (
@@ -1375,10 +1140,10 @@ export function ProductCatalog({
               <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
                 <div>
                   <p className="text-xs font-bold text-[#762b43] mb-1">
-                    اختر القسم المناسب
+                    Ø§Ø®ØªØ± Ø§Ù„Ù‚Ø³Ù… Ø§Ù„Ù…Ù†Ø§Ø³Ø¨
                   </p>
                   <h2 className="font-editorial text-2xl sm:text-3xl font-bold text-[#1f1917]">
-                    أقسام دار الأزياء
+                    Ø£Ù‚Ø³Ø§Ù… Ø¯Ø§Ø± Ø§Ù„Ø£Ø²ÙŠØ§Ø¡
                   </h2>
                 </div>
 
@@ -1389,7 +1154,7 @@ export function ProductCatalog({
                     className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#1f1917] hover:bg-[#3a312d] text-white text-xs font-bold cursor-pointer"
                   >
                     <Plus className="w-4 h-4" />
-                    <span>إضافة موديل جديد</span>
+                    <span>Ø¥Ø¶Ø§ÙØ© Ù…ÙˆØ¯ÙŠÙ„ Ø¬Ø¯ÙŠØ¯</span>
                   </button>
                 )}
               </div>
