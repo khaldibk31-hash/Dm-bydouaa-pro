@@ -196,14 +196,12 @@ function CapStylePicker({
                   : 'border-[#ece4da] hover:border-[#cdb9a6]'
               }`}
             >
-              <div className="relative aspect-[3/4] w-full rounded-xl overflow-hidden bg-[#f7e6ec] flex items-center justify-center">
+              <div className="relative aspect-[3/4] w-full rounded-xl bg-[#f7e6ec] flex items-center justify-center overflow-hidden">
                 <img
                   src={cap.image}
                   alt={cap.label}
                   loading="lazy"
-                  className={`w-full h-full object-contain transition-transform duration-500 ${
-                    active ? 'scale-[1.04]' : 'group-hover:scale-[1.04]'
-                  }`}
+                  className="w-full h-full object-contain p-2"
                 />
                 <span
                   className={`absolute top-1.5 right-1.5 w-6 h-6 rounded-full flex items-center justify-center transition-all ${
@@ -354,7 +352,10 @@ function ProductDetailView({
   const [customNotes, setCustomNotes] = useState('');
   const colorFileRef = useRef<HTMLInputElement>(null);
 
+  // ✅ استخدام capStyles المحدثة مباشرة
   const selectedCap = capStyles.find((c) => c.id === selectedCapId) ?? capStyles[0];
+
+  // ✅ تحديث addon من product مباشرة
   const addon = {
     title: product.americanShawlTitle?.trim() || DEFAULT_ADDON.title,
     subtitle: product.americanShawlSubtitle?.trim() || DEFAULT_ADDON.subtitle,
@@ -455,13 +456,13 @@ function ProductDetailView({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 p-4 sm:p-6 md:p-8 items-start">
         <div className="md:sticky md:top-24 min-w-0">
-          <div className="relative aspect-[4/5] rounded-2xl bg-[#f3eee8] overflow-hidden border border-[#ece4da] flex items-center justify-center">
+          <div className="relative aspect-[4/5] rounded-2xl bg-[#f3eee8] border border-[#ece4da] flex items-center justify-center overflow-hidden">
             {activeImageUrl ? (
               <img
                 src={activeImageUrl}
                 alt={product.name}
                 style={isMorphing ? MORPH_STYLE : undefined}
-                className="w-full h-full object-contain transition-opacity duration-300"
+                className="w-full h-full object-contain p-2"
               />
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center">
@@ -1304,8 +1305,7 @@ export function ProductCatalog({
                       onClick={() => handleOpenSection(sec.id)}
                       className="group relative bg-white border border-[#ece4da] rounded-3xl overflow-hidden grid grid-cols-1 sm:grid-cols-12 cursor-pointer transition-all duration-300 hover:shadow-[0_24px_50px_-30px_rgba(31,25,23,0.45)] hover:border-[#762b43]/35"
                     >
-                      {/* 🟢 هنا صلحنا الإطار: درنا object-contain باش الصورة تبان كاملة وما تتقطعش */}
-                      <div className="sm:col-span-5 sm:order-2 relative aspect-[16/11] sm:aspect-auto sm:min-h-72 bg-[#f3eee8] overflow-hidden flex items-center justify-center">
+                      <div className="sm:col-span-5 sm:order-2 relative aspect-[16/11] sm:aspect-auto sm:min-h-72 bg-[#f3eee8] flex items-center justify-center overflow-hidden">
                         <img
                           src={coverImg}
                           alt=""
@@ -1367,6 +1367,7 @@ export function ProductCatalog({
 
       {sheet && (
         <QuickEditSheet
+          key={editTarget?.kind + (editTarget as any)?.id + (editTarget as any)?.productId}
           isOpen
           title={sheet.title}
           fields={sheet.fields}
