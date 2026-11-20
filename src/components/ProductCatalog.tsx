@@ -196,7 +196,6 @@ function CapStylePicker({
                   : 'border-[#ece4da] hover:border-[#cdb9a6]'
               }`}
             >
-              {/* 🟢 اصلاح الإطار: استعملنا object-contain باش الصورة ما تتقطعش وتخرجش على إطارها */}
               <div className="relative aspect-[3/4] w-full rounded-xl overflow-hidden bg-[#f7e6ec] flex items-center justify-center">
                 <img
                   src={cap.image}
@@ -456,7 +455,6 @@ function ProductDetailView({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 p-4 sm:p-6 md:p-8 items-start">
         <div className="md:sticky md:top-24 min-w-0">
-          {/* 🟢 اصلاح الإطار: استعملنا object-contain باش الصورة الكبيرة ما تتقطعش */}
           <div className="relative aspect-[4/5] rounded-2xl bg-[#f3eee8] overflow-hidden border border-[#ece4da] flex items-center justify-center">
             {activeImageUrl ? (
               <img
@@ -1306,14 +1304,15 @@ export function ProductCatalog({
                       onClick={() => handleOpenSection(sec.id)}
                       className="group relative bg-white border border-[#ece4da] rounded-3xl overflow-hidden grid grid-cols-1 sm:grid-cols-12 cursor-pointer transition-all duration-300 hover:shadow-[0_24px_50px_-30px_rgba(31,25,23,0.45)] hover:border-[#762b43]/35"
                     >
-                      <div className="sm:col-span-5 sm:order-2 relative aspect-[16/11] sm:aspect-auto sm:min-h-72 bg-[#f3eee8] overflow-hidden">
+                      {/* 🟢 هنا صلحنا الإطار: درنا object-contain باش الصورة تبان كاملة وما تتقطعش */}
+                      <div className="sm:col-span-5 sm:order-2 relative aspect-[16/11] sm:aspect-auto sm:min-h-72 bg-[#f3eee8] overflow-hidden flex items-center justify-center">
                         <img
                           src={coverImg}
                           alt=""
                           loading="lazy"
-                          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          className="absolute inset-0 w-full h-full object-contain p-4 transition-transform duration-700 group-hover:scale-105"
                         />
-                        <span className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center font-editorial text-sm font-bold text-[#762b43] tabular-nums">
+                        <span className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center font-editorial text-sm font-bold text-[#762b43] tabular-nums z-10">
                           0{idx + 1}
                         </span>
                       </div>
