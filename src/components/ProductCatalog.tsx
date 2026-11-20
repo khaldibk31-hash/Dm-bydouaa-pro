@@ -196,12 +196,13 @@ function CapStylePicker({
                   : 'border-[#ece4da] hover:border-[#cdb9a6]'
               }`}
             >
-              <div className="relative aspect-[3/4] w-full rounded-xl overflow-hidden bg-[#f7e6ec]">
+              {/* 🟢 اصلاح الإطار: استعملنا object-contain باش الصورة ما تتقطعش وتخرجش على إطارها */}
+              <div className="relative aspect-[3/4] w-full rounded-xl overflow-hidden bg-[#f7e6ec] flex items-center justify-center">
                 <img
                   src={cap.image}
                   alt={cap.label}
                   loading="lazy"
-                  className={`absolute inset-0 w-full h-full object-cover transition-transform duration-500 ${
+                  className={`w-full h-full object-contain transition-transform duration-500 ${
                     active ? 'scale-[1.04]' : 'group-hover:scale-[1.04]'
                   }`}
                 />
@@ -239,7 +240,7 @@ function CapStylePicker({
                 />
                 <AdminButton
                   icon={Pencil}
-                  label="تعديل النص"
+                  label="تعديل السعر والاسم"
                   className="w-full !px-1.5 text-[11px]"
                   onClick={() => onEdit(cap.id)}
                 />
@@ -455,13 +456,14 @@ function ProductDetailView({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 p-4 sm:p-6 md:p-8 items-start">
         <div className="md:sticky md:top-24 min-w-0">
-          <div className="relative aspect-[4/5] rounded-2xl bg-[#f3eee8] overflow-hidden border border-[#ece4da]">
+          {/* 🟢 اصلاح الإطار: استعملنا object-contain باش الصورة الكبيرة ما تتقطعش */}
+          <div className="relative aspect-[4/5] rounded-2xl bg-[#f3eee8] overflow-hidden border border-[#ece4da] flex items-center justify-center">
             {activeImageUrl ? (
               <img
                 src={activeImageUrl}
                 alt={product.name}
                 style={isMorphing ? MORPH_STYLE : undefined}
-                className="w-full h-full object-cover transition-opacity duration-300"
+                className="w-full h-full object-contain transition-opacity duration-300"
               />
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center">
@@ -816,7 +818,7 @@ function ProductDetailView({
                 )}
                 {isAdminMode && (
                   <div className="flex flex-wrap gap-1.5 px-3 pb-3 pt-1" data-no-inline-edit>
-                    <AdminButton icon={Pencil} label="تعديل الإضافة" onClick={onEditAddon} />
+                    <AdminButton icon={Pencil} label="تعديل سعر واسم الشال" onClick={onEditAddon} />
                     {onToggleField && (
                       <AdminButton
                         icon={product.hideAmericanShawl ? Eye : EyeOff}
