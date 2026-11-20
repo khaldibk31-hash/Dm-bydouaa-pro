@@ -26,16 +26,22 @@ import {
   uploadStoreImage,
 } from './lib/supabase';
 import {
+  CapStyleOverride,
   CartItem,
   CategoryId,
   Product,
   ProductOption,
+  SectionOverride,
   StoreCopy,
   StoreState,
   ToastMessage,
 } from './types/store';
+import { useInlineEditor } from './hooks/useInlineEditor';
+import { Reveal } from './components/Reveal';
+import { ArrowDown, ArrowUp, CloudUpload, LogOut } from 'lucide-react';
 
 const CART_STORAGE_KEY = 'dg_by_douaa_cart_v1';
+const EMPTY_RECORD: Record<string, string> = {};
 
 export default function App() {
   const [storeState, setStoreState] = useState<StoreState>(DEFAULT_STORE_STATE);
@@ -174,21 +180,13 @@ export default function App() {
 
   const handleUpdateProductAddon = (
     productId: string,
-    addon: { title: string; subtitle: string; price: number }
+    addon: Pick<Product, 'americanShawlTitle' | 'americanShawlSubtitle' | 'americanShawlPrice'>
   ) => {
     setStoreState((prev) => ({
       ...prev,
-      products: prev.products.map((p) =>
-        p.id === productId
-          ? {
-              ...p,
-              americanShawlTitle: addon.title,
-              americanShawlSubtitle: addon.subtitle,
-              americanShawlPrice: addon.price,
-            }
-          : p
-      ),
+      products: prev.products.map((p) => (p.id === productId ? { ...p, ...addon } : p)),
     }));
+    notify('success', 'تم تحديث الإضافة. اضغطي "حفظ ونشر" لاعتمادها.');
   };
 
   const handleUnlockAdmin = () => {
@@ -348,175 +346,117 @@ export default function App() {
 
   const totalCartItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  /* ============ محرر النصوص الاحترافي (حذف + صور) ============ */
-  useEffect(() => {
-    document.querySelectorAll('.admin-floating-toolbar').forEach((t) => t.remove());
-    document.querySelectorAll<HTMLElement>('[data-admin-text]').forEach((el) => {
-      el.removeAttribute('data-admin-text');
-      el.style.outline = 'none';
-      el.style.cursor = '';
-      el.contentEditable = 'false';
-      el.onblur = null;
-      el.onmouseenter = null;
-      el.onmouseleave = null;
-    });
-
-    if (!isAdminMode) return;
-
-    const savedTexts = storeState.customTexts || {};
-    const savedImages = storeState.customImages || {};
-
-    const els = Array.from(
-      document.querySelectorAll<HTMLElement>(
-        'main h1, main h2, main h3, main p, main span, main th, main td, footer p'
-      )
-    ).filter((el) => el.children.length === 0);
-
-    const toolbar = document.createElement('div');
-    toolbar.className = 'admin-floating-toolbar';
-    toolbar.setAttribute('contenteditable', 'false');
-    toolbar.innerHTML = `
-      <button type="button" data-action="delete" title="حذف العنصر">🗑️</button>
-      <button type="button" data-action="image" title="إضافة صورة">🖼️</button>
-    `;
-    document.body.appendChild(toolbar);
-
-    let activeEl: HTMLElement | null = null;
-
-    const showFor = (target: HTMLElement) => {
-      activeEl = target;
-      const rect = target.getBoundingClientRect();
-      toolbar.style.display = 'inline-flex';
-      toolbar.style.top = `${Math.max(6, rect.top - 40)}px`;
-      toolbar.style.left = `${Math.max(6, Math.min(rect.left, window.innerWidth - 100))}px`;
-    };
-
-    const hide = () => {
-      setTimeout(() => {
-        if (!toolbar.matches(':hover')) {
-          toolbar.style.display = 'none';
-          activeEl = null;
-        }
-      }, 180);
-    };
-
-    toolbar.onmouseleave = hide;
-
-    const handleToolbarClick = async (e: Event) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const btn = (e.target as HTMLElement).closest('button');
-      if (!btn || !activeEl) return;
-      const action = btn.dataset.action;
-      const el = activeEl;
-      const idx = els.indexOf(el);
-      if (idx < 0) return;
-      const key = `txt_${idx}`;
-      const imgKey = `img_${idx}`;
-
-      if (action === 'delete') {
-        if (!confirm('هل تريد حذف هذا العنصر؟')) return;
-        el.style.display = 'none';
-        setStoreState((prev) => ({
-          ...prev,
-          customTexts: { ...(prev.customTexts || {}), [`${key}_hidden`]: '1' },
-        }));
-        toolbar.style.display = 'none';
-      }
-
-      if (action === 'image') {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
-        input.onchange = async () => {
-          const file = input.files?.[0];
-          if (!file) return;
-          try {
-            const url = await uploadStoreImage(file, 900);
-            const next = el.nextElementSibling as HTMLImageElement | null;
-            if (next?.classList.contains('admin-inserted-img')) {
-              next.src = url;
-            } else {
-              const img = document.createElement('img');
-              img.src = url;
-              img.className = 'admin-inserted-img';
-              el.after(img);
-            }
-            setStoreState((prev) => ({
-              ...prev,
-              customImages: { ...(prev.customImages || {}), [imgKey]: url },
-            }));
-            notify('success', 'تمت إضافة الصورة. اضغطي "حفظ ونشر" لتثبيتها.');
-          } catch (err) {
-            notify('error', err instanceof Error ? err.message : 'تعذر رفع الصورة.');
-          }
-        };
-        input.click();
-      }
-    };
-    toolbar.addEventListener('click', handleToolbarClick);
-
-    els.forEach((el, idx) => {
-      const key = `txt_${idx}`;
-      const imgKey = `img_${idx}`;
-
-      if (savedTexts[key] !== undefined && el.innerText !== savedTexts[key]) {
-        el.innerText = savedTexts[key];
-      }
-      if (savedTexts[`${key}_hidden`] === '1') {
-        el.style.display = 'none';
-        return;
-      }
-
-      if (savedImages[imgKey]) {
-        const next = el.nextElementSibling as HTMLImageElement | null;
-        if (next?.classList.contains('admin-inserted-img')) {
-          next.src = savedImages[imgKey];
-        } else {
-          const img = document.createElement('img');
-          img.src = savedImages[imgKey];
-          img.className = 'admin-inserted-img';
-          el.after(img);
-        }
-      }
-
-      el.dataset.adminText = 'true';
-      el.contentEditable = 'true';
-      el.style.outline = '1px dashed rgba(118, 43, 67, 0.35)';
-      el.style.cursor = 'text';
-      el.style.borderRadius = '4px';
-
-      el.onblur = () => {
-        setStoreState((prev) => ({
-          ...prev,
-          customTexts: { ...(prev.customTexts || {}), [key]: el.innerText.trim() },
-        }));
-      };
-
-      el.onmouseenter = () => showFor(el);
-      el.onmouseleave = hide;
-    });
-
-    return () => {
-      toolbar.removeEventListener('click', handleToolbarClick);
-      toolbar.remove();
-    };
-  }, [isAdminMode, storeState.products]);
-
-  /* ============ Scroll reveal للأقسام ============ */
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) entry.target.classList.add('in-view');
-        });
+  const handleUpdateCapStyle = (capId: string, patch: CapStyleOverride) => {
+    setStoreState((prev) => ({
+      ...prev,
+      capStyles: {
+        ...(prev.capStyles || {}),
+        [capId]: { ...(prev.capStyles?.[capId] || {}), ...patch },
       },
-      { threshold: 0.06, rootMargin: '0px 0px -60px 0px' }
-    );
-    const els = document.querySelectorAll('.section-reveal');
-    els.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, [sectionOrder]);
+    }));
+    notify('success', 'تم تحديث القبعة. اضغطي "حفظ ونشر" لاعتماد التعديل.');
+  };
+
+  const handleUploadCapStyleImage = async (capId: string, file: File) => {
+    try {
+      const url = await uploadStoreImage(file, 900);
+      setStoreState((prev) => ({
+        ...prev,
+        capStyles: {
+          ...(prev.capStyles || {}),
+          [capId]: { ...(prev.capStyles?.[capId] || {}), imageUrl: url },
+        },
+      }));
+      notify('success', 'تم تغيير صورة القبعة. اضغطي "حفظ ونشر" لتثبيتها.');
+    } catch (err) {
+      notify('error', err instanceof Error ? err.message : 'تعذر رفع صورة القبعة.');
+    }
+  };
+
+  const handleUpdateSection = (sectionId: string, patch: SectionOverride) => {
+    setStoreState((prev) => ({
+      ...prev,
+      sectionMeta: {
+        ...(prev.sectionMeta || {}),
+        [sectionId]: { ...(prev.sectionMeta?.[sectionId] || {}), ...patch },
+      },
+    }));
+    notify('success', 'تم تحديث القسم. اضغطي "حفظ ونشر" لاعتماد التعديل.');
+  };
+
+  const handleUploadSectionImage = async (sectionId: string, file: File) => {
+    try {
+      const url = await uploadStoreImage(file, 1200);
+      setStoreState((prev) => ({
+        ...prev,
+        sectionMeta: {
+          ...(prev.sectionMeta || {}),
+          [sectionId]: { ...(prev.sectionMeta?.[sectionId] || {}), imageUrl: url },
+        },
+      }));
+      notify('success', 'تم تغيير صورة القسم. اضغطي "حفظ ونشر" لتثبيتها.');
+    } catch (err) {
+      notify('error', err instanceof Error ? err.message : 'تعذر رفع صورة القسم.');
+    }
+  };
+
+  const handleSetProductColorImage = async (id: string, colorName: string, file: File | null) => {
+    try {
+      const url = file ? await uploadStoreImage(file, 900) : '';
+      setStoreState((prev) => ({
+        ...prev,
+        products: prev.products.map((p) => {
+          if (p.id !== id) return p;
+          const updatedColors = { ...(p.colorImages || {}) };
+          if (url) updatedColors[colorName] = url;
+          else delete updatedColors[colorName];
+          return { ...p, colorImages: updatedColors };
+        }),
+      }));
+      notify(
+        'info',
+        file
+          ? `تم رفع صورة لون "${colorName}". اضغطي "حفظ ونشر" لتثبيتها.`
+          : `تم حذف صورة لون "${colorName}".`
+      );
+    } catch (err) {
+      notify('error', err instanceof Error ? err.message : 'تعذر رفع الصورة. جربي صورة أخرى.');
+    }
+  };
+
+  useInlineEditor({
+    enabled: isAdminMode,
+    texts: storeState.customTexts || EMPTY_RECORD,
+    images: storeState.customImages || EMPTY_RECORD,
+    onSetText: (key, value) =>
+      setStoreState((prev) => {
+        const next = { ...(prev.customTexts || {}) };
+        if (value === null) delete next[key];
+        else next[key] = value;
+        return { ...prev, customTexts: next };
+      }),
+    onSetHidden: (key, hidden) =>
+      setStoreState((prev) => {
+        const next = { ...(prev.customTexts || {}) };
+        if (hidden) next[`${key}_hidden`] = '1';
+        else delete next[`${key}_hidden`];
+        return { ...prev, customTexts: next };
+      }),
+    onSetImage: async (key, file) => {
+      try {
+        const url = file ? await uploadStoreImage(file, 900) : '';
+        setStoreState((prev) => {
+          const next = { ...(prev.customImages || {}) };
+          if (url) next[key] = url;
+          else delete next[key];
+          return { ...prev, customImages: next };
+        });
+        if (file) notify('success', 'تمت إضافة الصورة. اضغطي "حفظ ونشر" لتثبيتها.');
+      } catch (err) {
+        notify('error', err instanceof Error ? err.message : 'تعذر رفع الصورة.');
+      }
+    },
+  });
 
   return (
     <div className="min-h-screen flex flex-col bg-[#faf8f5] text-[#1f1917]">
@@ -552,10 +492,13 @@ export default function App() {
               : 'جدول الأسعار والأسئلة الشائعة';
 
           return (
-            <div key={secId} className="relative section-reveal">
+            <Reveal key={secId} className="relative">
               {isAdminMode && (
-                <div className="max-w-6xl mx-auto px-4 pt-3 flex items-center justify-between gap-2">
-                  <span className="text-xs font-bold text-[#762b43] bg-[#faf8f5] px-3 py-1.5 rounded-full border border-[#e6ddd3]">
+                <div
+                  data-no-inline-edit
+                  className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 flex flex-wrap items-center justify-between gap-2"
+                >
+                  <span className="text-xs font-bold text-[#762b43] bg-[#fbf3f5] px-3 py-2 rounded-full border border-dashed border-[#762b43]/30">
                     قسم: {sectionTitle}
                   </span>
                   <div className="flex items-center gap-1.5">
@@ -563,17 +506,21 @@ export default function App() {
                       type="button"
                       disabled={index === 0}
                       onClick={() => moveSection(secId, -1)}
-                      className="px-3 py-1.5 rounded-full bg-white border border-[#e6ddd3] text-xs font-bold text-[#1f1917] disabled:opacity-40 cursor-pointer"
+                      aria-label="نقل القسم للأعلى"
+                      className="inline-flex items-center gap-1 min-h-9 px-3 rounded-xl bg-white border border-[#e6ddd3] text-xs font-bold text-[#1f1917] disabled:opacity-40 cursor-pointer"
                     >
-                      ↑ نقل للأعلى
+                      <ArrowUp className="w-3.5 h-3.5" />
+                      <span>للأعلى</span>
                     </button>
                     <button
                       type="button"
                       disabled={index === sectionOrder.length - 1}
                       onClick={() => moveSection(secId, 1)}
-                      className="px-3 py-1.5 rounded-full bg-white border border-[#e6ddd3] text-xs font-bold text-[#1f1917] disabled:opacity-40 cursor-pointer"
+                      aria-label="نقل القسم للأسفل"
+                      className="inline-flex items-center gap-1 min-h-9 px-3 rounded-xl bg-white border border-[#e6ddd3] text-xs font-bold text-[#1f1917] disabled:opacity-40 cursor-pointer"
                     >
-                      ↓ نقل للأسفل
+                      <ArrowDown className="w-3.5 h-3.5" />
+                      <span>للأسفل</span>
                     </button>
                   </div>
                 </div>
@@ -582,6 +529,12 @@ export default function App() {
               {secId === 'catalog' && (
                 <ProductCatalog
                   products={storeState.products}
+                  capStyleOverrides={storeState.capStyles}
+                  sectionOverrides={storeState.sectionMeta}
+                  onUpdateCapStyle={handleUpdateCapStyle}
+                  onUploadCapStyleImage={handleUploadCapStyleImage}
+                  onUpdateSection={handleUpdateSection}
+                  onUploadSectionImage={handleUploadSectionImage}
                   onToggleProductField={(id, field) => {
                     setStoreState((prev) => ({
                       ...prev,
@@ -619,39 +572,7 @@ export default function App() {
                     }));
                     notify('info', 'تمت إزالة الصورة. اضغطي "حفظ ونشر" لتثبيت التغيير.');
                   }}
-                  onSetProductColorImage={async (id, colorName, file) => {
-                    try {
-                      const dataUrl = file
-                        ? await new Promise<string>((res, rej) => {
-                            const r = new FileReader();
-                            r.onload = () => res(String(r.result || ''));
-                            r.onerror = rej;
-                            r.readAsDataURL(file);
-                          })
-                        : '';
-                      setStoreState((prev) => ({
-                        ...prev,
-                        products: prev.products.map((p) => {
-                          if (p.id !== id) return p;
-                          const updatedColors = { ...(p.colorImages || {}) };
-                          if (dataUrl) {
-                            updatedColors[colorName] = dataUrl;
-                          } else {
-                            delete updatedColors[colorName];
-                          }
-                          return { ...p, colorImages: updatedColors };
-                        }),
-                      }));
-                      notify(
-                        'info',
-                        file
-                          ? `تم رفع صورة لون "${colorName}". اضغطي "حفظ ونشر" لتثبيتها.`
-                          : `تم حذف صورة لون "${colorName}".`
-                      );
-                    } catch {
-                      notify('error', 'تعذر معالجة الصورة. جربي صورة أخرى.');
-                    }
-                  }}
+                  onSetProductColorImage={handleSetProductColorImage}
                 />
               )}
 
@@ -668,11 +589,11 @@ export default function App() {
 
               {secId === 'pricing' && (
                 <PricingAndFaq
-                  priceTitle={storeState.copy.pricesTitle}
+                  pricesTitle={storeState.copy.pricesTitle}
                   pricesSubtitle={storeState.copy.pricesSubtitle}
                 />
               )}
-            </div>
+            </Reveal>
           );
         })}
       </main>
@@ -759,27 +680,31 @@ export default function App() {
 
       {/* لوحة الإدارة العائمة */}
       {isAdminMode && (
-        <div className="fixed bottom-5 right-5 z-40 flex flex-col gap-2 bg-white/95 backdrop-blur-md border border-[#e6ddd3] rounded-2xl shadow-xl p-3 max-w-[230px]">
-          <div className="text-[11px] font-bold text-[#762b43] text-center pb-1.5 border-b border-[#e6ddd3]">
-            ✏️ وضع الإدارة مفعّل
-          </div>
-          <p className="text-[10px] text-[#6e645e] text-center leading-relaxed">
-            مرّر الماوس على أي نص ← يبانلك <b>حذف 🗑️</b> و <b>صورة 🖼️</b>
-          </p>
+        <div
+          data-no-inline-edit
+          className="fixed bottom-4 right-4 z-40 flex items-center gap-1.5 bg-[#1f1917]/95 backdrop-blur-md rounded-full shadow-2xl p-1.5 pr-3"
+        >
+          <span className="flex items-center gap-1.5 text-[11px] font-bold text-white/80 ml-1">
+            <span className="w-2 h-2 rounded-full bg-emerald-400" aria-hidden="true" />
+            <span className="hidden sm:inline">وضع الإدارة · اضغطي على أي نص لتعديله</span>
+            <span className="sm:hidden">الإدارة</span>
+          </span>
           <button
             type="button"
             onClick={handlePublishToCloud}
             disabled={isSavingCloud}
-            className="px-3 py-2 rounded-xl bg-[#762b43] hover:bg-[#581e31] text-white text-xs font-bold transition-colors disabled:opacity-50 cursor-pointer"
+            className="inline-flex items-center gap-1.5 h-10 px-4 rounded-full bg-[#762b43] hover:bg-[#8d3552] text-white text-xs font-bold transition-colors disabled:opacity-60 cursor-pointer"
           >
-            {isSavingCloud ? '⏳ جاري النشر...' : '💾 حفظ ونشر'}
+            <CloudUpload className="w-4 h-4" />
+            <span>{isSavingCloud ? 'جاري النشر...' : 'حفظ ونشر'}</span>
           </button>
           <button
             type="button"
             onClick={handleAdminLogout}
-            className="px-3 py-1.5 rounded-xl bg-[#faf8f5] hover:bg-[#f3eee8] text-[#1f1917] text-xs font-bold transition-colors cursor-pointer"
+            aria-label="خروج من الإدارة"
+            className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
           >
-            🚪 خروج
+            <LogOut className="w-4 h-4" />
           </button>
         </div>
       )}

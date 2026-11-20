@@ -40,6 +40,20 @@ export interface StoreCopy {
   pricesSubtitle: string;
 }
 
+export interface CapStyleOverride {
+  label?: string;
+  extraPrice?: number;
+  imageUrl?: string;
+}
+
+export interface SectionOverride {
+  title?: string;
+  subtitle?: string;
+  priceLabel?: string;
+  buttonText?: string;
+  imageUrl?: string;
+}
+
 export interface StoreState {
   version: number;
   logoUrl: string;
@@ -49,6 +63,8 @@ export interface StoreState {
   sectionOrder?: string[];
   customTexts?: Record<string, string>;
   customImages?: Record<string, string>;
+  capStyles?: Record<string, CapStyleOverride>;
+  sectionMeta?: Record<string, SectionOverride>;
 }
 
 export interface CartItem {
