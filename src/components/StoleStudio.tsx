@@ -22,7 +22,7 @@ export function StoleStudio({
   isAdminMode,
   onUploadStudioBg,
 }: StoleStudioProps) {
-  // النصوص ثابتة فالمعاينة حيت حيدنا المستطيلات
+  
   const rightText = 'دفعة 2026';
   const leftText = 'الاسم واللقب';
   
@@ -52,11 +52,9 @@ export function StoleStudio({
   const isLightStole = stoleColor.hex === '#f4efe6';
 
   return (
-    // 🟢 حيدنا الإطار والخلفية الجانبية ديال السيكسيون
     <section id="studio-sec" className="py-12 sm:py-16">
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
         
-        {/* العناوين */}
         <div className="text-center mb-8">
           <h2 className="font-editorial text-2xl sm:text-3xl font-bold text-[#1f1917]">
             {title}
@@ -64,10 +62,9 @@ export function StoleStudio({
           <p className="text-sm text-[#6e645e] mt-1">{subtitle}</p>
         </div>
 
-        {/* 🟢 حيدنا البلوك الكبير اللي كان فيه إطار (bg-white border rounded...)، وخليا غير المعاينة والألوان */}
         <div className="flex flex-col items-center gap-8">
           
-          {/* Interactive Stole Preview Canvas */}
+          {/* المعاينة */}
           <div
             className="w-full max-w-lg rounded-2xl bg-[#f3eee8] flex flex-col items-center justify-center p-6 sm:p-8 min-h-[340px] relative overflow-hidden"
             style={
@@ -80,7 +77,6 @@ export function StoleStudio({
                 : undefined
             }
           >
-            {/* زر تغيير الخلفية (للإدارة فقط) */}
             {isAdminMode && (
               <div className="absolute top-3 right-3 z-20">
                 <input
@@ -101,7 +97,6 @@ export function StoleStudio({
               </div>
             )}
 
-            {/* شكل الوشاح */}
             <div className="relative flex flex-col items-center">
               <div
                 className="relative w-48 sm:w-56 h-72 sm:h-80 transition-colors duration-200 flex justify-between px-4 sm:px-5 pt-7 pb-10 shadow-xl"
@@ -113,7 +108,6 @@ export function StoleStudio({
                   border: isLightStole ? '1px solid #d6cdc2' : 'none',
                 }}
               >
-                {/* الخطوط الجانبية للتطريز */}
                 <div
                   className="pointer-events-none absolute inset-1.5 opacity-60"
                   style={{
@@ -121,7 +115,6 @@ export function StoleStudio({
                   }}
                 />
 
-                {/* النص الأيمن */}
                 <div className="w-[38%] flex flex-col items-center justify-start pt-2 z-10">
                   <div
                     className="text-center font-bold leading-snug max-h-44 overflow-hidden select-none font-editorial text-lg sm:text-xl"
@@ -131,7 +124,6 @@ export function StoleStudio({
                   </div>
                 </div>
 
-                {/* النص الأيسر */}
                 <div className="w-[38%] flex flex-col items-center justify-start pt-2 z-10">
                   <div
                     className="text-center font-bold leading-snug max-h-44 overflow-hidden select-none font-editorial text-lg sm:text-xl"
@@ -150,10 +142,9 @@ export function StoleStudio({
             </div>
           </div>
 
-          {/* دوائر الألوان */}
+          {/* الألوان */}
           <div className="w-full max-w-lg space-y-6">
             
-            {/* لون القماش */}
             <div className="text-center">
               <span className="block text-sm font-bold text-[#1f1917] mb-3">
                 لون قماش الوشاح: <span className="text-[#762b43]">{stoleColor.name}</span>
@@ -187,7 +178,6 @@ export function StoleStudio({
               </div>
             </div>
 
-            {/* لون الخيط */}
             <div className="text-center">
               <span className="block text-sm font-bold text-[#1f1917] mb-3">
                 لون خيط التطريز: <span className="text-[#762b43]">{threadColor.name}</span>
