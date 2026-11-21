@@ -1,4 +1,3 @@
-
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import {
@@ -272,7 +271,7 @@ function ProductDetailView({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-5 sm:p-8 items-start">
-        <div className="relative aspect-[3/4] min-w-0 rounded-2xl bg-[#faf8f5] overflow-hidden border border-[#e6ddd3]">
+        <div className="relative aspect-[3/4] min-w-0 rounded-2xl bg-[#faf8f5] overflow-hidden border border-[#e6ddd3] flex items-center justify-center">
           {isAdminMode && (
             <div className="absolute top-3 left-3 z-10">
               <label className="cursor-pointer bg-white/95 backdrop-blur-md text-[#1f1917] px-3 py-1.5 rounded-lg border border-[#e6ddd3] text-xs font-bold shadow-sm hover:bg-[#f3eee8] flex items-center gap-1.5">
@@ -296,11 +295,12 @@ function ProductDetailView({
 
           {activeImageUrl ? (
             <>
+              {/* 🟢 تعديل 1: هنا درنا object-contain مع p-4 باش الصورة الكبيرة تبان كاملة */}
               <img
                 src={activeImageUrl}
                 alt={product.name}
                 style={isMorphing ? MORPH_STYLE : undefined}
-                className="w-full h-full object-cover transition-all duration-300"
+                className="w-full h-full object-contain p-4 transition-all duration-300"
               />
               <div className="absolute bottom-3 right-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-sm border border-[#e6ddd3] shadow-sm text-xs font-bold text-[#1f1917]">
                 <span
@@ -839,13 +839,14 @@ function SectionCard({
     >
       <div className="relative aspect-[4/3] w-full bg-[#f3eee8] overflow-hidden">
         {hasValidImage ? (
+          // 🟢 تعديل 2: هنا درنا object-contain و p-2 باش الصورة فالكارت تبان كاملة
           <img
             src={product.imageUrl}
             alt={product.name}
             referrerPolicy="no-referrer"
             onError={() => setImgError(true)}
             style={isMorphing ? MORPH_STYLE : undefined}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+            className="w-full h-full object-contain p-2 transition-transform duration-300 group-hover:scale-[1.03]"
           />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center p-5 text-center bg-gradient-to-br from-[#f3eee8] to-[#ebe2d8]">
@@ -1227,10 +1228,11 @@ export function ProductCatalog({
                       </div>
 
                       <div className="sm:col-span-5 aspect-[4/3] sm:aspect-auto bg-[#f3eee8] overflow-hidden">
+                        {/* 🟢 تعديل 3: هنا درنا object-contain و p-4 باش الصورة ديال القسم تبان كاملة */}
                         <img
                           src={coverImg}
                           alt={sec.title}
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          className="w-full h-full object-contain p-4 transition-transform duration-300 group-hover:scale-105"
                         />
                       </div>
                     </div>
