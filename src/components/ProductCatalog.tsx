@@ -39,6 +39,7 @@ interface ProductCatalogProps {
   onRemoveProductImage?: (productId: string) => void;
 }
 
+// 🟢 1. زدنا قسم جديد سميتو "الشال الأمريكي"
 const MAIN_SECTIONS = [
   {
     id: 'shawl' as CategoryId,
@@ -47,6 +48,14 @@ const MAIN_SECTIONS = [
     priceLabel: 'من 3,800 دج مع القبعة',
     buttonText: 'صمّم وشاحك',
     fallbackImg: SHAWL_IMAGE_PATH,
+  },
+  {
+    id: 'american_shawl' as CategoryId, // قسم جديد مستقل
+    title: 'الشال الأمريكي',
+    subtitle: 'شال التخرج الأمريكي (V) الفاخر، يُلبس على الكتفين ويتدلى بأناقة ليكمل إطلالة تخرجك.',
+    priceLabel: 'من 900 دج',
+    buttonText: 'تصفح الشال الأمريكي',
+    fallbackImg: SHAWL_IMAGE_PATH, // تقدر تبدل الصورة من لوحة الإدارة من بعد
   },
   {
     id: 'robe' as CategoryId,
@@ -134,7 +143,6 @@ function ProductDetailView({
   const [capEmbroideryPos, setCapEmbroideryPos] = useState<'سطح القبعة' | 'جبهة القبعة'>('سطح القبعة');
   const [capNotes, setCapNotes] = useState('');
 
-  const [addAmericanShawl, setAddAmericanShawl] = useState(false);
   const [customNotes, setCustomNotes] = useState('');
   const colorFileRef = useRef<HTMLInputElement>(null);
 
@@ -160,8 +168,7 @@ function ProductDetailView({
     !product.hideCapDetails;
   const capStyleSurcharge = showCapSection ? selectedCapStyle.extraPrice : 0;
   const tuxedoSurcharge = selectedSecondary.includes('+100') ? 100 : 0;
-  const americanShawlSurcharge = !product.hideAmericanShawl && addAmericanShawl ? 900 : 0;
-  const displayPrice = basePrice + capStyleSurcharge + tuxedoSurcharge + americanShawlSurcharge;
+  const displayPrice = basePrice + capStyleSurcharge + tuxedoSurcharge;
 
   const activeImageUrl = product.colorImages?.[selectedColor.name] || product.imageUrl;
   const hasDedicatedColorImg = Boolean(product.colorImages?.[selectedColor.name]);
@@ -200,7 +207,6 @@ function ProductDetailView({
       if (capNotes.trim()) detailParts.push(`ملاحظة القبعة: ${capNotes.trim()}`);
     }
 
-    if (!product.hideAmericanShawl && addAmericanShawl) detailParts.push('+ شال أمريكي V');
     if (customNotes.trim()) detailParts.push(`ملاحظة: ${customNotes.trim()}`);
 
     onAddToCart({
@@ -295,7 +301,6 @@ function ProductDetailView({
 
           {activeImageUrl ? (
             <>
-              {/* 🟢 تعديل 1: هنا درنا object-contain مع p-4 باش الصورة الكبيرة تبان كاملة */}
               <img
                 src={activeImageUrl}
                 alt={product.name}
@@ -724,41 +729,8 @@ function ProductDetailView({
               </div>
             )}
 
+            {/* 🟢 2. حيدنا بلوك الشال الأمريكي من هنا كامل */}
             <div className="pt-3 border-t border-[#e6ddd3] space-y-2.5">
-              {(isAdminMode || !product.hideAmericanShawl) && (
-                <div className={`p-3 rounded-2xl border border-[#e6ddd3] bg-[#faf8f5] space-y-2 ${product.hideAmericanShawl ? 'opacity-50' : ''}`}>
-                  {isAdminMode && onToggleField && (
-                    <div className="flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() => onToggleField('hideAmericanShawl')}
-                        className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold cursor-pointer ${
-                          product.hideAmericanShawl ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-700'
-                        }`}
-                      >
-                        {product.hideAmericanShawl ? '+ إظهار الشال الأمريكي' : '✕ حذف الشال الأمريكي'}
-                      </button>
-                    </div>
-                  )}
-                  {!product.hideAmericanShawl && (
-                    <label className="flex items-center justify-between cursor-pointer">
-                      <div>
-                        <span className="block text-xs font-bold text-[#1f1917]">
-                          إضافة الشال الأمريكي V (+900 دج)
-                        </span>
-                        <span className="text-[11px] text-[#6e645e]">يُلبس على الكتفين ويتدلى بأناقة</span>
-                      </div>
-                      <input
-                        type="checkbox"
-                        checked={addAmericanShawl}
-                        onChange={(e) => setAddAmericanShawl(e.target.checked)}
-                        className="w-4 h-4 accent-[#762b43]"
-                      />
-                    </label>
-                  )}
-                </div>
-              )}
-
               <input
                 type="text"
                 value={customNotes}
@@ -839,7 +811,6 @@ function SectionCard({
     >
       <div className="relative aspect-[4/3] w-full bg-[#f3eee8] overflow-hidden">
         {hasValidImage ? (
-          // 🟢 تعديل 2: هنا درنا object-contain و p-2 باش الصورة فالكارت تبان كاملة
           <img
             src={product.imageUrl}
             alt={product.name}
@@ -1228,7 +1199,6 @@ export function ProductCatalog({
                       </div>
 
                       <div className="sm:col-span-5 aspect-[4/3] sm:aspect-auto bg-[#f3eee8] overflow-hidden">
-                        {/* 🟢 تعديل 3: هنا درنا object-contain و p-4 باش الصورة ديال القسم تبان كاملة */}
                         <img
                           src={coverImg}
                           alt={sec.title}
