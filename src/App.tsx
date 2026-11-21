@@ -348,8 +348,9 @@ export default function App() {
 
   const totalCartItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  /* ============ محرر النصوص الاحترافي (حذف + صور) ============ */
+  /* ============ محرر النصوص والأسعار الاحترافي ============ */
   useEffect(() => {
+    // تنظيف العناصر القديمة
     document.querySelectorAll('.admin-floating-toolbar').forEach((t) => t.remove());
     document.querySelectorAll<HTMLElement>('[data-admin-text]').forEach((el) => {
       el.removeAttribute('data-admin-text');
@@ -366,18 +367,44 @@ export default function App() {
     const savedTexts = storeState.customTexts || {};
     const savedImages = storeState.customImages || {};
 
+    // كنجمعو كاع النصوص اللي في الموقع
     const els = Array.from(
       document.querySelectorAll<HTMLElement>(
-        'main h1, main h2, main h3, main p, main span, main th, main td, footer p'
+        'main h1, main h2, main h3, main h4, main p, main span, main th, main td, main div, main strong, main b, footer p, footer span'
       )
-    ).filter((el) => el.children.length === 0);
+    ).filter((el) => {
+      // كنديرو التعديل غير على العناصر اللي فيهم نص وماعندهمش عناصر داخلين فيهم
+      return (
+        el.childNodes.length > 0 &&
+        Array.from(el.childNodes).every((node) => node.nodeType === Node.TEXT_NODE) &&
+        el.innerText.trim().length > 0
+      );
+    });
+
+    // دالة باش نلقاو المسار الحقيقي ديال العنصر (باش ما يتبدلش التعديل)
+    const getPath = (el: HTMLElement) => {
+      let path: string[] = [];
+      let current: HTMLElement | null = el;
+      while (current && current !== document.body) {
+        let tagName = current.tagName.toLowerCase();
+        let index = 0;
+        let sibling = current.previousElementSibling;
+        while (sibling) {
+          if (sibling.tagName === current.tagName) index++;
+          sibling = sibling.previousElementSibling;
+        }
+        path.unshift(`${tagName}-${index}`);
+        current = current.parentElement;
+      }
+      return path.join('_');
+    };
 
     const toolbar = document.createElement('div');
     toolbar.className = 'admin-floating-toolbar';
     toolbar.setAttribute('contenteditable', 'false');
     toolbar.innerHTML = `
-      <button type="button" data-action="delete" title="حذف العنصر">🗑️</button>
-      <button type="button" data-action="image" title="إضافة صورة">🖼️</button>
+      <button type="button" data-action="delete" title="حذف العنصر" style="background:#fee2e2; color:#991b1b; border-radius:4px; padding:2px 6px; font-size:12px;">🗑️</button>
+      <button type="button" data-action="image" title="إضافة صورة" style="background:#e0e7ff; color:#3730a3; border-radius:4px; padding:2px 6px; font-size:12px;">🖼️</button>
     `;
     document.body.appendChild(toolbar);
 
@@ -387,6 +414,9 @@ export default function App() {
       activeEl = target;
       const rect = target.getBoundingClientRect();
       toolbar.style.display = 'inline-flex';
+      toolbar.style.position = 'fixed';
+      toolbar.style.zIndex = '9999';
+      toolbar.style.gap = '4px';
       toolbar.style.top = `${Math.max(6, rect.top - 40)}px`;
       toolbar.style.left = `${Math.max(6, Math.min(rect.left, window.innerWidth - 100))}px`;
     };
@@ -409,10 +439,7 @@ export default function App() {
       if (!btn || !activeEl) return;
       const action = btn.dataset.action;
       const el = activeEl;
-      const idx = els.indexOf(el);
-      if (idx < 0) return;
-      const key = `txt_${idx}`;
-      const imgKey = `img_${idx}`;
+      const key = getPath(el);
 
       if (action === 'delete') {
         if (!confirm('هل تريد حذف هذا العنصر؟')) return;
@@ -440,11 +467,12 @@ export default function App() {
               const img = document.createElement('img');
               img.src = url;
               img.className = 'admin-inserted-img';
+              img.style.maxWidth = '100%';
               el.after(img);
             }
             setStoreState((prev) => ({
               ...prev,
-              customImages: { ...(prev.customImages || {}), [imgKey]: url },
+              customImages: { ...(prev.customImages || {}), [key]: url },
             }));
             notify('success', 'تمت إضافة الصورة. اضغطي "حفظ ونشر" لتثبيتها.');
           } catch (err) {
@@ -456,10 +484,10 @@ export default function App() {
     };
     toolbar.addEventListener('click', handleToolbarClick);
 
-    els.forEach((el, idx) => {
-      const key = `txt_${idx}`;
-      const imgKey = `img_${idx}`;
+    els.forEach((el) => {
+      const key = getPath(el);
 
+      // تحميل النص المحفوظ
       if (savedTexts[key] !== undefined && el.innerText !== savedTexts[key]) {
         el.innerText = savedTexts[key];
       }
@@ -468,24 +496,28 @@ export default function App() {
         return;
       }
 
-      if (savedImages[imgKey]) {
+      // تحميل الصورة المحفوظة
+      if (savedImages[key]) {
         const next = el.nextElementSibling as HTMLImageElement | null;
         if (next?.classList.contains('admin-inserted-img')) {
-          next.src = savedImages[imgKey];
+          next.src = savedImages[key];
         } else {
           const img = document.createElement('img');
-          img.src = savedImages[imgKey];
+          img.src = savedImages[key];
           img.className = 'admin-inserted-img';
+          img.style.maxWidth = '100%';
           el.after(img);
         }
       }
 
+      // تفعيل التعديل
       el.dataset.adminText = 'true';
       el.contentEditable = 'true';
       el.style.outline = '1px dashed rgba(118, 43, 67, 0.35)';
       el.style.cursor = 'text';
       el.style.borderRadius = '4px';
 
+      // حفظ التعديل ملي كيخرج الماوس من العنصر
       el.onblur = () => {
         setStoreState((prev) => ({
           ...prev,
@@ -501,7 +533,7 @@ export default function App() {
       toolbar.removeEventListener('click', handleToolbarClick);
       toolbar.remove();
     };
-  }, [isAdminMode, storeState.products]);
+  }, [isAdminMode, storeState.products, storeState.sectionOrder]);
 
   /* ============ Scroll reveal للأقسام ============ */
   useEffect(() => {
