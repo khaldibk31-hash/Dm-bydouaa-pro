@@ -39,7 +39,7 @@ interface ProductCatalogProps {
   onRemoveProductImage?: (productId: string) => void;
 }
 
-// 🟢 1. زدنا قسم جديد سميتو "الشال الأمريكي"
+// 🟢 حيدنا قسم "الشال الأمريكي" نهائياً
 const MAIN_SECTIONS = [
   {
     id: 'shawl' as CategoryId,
@@ -48,14 +48,6 @@ const MAIN_SECTIONS = [
     priceLabel: 'من 3,800 دج مع القبعة',
     buttonText: 'صمّم وشاحك',
     fallbackImg: SHAWL_IMAGE_PATH,
-  },
-  {
-    id: 'american_shawl' as CategoryId, // قسم جديد مستقل
-    title: 'الشال الأمريكي',
-    subtitle: 'شال التخرج الأمريكي (V) الفاخر، يُلبس على الكتفين ويتدلى بأناقة ليكمل إطلالة تخرجك.',
-    priceLabel: 'من 900 دج',
-    buttonText: 'تصفح الشال الأمريكي',
-    fallbackImg: SHAWL_IMAGE_PATH, // تقدر تبدل الصورة من لوحة الإدارة من بعد
   },
   {
     id: 'robe' as CategoryId,
@@ -729,7 +721,6 @@ function ProductDetailView({
               </div>
             )}
 
-            {/* 🟢 2. حيدنا بلوك الشال الأمريكي من هنا كامل */}
             <div className="pt-3 border-t border-[#e6ddd3] space-y-2.5">
               <input
                 type="text"
