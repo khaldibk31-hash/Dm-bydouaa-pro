@@ -305,7 +305,7 @@ export function ProductEditorModal({
             value={basePrice}
             onChange={(e) => setBasePrice(e.target.value)}
             placeholder="السعر الأساسي بالدينار الجزائري"
-
+/>
                     <div>
             <label className="block text-xs font-semibold text-[#6e645e] mb-1">
               خيارات إضافية (كل خيار في سطر: الاسم|السعر)
