@@ -305,12 +305,15 @@
   }, [isAdminMode, storeState.products, storeState.sectionOrder]);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) entry.target.classList.add('in-view');
-        });
-      },
+    
+      const observer = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) entry.target.classList.add('in-view');
+    });
+  },
+
+        
       { threshold: 0.06, rootMargin: '0px 0px -60px 0px' }
     );
     const els = document.querySelectorAll('.section-reveal');
