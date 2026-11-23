@@ -1,225 +1,3 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Lock, MessageCircle } from 'lucide-react';
-import {
-  AdminLoginModal,
-  CopyEditorModal,
-  ProductEditorModal,
-} from './components/AdminModals';
-import { CartDrawer } from './components/CartDrawer';
-import { Header } from './components/Header';
-import { HeroSection } from './components/HeroSection';
-import { PricingAndFaq } from './components/PricingAndFaq';
-import { ProductCatalog } from './components/ProductCatalog';
-import { StoleStudio } from './components/StoleStudio';
-import { ToastContainer } from './components/Toast';
-import {
-  DEFAULT_STORE_STATE,
-  SHAWL_IMAGE_PATH,
-  WHATSAPP_NUMBER,
-} from './data/defaultStore';
-import {
-  loadStoreState,
-  saveStoreState,
-  signInAdmin,
-  signOutAdmin,
-  supabase,
-  uploadStoreImage,
-} from './lib/supabase';
-import {
-  CartItem,
-  CategoryId,
-  Product,
-  ProductOption,
-  StoreCopy,
-  StoreState,
-  ToastMessage,
-} from './types/store';
-
-const CART_STORAGE_KEY = 'dg_by_douaa_cart_v1';
-
-export default function App() {
-  const [storeState, setStoreState] = useState<StoreState>(DEFAULT_STORE_STATE);
-  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
-  const [isAdminMode, setIsAdminMode] = useState(false);
-  const [isSavingCloud, setIsSavingCloud] = useState(false);
-  const sectionOrder = storeState.sectionOrder && storeState.sectionOrder.length === 3
-    ? storeState.sectionOrder
-    : ['catalog', 'studio', 'pricing'];
-
-  const moveSection = (id: string, dir: -1 | 1) => {
-    const idx = sectionOrder.indexOf(id);
-    const target = idx + dir;
-    if (idx < 0 || target < 0 || target >= sectionOrder.length) return;
-    const next = [...sectionOrder];
-    [next[idx], next[target]] = [next[target], next[idx]];
-    setStoreState((prev) => ({ ...prev, sectionOrder: next }));
-  };
-
-  const [cart, setCart] = useState<CartItem[]>(() => {
-    try {
-      const saved = localStorage.getItem(CART_STORAGE_KEY);
-      return saved ? (JSON.parse(saved) as CartItem[]) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
-  const [productModalState, setProductModalState] = useState<{
-    isOpen: boolean;
-    category: CategoryId;
-    editing: Product | null;
-  }>({
-    isOpen: false,
-    category: 'shawl',
-    editing: null,
-  });
-
-  const [toasts, setToasts] = useState<ToastMessage[]>([]);
-
-  const notify = useCallback(
-    (type: ToastMessage['type'], text: string) => {
-      const id = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-      setToasts((prev) => [...prev, { id, type, text }]);
-      setTimeout(() => {
-        setToasts((prev) => prev.filter((t) => t.id !== id));
-      }, 3600);
-    },
-    []
-  );
-
-  const dismissToast = useCallback((id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  }, []);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
-    } catch {
-      // Ignore storage quota errors
-    }
-  }, [cart]);
-
-  useEffect(() => {
-    let active = true;
-
-    loadStoreState().then(({ state, session, error }) => {
-      if (!active) return;
-      setStoreState(state);
-      const authed = Boolean(session);
-      setIsAdminAuthenticated(authed);
-      setIsAdminMode(authed);
-      if (error) {
-        console.warn('Store load note:', error);
-      }
-    });
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        const authed = Boolean(session);
-        setIsAdminAuthenticated(authed);
-        setIsAdminMode(authed);
-      }
-    );
-
-    return () => {
-      active = false;
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
-
-  const handleAddToCart = (item: Omit<CartItem, 'id' | 'quantity'>) => {
-    setCart((prev) => {
-      const existingIdx = prev.findIndex(
-        (p) =>
-          p.title === item.title &&
-          (p.details || '') === (item.details || '') &&
-          p.unitPrice === item.unitPrice
-      );
-      if (existingIdx >= 0) {
-        return prev.map((entry, idx) =>
-          idx === existingIdx
-            ? { ...entry, quantity: entry.quantity + 1 }
-            : entry
-        );
-      }
-      const id = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-      return [...prev, { ...item, id, quantity: 1 }];
-    });
-    notify('success', 'تمت إضافة القطعة إلى الحقيبة.');
-  };
-
-  const handleUpdateQuantity = (id: string, delta: number) => {
-    setCart((prev) =>
-      prev
-        .map((item) =>
-          item.id === id
-            ? { ...item, quantity: Math.max(0, item.quantity + delta) }
-            : item
-        )
-        .filter((item) => item.quantity > 0)
-    );
-  };
-
-  const handleRemoveCartItem = (id: string) => {
-    setCart((prev) => prev.filter((item) => item.id !== id));
-  };
-
-  const handleClearCart = () => {
-    setCart([]);
-    notify('info', 'تم تفريغ الحقيبة.');
-  };
-
-  const handleUpdateProductAddon = (
-    productId: string,
-    addon: { title: string; subtitle: string; price: number }
-  ) => {
-    setStoreState((prev) => ({
-      ...prev,
-      products: prev.products.map((p) =>
-        p.id === productId
-          ? {
-              ...p,
-              americanShawlTitle: addon.title,
-              americanShawlSubtitle: addon.subtitle,
-              americanShawlPrice: addon.price,
-            }
-          : p
-      ),
-    }));
-  };
-
-  const handleUnlockAdmin = () => {
-    if (isAdminAuthenticated) {
-      setIsAdminMode((prev) => !prev);
-      return;
-    }
-    setIsLoginOpen(true);
-  };
-
-  const handleAdminLogin = async (email: string, password: string) => {
-    if (password !== '20262026') throw new Error('كلمة المرور غير صحيحة');
-    setIsAdminAuthenticated(true);
-    setIsAdminMode(true);
-    notify('success', 'تم تسجيل الدخول إلى لوحة الإدارة.');
-  };
-
-  const handleAdminLogout = async () => {
-    try {
-      await signOutAdmin();
-      setIsAdminAuthenticated(false);
-      setIsAdminMode(false);
-      notify('info', 'تم تسجيل الخروج من الإدارة.');
-    } catch (err) {
-      notify(
-        'error',
-        err instanceof Error ? err.message : 'تعذر تسجيل الخروج.'
-      );
-    }
-  };
-
   const handlePublishToCloud = async () => {
     setIsSavingCloud(true);
     try {
@@ -348,9 +126,7 @@ export default function App() {
 
   const totalCartItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  /* ============ محرر النصوص والأسعار الاحترافي ============ */
   useEffect(() => {
-    // تنظيف العناصر القديمة
     document.querySelectorAll('.admin-floating-toolbar').forEach((t) => t.remove());
     document.querySelectorAll<HTMLElement>('[data-admin-text]').forEach((el) => {
       el.removeAttribute('data-admin-text');
@@ -367,13 +143,11 @@ export default function App() {
     const savedTexts = storeState.customTexts || {};
     const savedImages = storeState.customImages || {};
 
-    // كنجمعو كاع النصوص اللي في الموقع
     const els = Array.from(
       document.querySelectorAll<HTMLElement>(
         'main h1, main h2, main h3, main h4, main p, main span, main th, main td, main div, main strong, main b, footer p, footer span'
       )
     ).filter((el) => {
-      // كنديرو التعديل غير على العناصر اللي فيهم نص وماعندهمش عناصر داخلين فيهم
       return (
         el.childNodes.length > 0 &&
         Array.from(el.childNodes).every((node) => node.nodeType === Node.TEXT_NODE) &&
@@ -381,7 +155,6 @@ export default function App() {
       );
     });
 
-    // دالة باش نلقاو المسار الحقيقي ديال العنصر (باش ما يتبدلش التعديل)
     const getPath = (el: HTMLElement) => {
       let path: string[] = [];
       let current: HTMLElement | null = el;
@@ -487,7 +260,6 @@ export default function App() {
     els.forEach((el) => {
       const key = getPath(el);
 
-      // تحميل النص المحفوظ
       if (savedTexts[key] !== undefined && el.innerText !== savedTexts[key]) {
         el.innerText = savedTexts[key];
       }
@@ -496,7 +268,6 @@ export default function App() {
         return;
       }
 
-      // تحميل الصورة المحفوظة
       if (savedImages[key]) {
         const next = el.nextElementSibling as HTMLImageElement | null;
         if (next?.classList.contains('admin-inserted-img')) {
@@ -510,14 +281,12 @@ export default function App() {
         }
       }
 
-      // تفعيل التعديل
       el.dataset.adminText = 'true';
       el.contentEditable = 'true';
       el.style.outline = '1px dashed rgba(118, 43, 67, 0.35)';
       el.style.cursor = 'text';
       el.style.borderRadius = '4px';
 
-      // حفظ التعديل ملي كيخرج الماوس من العنصر
       el.onblur = () => {
         setStoreState((prev) => ({
           ...prev,
@@ -535,10 +304,9 @@ export default function App() {
     };
   }, [isAdminMode, storeState.products, storeState.sectionOrder]);
 
-  /* ============ Scroll reveal للأقسام ============ */
   useEffect(() => {
     const observer = new IntersectionObserver(
-      (entries) => {
+      
         entries.forEach((entry) => {
           if (entry.isIntersecting) entry.target.classList.add('in-view');
         });
@@ -722,7 +490,7 @@ export default function App() {
 
           <div className="flex flex-wrap items-center gap-4 text-xs text-[#6e645e]">
             <a
-              href={`https://wa.me/${WHATSAPP_NUMBER}`}
+              href={`https://wa.me{WHATSAPP_NUMBER}`}
               target="_blank"
               rel="noopener noreferrer"
               className="font-bold text-[#18734b] hover:underline"
@@ -746,7 +514,7 @@ export default function App() {
       </footer>
 
       <a
-        href={`https://wa.me/${WHATSAPP_NUMBER}`}
+        href={`https://wa.me{WHATSAPP_NUMBER}`}
         target="_blank"
         rel="noopener noreferrer"
         title="تواصل عبر WhatsApp"
@@ -789,15 +557,24 @@ export default function App() {
         onSaveCopy={handleSaveCopy}
       />
 
-      {/* لوحة الإدارة العائمة */}
+      <AdminDashboardModal
+        isOpen={isDashboardOpen}
+        onClose={() => setIsDashboardOpen(false)}
+        onNotify={notify}
+      />
+
       {isAdminMode && (
         <div className="fixed bottom-5 right-5 z-40 flex flex-col gap-2 bg-white/95 backdrop-blur-md border border-[#e6ddd3] rounded-2xl shadow-xl p-3 max-w-[230px]">
           <div className="text-[11px] font-bold text-[#762b43] text-center pb-1.5 border-b border-[#e6ddd3]">
             ✏️ وضع الإدارة مفعّل
           </div>
-          <p className="text-[10px] text-[#6e645e] text-center leading-relaxed">
-            مرّر الماوس على أي نص ← يبانلك <b>حذف 🗑️</b> و <b>صورة 🖼️</b>
-          </p>
+          <button
+            type="button"
+            onClick={() => setIsDashboardOpen(true)}
+            className="px-3 py-2 rounded-xl bg-[#18734b] hover:bg-[#135c3c] text-white text-xs font-bold transition-colors cursor-pointer"
+          >
+            📊 الطلبات والأرباح
+          </button>
           <button
             type="button"
             onClick={handlePublishToCloud}
