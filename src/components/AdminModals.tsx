@@ -758,92 +758,69 @@ export function AdminDashboardModal({
                   لا توجد طلبات مسجلة في القاعدة بعد.
                 </p>
               ) : (
+                          <div className="bg-[#faf8f5] border border-[#e6ddd3] rounded-lg p-2.5 space-y-1">
+                            <p className="font-bold text-[#762b43]">🛒 اختيارات الزبون والقطع المطلوبة:</p>
+                            {rawItems.length > 0 ? (
+                              rawItems.map((item: { title?: string; name?: string; details?: string; quantity?: number; unitPrice?: number }, idx: number) => (
+                                <p key={idx} className="text-[#1f1917] leading-relaxed">
+                                  • <strong>{item.title || item.name || 'منتج'}</strong>
+                                  {item.details ? ` — [${item.details}]` : ''} × {item.quantity || 1}
+                                </p>
+                              ))
+                            ) : (
+                              <p className="text-[#6e645e]">لا توجد تفاصيل إضافية مسجلة.</p>
+                            )}
+                          </div>
 
-                                <div className="space-y-3">
-                  {orders.map((order) => (
-                    <div
-                      key={order.id}
-                      className="bg-white border border-[#e6ddd3] rounded-xl p-4 space-y-2.5"
-                    >
-                      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#e6ddd3] pb-2">
-                        <div>
-                          <span className="text-xs font-extrabold bg-[#762b43] text-white px-2 py-0.5 rounded ml-2">
-                            #{order.order_number}
-                          </span>
-                          <span className="text-sm font-bold text-[#1f1917]">
-                            {order.customer_name}
-                          </span>
-                          <span className="text-xs text-[#6e645e] mr-2" dir="ltr">
-                            ({order.customer_phone})
-                          </span>
+                          {displayNotes && (
+                            <p className="text-amber-900 bg-amber-50 p-2 rounded-lg border border-amber-200">
+                              📝 <strong>ملاحظات المقاس/التطريز:</strong> {displayNotes}
+                            </p>
+                          )}
                         </div>
-                        <select
-                          value={order.status}
-                          onChange={(e) => handleUpdateOrderStatus(order.id, e.target.value)}
-                          className="px-2.5 py-1 rounded-lg border border-[#e6ddd3] bg-[#faf8f5] text-xs font-bold text-[#1f1917]"
-                        >
-                          {['جديد', 'مؤكد', 'قيد التوصيل', 'مستلم', 'ملغى'].map((st) => (
-                            <option key={st} value={st}>
-                              {st}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
 
-                      <div className="text-xs text-[#6e645e] space-y-1">
-                        <p>
-                          📍 <strong>العنوان:</strong> {order.wilaya} - {order.commune} ({order.delivery_type})
-                        </p>
-                        {order.product_details?.items?.map((item, idx) => (
-                          <p key={idx} className="text-[#1f1917]">
-                            • {item.title} {item.details ? `(${item.details})` : ''} × {item.quantity}
-                          </p>
-                        ))}
-                        {order.product_details?.notes && (
-                          <p className="text-amber-800">📝 ملاحظة: {order.product_details.notes}</p>
-                        )}
-                      </div>
+                        <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[#e6ddd3] text-xs">
+                          <div className="flex items-center gap-3">
+                            <span>
+                              البيع: <strong>{Number(order.total_sell_price).toLocaleString('en-US')} دج</strong>
+                            </span>
+                            <label className="inline-flex items-center gap-1">
+                              <span>التكلفة:</span>
+                              <input
+                                type="number"
+                                defaultValue={order.total_cost_price}
+                                onBlur={(e) =>
+                                  handleUpdateOrderCost(order.id, Number(e.target.value) || 0)
+                                }
+                                className="w-20 px-2 py-0.5 border border-[#e6ddd3] rounded bg-[#faf8f5] font-bold"
+                              />
+                            </label>
+                            <span className="text-emerald-700 font-bold">
+                              الفائدة: {Number(order.net_profit).toLocaleString('en-US')} دج
+                            </span>
+                          </div>
 
-                      <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[#e6ddd3] text-xs">
-                        <div className="flex items-center gap-3">
-                          <span>
-                            البيع: <strong>{Number(order.total_sell_price).toLocaleString('en-US')} دج</strong>
-                          </span>
-                          <label className="inline-flex items-center gap-1">
-                            <span>التكلفة:</span>
-                            <input
-                              type="number"
-                              defaultValue={order.total_cost_price}
-                              onBlur={(e) =>
-                                handleUpdateOrderCost(order.id, Number(e.target.value) || 0)
+                          {order.status === 'مؤكد' && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                onNotify(
+                                  'info',
+                                  `جاهز للإرسال عبر ${deliveryCompany} (تأكد من إدخال مفاتيح API في تبويب مكتب التوصيل).`
+                                )
                               }
-                              className="w-20 px-2 py-0.5 border border-[#e6ddd3] rounded bg-[#faf8f5] font-bold"
-                            />
-                          </label>
-                          <span className="text-emerald-700 font-bold">
-                            الفائدة: {Number(order.net_profit).toLocaleString('en-US')} دج
-                          </span>
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#1f1917] text-white font-bold cursor-pointer"
+                            >
+                              <Send className="w-3 h-3" />
+                              <span>إرسال للتوصيل</span>
+                            </button>
+                          )}
                         </div>
-
-                        {order.status === 'مؤكد' && (
-                          <button
-                            type="button"
-                            onClick={() =>
-                              onNotify(
-                                'info',
-                                `جاهز للإرسال عبر ${deliveryCompany} (تأكد من إدخال مفاتيح API في تبويب مكتب التوصيل).`
-                              )
-                            }
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#1f1917] text-white font-bold cursor-pointer"
-                          >
-                            <Send className="w-3 h-3" />
-                            <span>إرسال للتوصيل</span>
-                          </button>
-                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
+
               )}
             </>
           ) : activeTab === 'inventory' ? (
