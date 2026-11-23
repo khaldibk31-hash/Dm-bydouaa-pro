@@ -810,7 +810,7 @@ export default function App() {
         onRemoveItem={handleRemoveCartItem}
         onClearCart={handleClearCart}
         onNotify={notify}
-        onSubmitOrder={handleSubmitOrder} // 🟢 ربطنا الدالة هنا
+        
       />
 
       <AdminLoginModal
