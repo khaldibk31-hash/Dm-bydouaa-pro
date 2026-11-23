@@ -1,122 +1,3 @@
-import { FormEvent, useMemo, useState } from 'react';
-import {
-  Check,
-  Copy,
-  ExternalLink,
-  Minus,
-  Plus,
-  ShoppingBag,
-  Trash2,
-  X,
-} from 'lucide-react';
-import { ALGERIA_WILAYAS, WHATSAPP_NUMBER } from '../data/defaultStore';
-import { CartItem } from '../types/store';
-
-interface CartDrawerProps {
-  isOpen: boolean;
-  items: CartItem[];
-  onClose: () => void;
-  onUpdateQuantity: (id: string, delta: number) => void;
-  onRemoveItem: (id: string) => void;
-  onClearCart: () => void;
-  onNotify: (type: 'success' | 'error' | 'info', text: string) => void;
-}
-
-export function CartDrawer({
-  isOpen,
-  items,
-  onClose,
-  onUpdateQuantity,
-  onRemoveItem,
-  onClearCart,
-  onNotify,
-}: CartDrawerProps) {
-  const [fullName, setFullName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [wilaya, setWilaya] = useState('16 - الجزائر');
-  const [commune, setCommune] = useState('');
-  const [deliveryMethod, setDeliveryMethod] = useState<'home' | 'desk'>('home');
-  const [deliveryDate, setDeliveryDate] = useState('');
-  const [notes, setNotes] = useState('');
-  const [nameError, setNameError] = useState('');
-  const [generatedOrderText, setGeneratedOrderText] = useState('');
-  const [copied, setCopied] = useState(false);
-
-  const minDateString = useMemo(() => {
-    const d = new Date();
-    d.setDate(d.getDate() + 7);
-    return d.toISOString().split('T')[0];
-  }, []);
-
-  if (!isOpen) return null;
-
-  const subtotal = items.reduce(
-    (sum, item) => sum + item.unitPrice * item.quantity,
-    0
-  );
-  const deposit30 = Math.round(subtotal * 0.3);
-
-  const buildOrderMessage = () => {
-    const lines = items
-      .map(
-        (it, idx) =>
-          `${idx + 1}. ${it.title}${it.details ? ` [${it.details}]` : ''} × ${
-            it.quantity
-          } — ${(it.unitPrice * it.quantity).toLocaleString('en-US')} دج`
-      )
-      .join('\n');
-
-    const methodText =
-      deliveryMethod === 'home' ? 'توصيل إلى المنزل' : 'استلام من مكتب التوصيل';
-
-    return [
-      '*طلب جديد عبر متجر DG by Douaa 🎓*',
-      `👤 *الاسم:* ${fullName.trim()}`,
-      phone.trim() ? `📱 *الهاتف:* ${phone.trim()}` : null,
-      `📍 *الولاية:* ${wilaya}${commune.trim() ? ` - ${commune.trim()}` : ''}`,
-      `🚚 *طريقة الاستلام:* ${methodText}`,
-      `📅 *موعد التسليم المطلوب:* ${deliveryDate || 'أقرب موعد متاح'}`,
-      `🛒 *الطلبات:*\n${lines}`,
-      `💰 *المجموع التقديري:* ${subtotal.toLocaleString('en-US')} دج`,
-      `💳 *العربون التقريبي (30% عند التأكيد):* ${deposit30.toLocaleString('en-US')} دج`,
-      notes.trim() ? `📝 *ملاحظات:* ${notes.trim()}` : null,
-    ]
-      .filter(Boolean)
-      .join('\n');
-  };
-
-  const whatsappUrl = generatedOrderText
-    ? `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(generatedOrderText)}`
-    : '';
-
-  const handlePrepareOrder = (e: FormEvent) => {
-    e.preventDefault();
-    if (items.length === 0) {
-      onNotify('error', 'الحقيبة فارغة حالياً.');
-      return;
-    }
-    if (!fullName.trim()) {
-      setNameError('يرجى إدخال الاسم الكامل لتأكيد الطلب.');
-      return;
-    }
-    setNameError('');
-    const message = buildOrderMessage();
-    setGeneratedOrderText(message);
-    onNotify('success', 'تم تجهيز طلبك. اضغطي على زر المتابعة عبر WhatsApp.');
-  };
-
-  const handleCopyOrder = async () => {
-    if (!generatedOrderText) return;
-    try {
-      await navigator.clipboard.writeText(generatedOrderText);
-      setCopied(true);
-      onNotify('success', 'تم نسخ تفاصيل الطلب بنجاح.');
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      onNotify('error', 'تعذر النسخ التلقائي. يمكنك تحديد النص ونسخه يدوياً.');
-    }
-  };
-
   return (
     <div
       className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-xs"
@@ -277,18 +158,24 @@ export function CartDrawer({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-semibold text-[#6e645e] mb-1">
-                      رقم الهاتف (اختياري)
+                      رقم الهاتف *
                     </label>
                     <input
                       type="tel"
                       value={phone}
                       onChange={(e) => {
                         setPhone(e.target.value);
+                        if (phoneError) setPhoneError('');
                         setGeneratedOrderText('');
                       }}
                       placeholder="05 / 06 / 07..."
                       className="w-full px-3.5 py-2.5 rounded-lg border border-[#e6ddd3] bg-white text-sm text-[#1f1917]"
                     />
+                    {phoneError && (
+                      <p className="text-xs text-red-700 font-semibold mt-1">
+                        {phoneError}
+                      </p>
+                    )}
                   </div>
 
                   <div>
@@ -309,7 +196,7 @@ export function CartDrawer({
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
+                                    <div>
                     <label className="block text-xs font-semibold text-[#6e645e] mb-1">
                       الولاية
                     </label>
@@ -397,14 +284,24 @@ export function CartDrawer({
                 {!generatedOrderText ? (
                   <button
                     type="submit"
-                    className="w-full py-3 px-4 rounded-lg bg-[#18734b] hover:bg-[#135c3c] text-white text-sm font-bold transition-colors cursor-pointer"
+                    disabled={isSubmitting}
+                    className="w-full py-3 px-4 rounded-lg bg-[#18734b] hover:bg-[#135c3c] disabled:opacity-60 text-white text-sm font-bold transition-colors cursor-pointer flex items-center justify-center gap-2"
                   >
-                    تجهيز وإرسال الطلب عبر WhatsApp
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>جاري حفظ الطلب...</span>
+                      </>
+                    ) : (
+                      <span>تأكيد الطلب وإرساله</span>
+                    )}
                   </button>
                 ) : (
                   <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 space-y-3">
                     <p className="text-xs font-bold text-emerald-900">
-                      ملخص طلبك جاهز للإرسال عبر WhatsApp:
+                      {orderNumber
+                        ? `تم حفظ طلبك رقم #${orderNumber} في النظام بنجاح!`
+                        : 'ملخص طلبك جاهز للإرسال عبر WhatsApp:'}
                     </p>
                     <pre className="text-[11px] text-emerald-950 bg-white/80 p-2.5 rounded-lg border border-emerald-200 whitespace-pre-wrap font-sans leading-relaxed max-h-36 overflow-y-auto">
                       {generatedOrderText}
@@ -417,7 +314,7 @@ export function CartDrawer({
                         className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-lg bg-[#18734b] hover:bg-[#135c3c] text-white text-xs font-bold transition-colors"
                       >
                         <ExternalLink className="w-3.5 h-3.5" />
-                        <span>فتح WhatsApp الآن</span>
+                        <span>متابعة عبر WhatsApp</span>
                       </a>
                       <button
                         type="button"
@@ -441,6 +338,7 @@ export function CartDrawer({
                   type="button"
                   onClick={() => {
                     setGeneratedOrderText('');
+                    setOrderNumber(null);
                     onClearCart();
                   }}
                   className="text-xs font-semibold text-[#6e645e] hover:text-red-700 transition-colors cursor-pointer"
