@@ -174,6 +174,59 @@ export default function App() {
     notify('info', 'تم تفريغ الحقيبة.');
   };
 
+  // 🟢 الدالة الجديدة: إرسال الطلب إلى Supabase
+  const handleSubmitOrder = async (customerInfo: {
+    name: string;
+    phone: string;
+    wilaya: string;
+    commune: string;
+    deliveryType: 'office' | 'home';
+  }) => {
+    if (cart.length === 0) {
+      notify('error', 'الحقيبة فارغة! أضف منتجات أولاً.');
+      return;
+    }
+
+    const totalSellPrice = cart.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
+    // نفترض أنك أضفت costPrice في واجهة المنتج، إذا لم يكن موجوداً سيحسب 0
+    const totalCostPrice = cart.reduce((sum, item: any) => sum + ((item.costPrice || 0) * item.quantity), 0);
+
+    const orderItems = cart.map((item: any) => ({
+      product_id: item.productId || null,
+      title: item.title,
+      quantity: item.quantity,
+      unit_price: item.unitPrice,
+      unit_cost: item.costPrice || 0,
+      details: item.details,
+    }));
+
+    const { data, error } = await supabase
+      .from('orders')
+      .insert([{
+        customer_name: customerInfo.name,
+        phone: customerInfo.phone,
+        wilaya: customerInfo.wilaya,
+        commune: customerInfo.commune,
+        delivery_type: customerInfo.deliveryType,
+        total_sell_price: totalSellPrice,
+        total_cost_price: totalCostPrice,
+        order_items: orderItems,
+        status: 'جديد'
+      }])
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error submitting order:", error);
+      notify('error', `فشل إرسال الطلب: ${error.message}`);
+      throw error;
+    }
+
+    notify('success', `تم استلام طلبك رقم #${data.order_number} بنجاح!`);
+    handleClearCart();
+    setIsCartOpen(false);
+  };
+
   const handleUpdateProductAddon = (
     productId: string,
     addon: { title: string; subtitle: string; price: number }
@@ -223,9 +276,7 @@ export default function App() {
     }
   };
 
-
-
-const handlePublishToCloud = async () => {
+  const handlePublishToCloud = async () => {
     setIsSavingCloud(true);
     try {
       await saveStoreState(storeState);
@@ -532,15 +583,12 @@ const handlePublishToCloud = async () => {
   }, [isAdminMode, storeState.products, storeState.sectionOrder]);
 
   useEffect(() => {
-    
-      const observer = new IntersectionObserver(
-  (entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) entry.target.classList.add('in-view');
-    });
-  },
-
-        
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) entry.target.classList.add('in-view');
+        });
+      },
       { threshold: 0.06, rootMargin: '0px 0px -60px 0px' }
     );
     const els = document.querySelectorAll('.section-reveal');
@@ -720,7 +768,7 @@ const handlePublishToCloud = async () => {
 
           <div className="flex flex-wrap items-center gap-4 text-xs text-[#6e645e]">
             <a
-              href={`https://wa.me{WHATSAPP_NUMBER}`}
+              href={`https://wa.me/${WHATSAPP_NUMBER}`}
               target="_blank"
               rel="noopener noreferrer"
               className="font-bold text-[#18734b] hover:underline"
@@ -744,7 +792,7 @@ const handlePublishToCloud = async () => {
       </footer>
 
       <a
-        href={`https://wa.me{WHATSAPP_NUMBER}`}
+        href={`https://wa.me/${WHATSAPP_NUMBER}`}
         target="_blank"
         rel="noopener noreferrer"
         title="تواصل عبر WhatsApp"
@@ -762,6 +810,7 @@ const handlePublishToCloud = async () => {
         onRemoveItem={handleRemoveCartItem}
         onClearCart={handleClearCart}
         onNotify={notify}
+        onSubmitOrder={handleSubmitOrder} // 🟢 ربطنا الدالة هنا
       />
 
       <AdminLoginModal
