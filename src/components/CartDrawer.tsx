@@ -1,4 +1,189 @@
-  return (
+import { FormEvent, useMemo, useState } from 'react';
+import {
+  Check,
+  Copy,
+  ExternalLink,
+  Loader2,
+  Minus,
+  Plus,
+  ShoppingBag,
+  Trash2,
+  X,
+} from 'lucide-react';
+import { ALGERIA_WILAYAS, WHATSAPP_NUMBER } from '../data/defaultStore';
+import { CartItem } from '../types/store';
+import { supabase } from '../lib/supabase';
+
+interface CartDrawerProps {
+  isOpen: boolean;
+  items: CartItem[];
+  onClose: () => void;
+  onUpdateQuantity: (id: string, delta: number) => void;
+  onRemoveItem: (id: string) => void;
+  onClearCart: () => void;
+  onNotify: (type: 'success' | 'error' | 'info', text: string) => void;
+}
+
+export function CartDrawer({
+  isOpen,
+  items,
+  onClose,
+  onUpdateQuantity,
+  onRemoveItem,
+  onClearCart,
+  onNotify,
+}: CartDrawerProps) {
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [wilaya, setWilaya] = useState('16 - الجزائر');
+  const [commune, setCommune] = useState('');
+  const [deliveryMethod, setDeliveryMethod] = useState<'home' | 'desk'>('home');
+  const [deliveryDate, setDeliveryDate] = useState('');
+  const [notes, setNotes] = useState('');
+  const [nameError, setNameError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
+  const [generatedOrderText, setGeneratedOrderText] = useState('');
+  const [orderNumber, setOrderNumber] = useState<number | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const minDateString = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    return d.toISOString().split('T');
+  }, []);
+
+  if (!isOpen) return null;
+
+  const subtotal = items.reduce(
+    (sum, item) => sum + item.unitPrice * item.quantity,
+    0
+  );
+  const deposit30 = Math.round(subtotal * 0.3);
+
+  const buildOrderMessage = (savedOrderNum?: number | null) => {
+    const lines = items
+      .map(
+        (it, idx) =>
+          `${idx + 1}. ${it.title}${it.details ? ` [${it.details}]` : ''} × ${
+            it.quantity
+          } — ${(it.unitPrice * it.quantity).toLocaleString('en-US')} دج`
+      )
+      .join('\n');
+
+    const methodText =
+      deliveryMethod === 'home' ? 'توصيل إلى المنزل' : 'استلام من مكتب التوصيل';
+
+    return [
+      `*طلب جديد عبر متجر DG by Douaa 🎓*${savedOrderNum ? ` (#${savedOrderNum})` : ''}`,
+      `👤 *الاسم:* ${fullName.trim()}`,
+      `📱 *الهاتف:* ${phone.trim()}`,
+      `📍 *الولاية:* ${wilaya}${commune.trim() ? ` - ${commune.trim()}` : ''}`,
+      `🚚 *طريقة الاستلام:* ${methodText}`,
+      `📅 *موعد التسليم المطلوب:* ${deliveryDate || 'أقرب موعد متاح'}`,
+      `🛒 *الطلبات:*\n${lines}`,
+      `💰 *المجموع التقديري:* ${subtotal.toLocaleString('en-US')} دج`,
+      `💳 *العربون التقريبي (30% عند التأكيد):* ${deposit30.toLocaleString('en-US')} دج`,
+      notes.trim() ? `📝 *ملاحظات:* ${notes.trim()}` : null,
+    ]
+      .filter(Boolean)
+      .join('\n');
+  };
+
+  const whatsappUrl = generatedOrderText
+    ? `https://wa.me{WHATSAPP_NUMBER}?text=${encodeURIComponent(generatedOrderText)}`
+    : '';
+
+  const handlePrepareOrder = async (e: FormEvent) => {
+    e.preventDefault();
+    if (items.length === 0) {
+      onNotify('error', 'الحقيبة فارغة حالياً.');
+      return;
+    }
+    if (!fullName.trim()) {
+      setNameError('يرجى إدخال الاسم الكامل لتأكيد الطلب.');
+      return;
+    }
+    if (!phone.trim() || phone.trim().length < 9) {
+      setPhoneError('يرجى إدخال رقم هاتف صحيح للتواصل والتوصيل.');
+      return;
+    }
+
+    setNameError('');
+    setPhoneError('');
+    setIsSubmitting(true);
+
+    try {
+      let savedNumber: number | null = null;
+
+      if (supabase) {
+        const { data, error } = await supabase
+          .from('orders')
+          .insert([
+            {
+              customer_name: fullName.trim(),
+              customer_phone: phone.trim(),
+              wilaya: wilaya,
+              commune: commune.trim() || 'غير محددة',
+              delivery_type: deliveryMethod === 'home' ? 'منزل' : 'مكتب',
+              product_details: {
+                items: items.map((i) => ({
+                  title: i.title,
+                  details: i.details || '',
+                  quantity: i.quantity,
+                  unitPrice: i.unitPrice,
+                })),
+                deliveryDate: deliveryDate || 'أقرب موعد',
+                notes: notes.trim(),
+              },
+              total_sell_price: subtotal,
+              total_cost_price: 0,
+              delivery_price: 0,
+              status: 'جديد',
+            },
+          ])
+          .select('order_number')
+          .single();
+
+        if (error) {
+          console.error('Supabase order insert error:', error);
+        } else if (data?.order_number) {
+          savedNumber = data.order_number;
+          setOrderNumber(savedNumber);
+        }
+      }
+
+      const message = buildOrderMessage(savedNumber);
+      setGeneratedOrderText(message);
+      onNotify(
+        'success',
+        savedNumber
+          ? `تم تسجيل طلبك رقم #${savedNumber} بنجاح! يمكنك متابعته عبر WhatsApp.`
+          : 'تم تجهيز طلبك بنجاح. اضغطي على زر المتابعة عبر WhatsApp.'
+      );
+    } catch {
+      const message = buildOrderMessage(null);
+      setGeneratedOrderText(message);
+      onNotify('success', 'تم تجهيز طلبك. اضغطي على زر المتابعة عبر WhatsApp.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCopyOrder = async () => {
+    if (!generatedOrderText) return;
+    try {
+      await navigator.clipboard.writeText(generatedOrderText);
+      setCopied(true);
+      onNotify('success', 'تم نسخ تفاصيل الطلب بنجاح.');
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      onNotify('error', 'تعذر النسخ التلقائي. يمكنك تحديد النص ونسخه يدوياً.');
+    }
+  };
+
+
+return (
     <div
       className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-xs"
       role="dialog"
