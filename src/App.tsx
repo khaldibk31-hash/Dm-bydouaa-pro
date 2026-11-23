@@ -1,4 +1,231 @@
-  const handlePublishToCloud = async () => {
+import { useCallback, useEffect, useState } from 'react';
+import { Lock, MessageCircle } from 'lucide-react';
+import {
+  AdminDashboardModal,
+  AdminLoginModal,
+  CopyEditorModal,
+  ProductEditorModal,
+} from './components/AdminModals';
+import { CartDrawer } from './components/CartDrawer';
+import { Header } from './components/Header';
+import { HeroSection } from './components/HeroSection';
+import { PricingAndFaq } from './components/PricingAndFaq';
+import { ProductCatalog } from './components/ProductCatalog';
+import { StoleStudio } from './components/StoleStudio';
+import { ToastContainer } from './components/Toast';
+import {
+  DEFAULT_STORE_STATE,
+  SHAWL_IMAGE_PATH,
+  WHATSAPP_NUMBER,
+} from './data/defaultStore';
+import {
+  loadStoreState,
+  saveStoreState,
+  signInAdmin,
+  signOutAdmin,
+  supabase,
+  uploadStoreImage,
+} from './lib/supabase';
+import {
+  CartItem,
+  CategoryId,
+  Product,
+  ProductOption,
+  StoreCopy,
+  StoreState,
+  ToastMessage,
+} from './types/store';
+
+const CART_STORAGE_KEY = 'dg_by_douaa_cart_v1';
+
+export default function App() {
+  const [storeState, setStoreState] = useState<StoreState>(DEFAULT_STORE_STATE);
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  const [isAdminMode, setIsAdminMode] = useState(false);
+  const [isSavingCloud, setIsSavingCloud] = useState(false);
+  const sectionOrder = storeState.sectionOrder && storeState.sectionOrder.length === 3
+    ? storeState.sectionOrder
+    : ['catalog', 'studio', 'pricing'];
+
+  const moveSection = (id: string, dir: -1 | 1) => {
+    const idx = sectionOrder.indexOf(id);
+    const target = idx + dir;
+    if (idx < 0 || target < 0 || target >= sectionOrder.length) return;
+    const next = [...sectionOrder];
+    [next[idx], next[target]] = [next[target], next[idx]];
+    setStoreState((prev) => ({ ...prev, sectionOrder: next }));
+  };
+
+  const [cart, setCart] = useState<CartItem[]>(() => {
+    try {
+      const saved = localStorage.getItem(CART_STORAGE_KEY);
+      return saved ? (JSON.parse(saved) as CartItem[]) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
+  const [isDashboardOpen, setIsDashboardOpen] = useState(false);
+  const [productModalState, setProductModalState] = useState<{
+    isOpen: boolean;
+    category: CategoryId;
+    editing: Product | null;
+  }>({
+    isOpen: false,
+    category: 'shawl',
+    editing: null,
+  });
+
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+
+  const notify = useCallback(
+    (type: ToastMessage['type'], text: string) => {
+      const id = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+      setToasts((prev) => [...prev, { id, type, text }]);
+      setTimeout(() => {
+        setToasts((prev) => prev.filter((t) => t.id !== id));
+      }, 3600);
+    },
+    []
+  );
+
+  const dismissToast = useCallback((id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+    } catch {
+      // Ignore storage quota errors
+    }
+  }, [cart]);
+
+  useEffect(() => {
+    let active = true;
+
+    loadStoreState().then(({ state, session, error }) => {
+      if (!active) return;
+      setStoreState(state);
+      const authed = Boolean(session);
+      setIsAdminAuthenticated(authed);
+      setIsAdminMode(authed);
+      if (error) {
+        console.warn('Store load note:', error);
+      }
+    });
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        const authed = Boolean(session);
+        setIsAdminAuthenticated(authed);
+        setIsAdminMode(authed);
+      }
+    );
+
+    return () => {
+      active = false;
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+
+  const handleAddToCart = (item: Omit<CartItem, 'id' | 'quantity'>) => {
+    setCart((prev) => {
+      const existingIdx = prev.findIndex(
+        (p) =>
+          p.title === item.title &&
+          (p.details || '') === (item.details || '') &&
+          p.unitPrice === item.unitPrice
+      );
+      if (existingIdx >= 0) {
+        return prev.map((entry, idx) =>
+          idx === existingIdx
+            ? { ...entry, quantity: entry.quantity + 1 }
+            : entry
+        );
+      }
+      const id = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+      return [...prev, { ...item, id, quantity: 1 }];
+    });
+    notify('success', 'تمت إضافة القطعة إلى الحقيبة.');
+  };
+
+  const handleUpdateQuantity = (id: string, delta: number) => {
+    setCart((prev) =>
+      prev
+        .map((item) =>
+          item.id === id
+            ? { ...item, quantity: Math.max(0, item.quantity + delta) }
+            : item
+        )
+        .filter((item) => item.quantity > 0)
+    );
+  };
+
+  const handleRemoveCartItem = (id: string) => {
+    setCart((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const handleClearCart = () => {
+    setCart([]);
+    notify('info', 'تم تفريغ الحقيبة.');
+  };
+
+  const handleUpdateProductAddon = (
+    productId: string,
+    addon: { title: string; subtitle: string; price: number }
+  ) => {
+    setStoreState((prev) => ({
+      ...prev,
+      products: prev.products.map((p) =>
+        p.id === productId
+          ? {
+              ...p,
+              americanShawlTitle: addon.title,
+              americanShawlSubtitle: addon.subtitle,
+              americanShawlPrice: addon.price,
+            }
+          : p
+      ),
+    }));
+  };
+
+  const handleUnlockAdmin = () => {
+    if (isAdminAuthenticated) {
+      setIsAdminMode((prev) => !prev);
+      return;
+    }
+    setIsLoginOpen(true);
+  };
+
+  const handleAdminLogin = async (email: string, password: string) => {
+    await signInAdmin(email, password);
+    setIsAdminAuthenticated(true);
+    setIsAdminMode(true);
+    notify('success', 'تم تسجيل الدخول إلى لوحة الإدارة.');
+  };
+
+  const handleAdminLogout = async () => {
+    try {
+      await signOutAdmin();
+      setIsAdminAuthenticated(false);
+      setIsAdminMode(false);
+      setIsDashboardOpen(false);
+      notify('info', 'تم تسجيل الخروج من الإدارة.');
+    } catch (err) {
+      notify(
+        'error',
+        err instanceof Error ? err.message : 'تعذر تسجيل الخروج.'
+      );
+    }
+  };
+
+
+
+const handlePublishToCloud = async () => {
     setIsSavingCloud(true);
     try {
       await saveStoreState(storeState);
